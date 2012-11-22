@@ -4,11 +4,23 @@
     android:layout_height="match_parent" >
 
     <TextView
+        android:id="@+id/ioio_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/hello_world"
+        android:layout_marginTop="71dp"
+        android:text="@string/ioio_status"
+        android:textSize="12pt"
         tools:context=".MainActivity" />
+
+    <ToggleButton
+        android:id="@+id/button_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ioio_status"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="48dp"
+        android:text="@string/button_state" />
 
 </RelativeLayout>
