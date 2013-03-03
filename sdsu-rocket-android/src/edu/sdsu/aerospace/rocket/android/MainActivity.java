@@ -1,6 +1,12 @@
 package edu.sdsu.aerospace.rocket.android;
 
-import ioio.lib.api.DigitalInput;
+import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import edu.sdsu.aerospace.rocket.UDPServer;
+import edu.sdsu.aerospace.rocket.UDPServer.UDPServerListener;
+import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.IOIOLooper;
@@ -11,7 +17,7 @@ import android.view.Menu;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends IOIOActivity {
+public class MainActivity extends IOIOActivity implements UDPServerListener {
 
 	/**
 	 * Per "good convention" recommendations found at:
@@ -19,27 +25,38 @@ public class MainActivity extends IOIOActivity {
 	 */
 	private static final String TAG = "SDSURocket";
 	
-	private static final int BUTTON_PIN = 35;
+	private static UDPServer server;
+	public final static int PORT = 12161;
+	
+	private static final int DIGITAL_OUTPUT_PIN = 3; // 3.3V
+	private static final long IGNITION_DURATION = 3000L; // milliseconds
 	
 	private TextView ioioStatusTextView;
+	private TextView serverStatusTextView;
 	private ToggleButton buttonToggleButton;
+
+	private Timer timer;
 	
 	@Override
 	protected IOIOLooper createIOIOLooper() {
 		return new IOIOLooper() {
-			private DigitalInput button;
+			private DigitalOutput output;
 			
 			@Override
 			public void setup(IOIO ioio) throws ConnectionLostException, InterruptedException {
-				button = ioio.openDigitalInput(BUTTON_PIN, DigitalInput.Spec.Mode.PULL_UP);
+				output = ioio.openDigitalOutput(DIGITAL_OUTPUT_PIN);
+				
 				Log.i(TAG, "IOIO connected.");
-				setText("IOIO connected.");
+				setIOIOText("IOIO connected.");
 			}
 			
 			@Override
 			public void loop() throws ConnectionLostException, InterruptedException {
-				final boolean reading = button.read();
-				setState(!reading);
+				// TODO setState from UDP packets
+//				setState(!reading);
+				
+				boolean state = buttonToggleButton.isChecked();
+				output.write(state);
 				
 				Thread.sleep(100);
 			}
@@ -47,13 +64,13 @@ public class MainActivity extends IOIOActivity {
 			@Override
 			public void incompatible() {
 				Log.e(TAG, "IOIO incompatible.");
-				setText("IOIO incompatible.");
+				setIOIOText("IOIO incompatible.");
 			}
 			
 			@Override
 			public void disconnected() {
 				Log.e(TAG, "IOIO disconnected.");
-				setText("IOIO disconnected.");
+				setIOIOText("IOIO disconnected.");
 			}
 		};
 	}
@@ -64,16 +81,46 @@ public class MainActivity extends IOIOActivity {
 		setContentView(R.layout.activity_main);
 		
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
+		serverStatusTextView = (TextView) findViewById(R.id.server_status);
 		buttonToggleButton = (ToggleButton) findViewById(R.id.button_state);
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		
+		server = new UDPServer();
+		server.listen(PORT);
+		server.setListener(this);
+		setServerText("Listening on port " + PORT + ".");
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
+	}
+	
+	@Override
+	public void onReceivedPacket(byte[] data, InetAddress inetAddress, int port) {
+		String text = new String(data);
+		setServerText(text);
+		
+		if (text.startsWith("LAUNCH")) {
+			setState(true);
+		}
+		
+		if (timer != null) {
+			timer.cancel();
+		}
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				setServerText("");
+				setState(false);
+				timer.cancel();
+				timer = null;
+			}
+		}, IGNITION_DURATION);
 	}
 	
 //	@Override
@@ -97,11 +144,20 @@ public class MainActivity extends IOIOActivity {
 //		startActivity(settingsIntent);
 //	}
 	
-	private void setText(final String text) {
+	private void setIOIOText(final String text) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				ioioStatusTextView.setText(text);
+			}
+		});
+	}
+	
+	private void setServerText(final String text) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				serverStatusTextView.setText(text);
 			}
 		});
 	}

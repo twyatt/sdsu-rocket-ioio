@@ -14,13 +14,25 @@
         android:textSize="12pt"
         tools:context=".MainActivity" />
 
-    <ToggleButton
-        android:id="@+id/button_state"
+    <TextView
+        android:id="@+id/server_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/ioio_status"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="30dp"
+        android:lines="2"
+        android:text="@string/server_status"
+        android:textSize="12pt"
+        tools:context=".MainActivity" />
+
+    <ToggleButton
+        android:id="@+id/button_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/server_status"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
         android:text="@string/button_state" />
 
 </RelativeLayout>

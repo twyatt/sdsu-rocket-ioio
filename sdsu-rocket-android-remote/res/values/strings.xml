@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SDSU Rocket Remote</string>
+    <string name="action_settings">Settings</string>
+    <string name="text_launch">Launch!</string>
+    
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+</resources>
