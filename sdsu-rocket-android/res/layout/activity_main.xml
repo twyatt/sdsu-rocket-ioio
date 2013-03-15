@@ -35,4 +35,15 @@
         android:layout_marginTop="44dp"
         android:text="@string/button_state" />
 
+    <TextView
+        android:id="@+id/ioio_v_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ioio_status"
+        android:layout_below="@+id/button_state"
+        android:layout_marginTop="46dp"
+        android:text="@string/ioio_v_in"
+        android:textSize="12pt"
+        tools:context=".MainActivity" />
+
 </RelativeLayout>

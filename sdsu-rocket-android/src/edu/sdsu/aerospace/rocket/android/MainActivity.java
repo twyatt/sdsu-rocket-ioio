@@ -6,6 +6,7 @@ import java.util.TimerTask;
 
 import edu.sdsu.aerospace.rocket.UDPServer;
 import edu.sdsu.aerospace.rocket.UDPServer.UDPServerListener;
+import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -30,8 +31,11 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 	
 	private static final int DIGITAL_OUTPUT_PIN = 3; // 3.3V
 	private static final long IGNITION_DURATION = 3000L; // milliseconds
+
+	protected static final int PRESSURE_TRANSDUCER_INPUT_PIN = 35; // analog, 3.3V max input
 	
 	private TextView ioioStatusTextView;
+	private TextView ioioVoltageTextView;
 	private TextView serverStatusTextView;
 	private ToggleButton buttonToggleButton;
 
@@ -41,10 +45,12 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 	protected IOIOLooper createIOIOLooper() {
 		return new IOIOLooper() {
 			private DigitalOutput output;
+			private AnalogInput input;
 			
 			@Override
 			public void setup(IOIO ioio) throws ConnectionLostException, InterruptedException {
-				output = ioio.openDigitalOutput(DIGITAL_OUTPUT_PIN);
+//				output = ioio.openDigitalOutput(DIGITAL_OUTPUT_PIN);
+				input = ioio.openAnalogInput(PRESSURE_TRANSDUCER_INPUT_PIN);
 				
 				Log.i(TAG, "IOIO connected.");
 				setIOIOText("IOIO connected.");
@@ -55,8 +61,12 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 				// TODO setState from UDP packets
 //				setState(!reading);
 				
-				boolean state = buttonToggleButton.isChecked();
-				output.write(state);
+//				boolean state = buttonToggleButton.isChecked();
+//				output.write(state);
+				
+				float voltage = input.getVoltage();
+				float psi = 190.02f * voltage - 139.87f;
+				setIOIOVText(Float.toString(psi));
 				
 				Thread.sleep(100);
 			}
@@ -81,6 +91,7 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		setContentView(R.layout.activity_main);
 		
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
+		ioioVoltageTextView = (TextView) findViewById(R.id.ioio_v_in);
 		serverStatusTextView = (TextView) findViewById(R.id.server_status);
 		buttonToggleButton = (ToggleButton) findViewById(R.id.button_state);
 		
@@ -149,6 +160,15 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 			@Override
 			public void run() {
 				ioioStatusTextView.setText(text);
+			}
+		});
+	}
+	
+	private void setIOIOVText(final String text) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				ioioVoltageTextView.setText(text);
 			}
 		});
 	}
