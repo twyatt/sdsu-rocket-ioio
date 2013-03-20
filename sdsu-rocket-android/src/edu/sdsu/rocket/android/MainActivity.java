@@ -1,21 +1,19 @@
-package edu.sdsu.aerospace.rocket.android;
+package edu.sdsu.rocket.android;
 
-import java.net.InetAddress;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import edu.sdsu.aerospace.rocket.UDPServer;
-import edu.sdsu.aerospace.rocket.UDPServer.UDPServerListener;
-import ioio.lib.api.DigitalOutput;
-import ioio.lib.api.IOIO;
-import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
+
+import java.net.InetAddress;
+
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import edu.sdsu.aerospace.rocket.android.R;
+import edu.sdsu.aerospace.rocket.network.UDPServer;
+import edu.sdsu.aerospace.rocket.network.UDPServer.UDPServerListener;
+import edu.sdsu.rocket.android.devices.Ignitor;
+import edu.sdsu.rocket.android.devices.PressureTransducer;
 
 public class MainActivity extends IOIOActivity implements UDPServerListener {
 
@@ -28,51 +26,15 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 	private static UDPServer server;
 	public final static int PORT = 12161;
 	
-	private static final int DIGITAL_OUTPUT_PIN = 3; // 3.3V
-	private static final long IGNITION_DURATION = 3000L; // milliseconds
+	private DeviceManager deviceManager;
 	
 	private TextView ioioStatusTextView;
 	private TextView serverStatusTextView;
 	private ToggleButton buttonToggleButton;
 
-	private Timer timer;
-	
 	@Override
 	protected IOIOLooper createIOIOLooper() {
-		return new IOIOLooper() {
-			private DigitalOutput output;
-			
-			@Override
-			public void setup(IOIO ioio) throws ConnectionLostException, InterruptedException {
-				output = ioio.openDigitalOutput(DIGITAL_OUTPUT_PIN);
-				
-				Log.i(TAG, "IOIO connected.");
-				setIOIOText("IOIO connected.");
-			}
-			
-			@Override
-			public void loop() throws ConnectionLostException, InterruptedException {
-				// TODO setState from UDP packets
-//				setState(!reading);
-				
-				boolean state = buttonToggleButton.isChecked();
-				output.write(state);
-				
-				Thread.sleep(100);
-			}
-			
-			@Override
-			public void incompatible() {
-				Log.e(TAG, "IOIO incompatible.");
-				setIOIOText("IOIO incompatible.");
-			}
-			
-			@Override
-			public void disconnected() {
-				Log.e(TAG, "IOIO disconnected.");
-				setIOIOText("IOIO disconnected.");
-			}
-		};
+		return deviceManager;
 	}
 
 	@Override
@@ -87,10 +49,28 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
+		setupServer();
+		
+		deviceManager = new DeviceManager();
+		setupDevices();
+	}
+
+	private void setupServer() {
 		server = new UDPServer();
 		server.listen(PORT);
 		server.setListener(this);
 		setServerText("Listening on port " + PORT + ".");
+	}
+
+	private void setupDevices() {
+		// 3.3V digital
+		Ignitor ignitor = new Ignitor(3 /* pin */, 3000L /* duration (milliseconds) */);
+		
+		// max voltage for pin 35 = 3.3V
+		PressureTransducer transducer = new PressureTransducer(35 /* pin */, 190.02f /* slope */, -139.87f /* bias */);
+		
+		deviceManager.add(ignitor);
+		deviceManager.add(transducer);
 	}
 
 	@Override
@@ -107,20 +87,6 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		if (text.startsWith("LAUNCH")) {
 			setState(true);
 		}
-		
-		if (timer != null) {
-			timer.cancel();
-		}
-		timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				setServerText("");
-				setState(false);
-				timer.cancel();
-				timer = null;
-			}
-		}, IGNITION_DURATION);
 	}
 	
 //	@Override

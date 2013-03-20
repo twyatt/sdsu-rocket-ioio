@@ -1,6 +1,6 @@
 package edu.sdsu.aerospace.rocket.android.remote;
 
-import edu.sdsu.aerospace.rocket.UDPClient;
+import edu.sdsu.aerospace.rocket.network.UDPClient;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
@@ -9,12 +9,13 @@ import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-	// Motorola Triumph
-	private static final String HOST = "130.191.178.84";
+	/**
+	 * Per "good convention" recommendations found at:
+	 * {@link http://developer.android.com/reference/android/util/Log.html}
+	 */
+	private static final String TAG = "SDSURocketRemote";
 	
-	// MacBook Pro
-//	private static final String HOST = "146.244.179.223";
-	
+	private static final String HOST = "192.168.1.3";
 	private static final int PORT = 12161;
 	private UDPClient client;
 

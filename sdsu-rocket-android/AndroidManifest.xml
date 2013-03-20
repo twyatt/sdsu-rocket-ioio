@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         android:allowBackup="true">
         <activity
-            android:name=".MainActivity"
+            android:name="edu.sdsu.rocket.android.MainActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

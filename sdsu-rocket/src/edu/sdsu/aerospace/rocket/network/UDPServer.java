@@ -1,18 +1,24 @@
-package edu.sdsu.aerospace.rocket.server;
+package edu.sdsu.aerospace.rocket.network;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.Arrays;
 
 import edu.sdsu.aerospace.rocket.Log;
 
-public class Server {
+
+public class UDPServer {
 
 	private DatagramSocket socket;
 	private volatile InterruptibleUDPThread interruptibleUDPThread;
+	
+	private UDPServerListener listener;
+	
+	public void setListener(UDPServerListener listener) {
+		this.listener = listener;
+	}
 	
 	public void listen(final int port) {
 		stop();
@@ -39,10 +45,10 @@ public class Server {
 		}
 	}
 	
-	public void onReceivedPacket(byte[] data, InetAddress inetAddress, int port) {
-		String string = new String(data);
-		Log.i("onReceivedPacket: " + string);
-	}
+//	public void onReceivedPacket(byte[] data, InetAddress inetAddress, int port) {
+//		String string = new String(data);
+//		Log.i("onReceivedPacket: " + string);
+//	}
 	
 	/**
 	 * Interruptible network IO thread implementation.
@@ -79,8 +85,25 @@ public class Server {
 				try {
 					InetAddress inetAddress = packet.getAddress();
 					int port = packet.getPort();
-					byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
-					onReceivedPacket(data, inetAddress, port);
+					
+					//byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
+					
+					/**
+					 * Using System.arraycopy instead of Arrays.copyOf as
+					 * Arrays.copyOf is since Android API level 9.
+					 * http://developer.android.com/reference/java/util/Arrays.html#copyOf%28byte[],%20int%29
+					 * 
+					 * "Just use System.arraycopy(), it's the most efficient way
+					 * to copy arrays." -- Romain Guy
+					 * https://groups.google.com/forum/?fromgroups#!topic/android-developers/4IFUyQkMZQw
+					 */
+					int length = packet.getLength();
+					byte[] copyOf = new byte[length];
+					System.arraycopy(buffer, 0, copyOf, 0, length);
+					
+					if (listener != null) {
+						listener.onReceivedPacket(copyOf, inetAddress, port);
+					}
 				} catch (Exception e) {
 					Log.e("Unknown exception, possibly due to peer leaving after sending packet?", e);
 				}
@@ -95,4 +118,9 @@ public class Server {
 			socket.close();
 		}
 	}
+	
+	public interface UDPServerListener {
+		public void onReceivedPacket(byte[] data, InetAddress inetAddress, int port);
+	}
+	
 }

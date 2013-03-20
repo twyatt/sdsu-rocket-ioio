@@ -1,4 +1,4 @@
-package edu.sdsu.aerospace.rocket;
+package edu.sdsu.aerospace.rocket.network;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
