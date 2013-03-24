@@ -7,7 +7,7 @@ import ioio.lib.api.exception.ConnectionLostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Ignitor implements Device {
+public class DMO063 implements Device {
 
 	public long duration; // milliseconds
 	public boolean value;
@@ -17,7 +17,7 @@ public class Ignitor implements Device {
 	
 	private Timer timer;
 	
-	public Ignitor(int pin, long duration) {
+	public DMO063(int pin, long duration) {
 		this.pin = pin;
 		setIgnitionDuration(duration);
 	}

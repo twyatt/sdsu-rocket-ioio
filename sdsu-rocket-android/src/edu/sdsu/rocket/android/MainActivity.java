@@ -9,20 +9,16 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-import edu.sdsu.aerospace.rocket.android.R;
 import edu.sdsu.aerospace.rocket.network.UDPServer;
 import edu.sdsu.aerospace.rocket.network.UDPServer.UDPServerListener;
-import edu.sdsu.rocket.android.devices.Ignitor;
-import edu.sdsu.rocket.android.devices.PressureTransducer;
+import edu.sdsu.rocket.android.devices.BMP085;
+import edu.sdsu.rocket.android.devices.DMO063;
+import edu.sdsu.rocket.android.devices.Device;
+import edu.sdsu.rocket.android.devices.P51500AA1365V;
+import edu.sdsu.rocket.android.logging.UDPLog;
 
 public class MainActivity extends IOIOActivity implements UDPServerListener {
 
-	/**
-	 * Per "good convention" recommendations found at:
-	 * {@link http://developer.android.com/reference/android/util/Log.html}
-	 */
-	private static final String TAG = "SDSURocket";
-	
 	private static UDPServer server;
 	public final static int PORT = 12161;
 	
@@ -42,6 +38,8 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		App.log = new UDPLog("192.168.1.7", 10001);
+		
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
 		serverStatusTextView = (TextView) findViewById(R.id.server_status);
 		buttonToggleButton = (ToggleButton) findViewById(R.id.button_state);
@@ -60,17 +58,33 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		server.listen(PORT);
 		server.setListener(this);
 		setServerText("Listening on port " + PORT + ".");
+		App.log.i(App.TAG, "Listening on port " + PORT + ".");
 	}
 
 	private void setupDevices() {
 		// 3.3V digital
-		Ignitor ignitor = new Ignitor(3 /* pin */, 3000L /* duration (milliseconds) */);
+		Device ignitor = new DMO063(3 /* pin */, 3000L /* duration (milliseconds) */);
 		
 		// max voltage for pin 35 = 3.3V
-		PressureTransducer transducer = new PressureTransducer(35 /* pin */, 190.02f /* slope */, -139.87f /* bias */);
+		Device pressure = new P51500AA1365V(35 /* pin */, 190.02f /* slope */, -139.87f /* bias */);
 		
-		deviceManager.add(ignitor);
-		deviceManager.add(transducer);
+		// twiNum 0 = pin 4 (SDA) and 5 (SCL)
+		BMP085 barometer = new BMP085(0 /* twiNum */, 3 /* eocPin */, 0 /* oversampling */);
+		
+		barometer.setListener(new BMP085.Listener() {
+			@Override
+			public void onBMP085Values(float pressure, double temperature) {
+				float alt = BMP085.altitude(pressure, BMP085.p0);
+				alt = Units.convertMetersToFeet(alt);
+				double temp = Units.convertCelsiusToFahrenheit(temperature);
+//				App.log.i(App.TAG, "Pressure: " + pressure + ", Temperature: " + temperature);
+				setIOIOText("A: " + alt + ", \nT: " + temp);
+			}
+		});
+		
+//		deviceManager.add(ignitor);
+//		deviceManager.add(pressure);
+		deviceManager.add(barometer, true);
 	}
 
 	@Override

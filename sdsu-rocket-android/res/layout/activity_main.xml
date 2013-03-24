@@ -7,9 +7,9 @@
         android:id="@+id/ioio_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="71dp"
+        android:layout_alignLeft="@+id/server_status"
+        android:layout_alignRight="@+id/server_status"
+        android:lines="2"
         android:text="@string/ioio_status"
         android:textSize="12pt"
         tools:context=".MainActivity" />
