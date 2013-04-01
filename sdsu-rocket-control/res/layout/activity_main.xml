@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+	<TextView
+	    android:id="@+id/server_status"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:lines="2"
+	    android:text="@string/server_status"
+	    android:textSize="12pt"
+	    tools:context=".MainActivity" />
+	
+	<TextView
+	    android:id="@+id/ioio_status"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:lines="3"
+	    android:text="@string/ioio_status"
+	    android:textSize="12pt"
+	    tools:context=".MainActivity" />
+
+</LinearLayout>
