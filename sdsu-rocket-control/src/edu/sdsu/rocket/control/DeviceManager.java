@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import edu.sdsu.rocket.control.devices.Device;
 import edu.sdsu.rocket.control.devices.DeviceThread;
-import edu.sdsu.rocket.logging.Log;
 
 public class DeviceManager implements IOIOLooper {
 	
@@ -21,7 +20,7 @@ public class DeviceManager implements IOIOLooper {
 	
 	public void add(Device device, boolean spawnThread) {
 		if (spawnThread) {
-			Log.i("Spawning thread for device: " + device.info());
+			App.log.i(App.TAG, "Spawning thread for device: " + device.info());
 			
 			DeviceThread thread = new DeviceThread(device);
 			threads.add(thread);
@@ -47,15 +46,22 @@ public class DeviceManager implements IOIOLooper {
 		
 		try {
 			for (Device device : devices) {
+				App.log.i(App.TAG, "Setting up device: " + device.info());
 				device.setup(ioio);
 			}
 			for (DeviceThread thread : threads) {
+				App.log.i(App.TAG, "Setting up device: " + thread.device.info());
 				thread.device.setup(ioio);
-				thread.run();
 			}
 		} catch (ConnectionLostException e) {
 			e.printStackTrace();
-			// TODO log connection lost
+			App.log.i(App.TAG, "Connection lost with IOIO during setup");
+			return;
+		}
+		
+		for (DeviceThread thread : threads) {
+			App.log.i(App.TAG, "Starting thread for device: " + thread.device.info());
+			thread.start();
 		}
 	}
 	
@@ -67,17 +73,20 @@ public class DeviceManager implements IOIOLooper {
 			}
 		} catch (ConnectionLostException e) {
 			e.printStackTrace();
-			// TODO log connection lost
+			App.log.i(App.TAG, "Connection lost with IOIO during loop");
+			return;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			// TODO log interrupted
+			App.log.i(App.TAG, "Interrupted exception during IOIO loop");
+			return;
 		}
 		
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			// TODO log thread sleep exception
+			App.log.i(App.TAG, "Thread sleep exception during IOIO loop");
+			return;
 		}
 	}
 	

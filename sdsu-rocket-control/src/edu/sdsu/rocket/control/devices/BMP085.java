@@ -1,10 +1,10 @@
 package edu.sdsu.rocket.control.devices;
 
-import edu.sdsu.rocket.control.App;
 import ioio.lib.api.DigitalInput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.TwiMaster;
 import ioio.lib.api.exception.ConnectionLostException;
+import edu.sdsu.rocket.control.App;
 
 /**
  * Barometer

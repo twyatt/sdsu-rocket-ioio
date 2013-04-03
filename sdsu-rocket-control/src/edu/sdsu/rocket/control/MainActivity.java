@@ -9,10 +9,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import edu.sdsu.rocket.control.devices.ArduIMU;
 import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.DMO063;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
+import edu.sdsu.rocket.control.devices.UARTPing;
+import edu.sdsu.rocket.control.devices.UARTReceiver;
 import edu.sdsu.rocket.control.logging.UDPLog;
 import edu.sdsu.rocket.control.network.UDPServer;
 import edu.sdsu.rocket.control.network.UDPServer.UDPServerListener;
@@ -26,6 +29,7 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 	
 	private TextView ioioStatusTextView;
 	private TextView serverStatusTextView;
+	private TextView debugTextView;
 	private ToggleButton buttonToggleButton;
 
 	@Override
@@ -42,6 +46,7 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
 		serverStatusTextView = (TextView) findViewById(R.id.server_status);
+		debugTextView = (TextView) findViewById(R.id.debug);
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -101,10 +106,39 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 			}
 		});
 		
+		ArduIMU imu = new ArduIMU(10 /* RX pin */);
+		imu.setListener(new ArduIMU.ArduIMUListener() {
+			@Override
+			public void onArduIMUValues(String values) {
+				App.log.i(App.TAG, "uart_rx=" + values);
+			}
+		});
+		
+		UARTPing ping = new UARTPing(10 /* TX pin */, 1000 /* thread sleep */);
+		
+		UARTReceiver receiver = new UARTReceiver(12 /* RX pin */);
+		receiver.setListener(new UARTReceiver.UARTReceiverListener() {
+			@Override
+			public void onUARTMessage(final String response) {
+				App.log.i(App.TAG, "uart response=" + response);
+				
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						debugTextView.setText(response);
+					}
+				});
+			}
+		});
+		
 //		deviceManager.add(ignitor);
 //		deviceManager.add(pressure);
 //		deviceManager.add(barometer1, true /* spawn thread */);
-		deviceManager.add(barometer2, true /* spawn thread */);
+//		deviceManager.add(barometer2, true /* spawn thread */);
+//		deviceManager.add(imu, true /* spawn thread */);
+		
+//		deviceManager.add(ping, true /* spawn thread */);
+		deviceManager.add(receiver, true /* spawn thread */);
 	}
 
 	@Override
