@@ -2,13 +2,9 @@ package edu.sdsu.rocket.control;
 
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
-
-import java.net.InetAddress;
-
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 import edu.sdsu.rocket.control.devices.ArduIMU;
 import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.DMO063;
@@ -16,21 +12,17 @@ import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.UARTPing;
 import edu.sdsu.rocket.control.devices.UARTReceiver;
-import edu.sdsu.rocket.control.logging.UDPLog;
-import edu.sdsu.rocket.control.network.UDPServer;
-import edu.sdsu.rocket.control.network.UDPServer.UDPServerListener;
 
-public class MainActivity extends IOIOActivity implements UDPServerListener {
+public class MainActivity extends IOIOActivity {
 
-	private static UDPServer server;
 	public final static int PORT = 12161;
 	
 	private DeviceManager deviceManager;
+	private RemoteCommandController remoteCommand;
 	
 	private TextView ioioStatusTextView;
 	private TextView serverStatusTextView;
 	private TextView debugTextView;
-	private ToggleButton buttonToggleButton;
 
 	@Override
 	protected IOIOLooper createIOIOLooper() {
@@ -42,8 +34,6 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		App.log = new UDPLog("192.168.1.100", 10001);
-		
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
 		serverStatusTextView = (TextView) findViewById(R.id.server_status);
 		debugTextView = (TextView) findViewById(R.id.debug);
@@ -51,18 +41,12 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
-		setupServer();
-		
 		deviceManager = new DeviceManager();
 		setupDevices();
-	}
-
-	private void setupServer() {
-		server = new UDPServer();
-		server.listen(PORT);
-		server.setListener(this);
+		
+		remoteCommand = new RemoteCommandController();
+		remoteCommand.listen(PORT);
 		setServerText("Listening on port " + PORT + ".");
-		App.log.i(App.TAG, "Listening on port " + PORT + ".");
 	}
 
 	private void setupDevices() {
@@ -70,7 +54,8 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 		DMO063 ignitor = new DMO063(3 /* pin */, 3000L /* duration (milliseconds) */);
 		
 		// max voltage for pin 35 = 3.3V
-		P51500AA1365V pressure = new P51500AA1365V(35 /* pin */, 190.02f /* slope */, -139.87f /* bias */);
+		P51500AA1365V pressure1 = new P51500AA1365V(36 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
+		P51500AA1365V pressure2 = new P51500AA1365V(40 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
 		
 		// TODO test oversampling of 3 (max)
 		// twiNum 0 = pin 4 (SDA) and 5 (SCL)
@@ -131,30 +116,23 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 			}
 		});
 		
+//		servo = new PS050(3, 100);
+		
 //		deviceManager.add(ignitor);
-//		deviceManager.add(pressure);
+		deviceManager.add(pressure1);
+//		deviceManager.add(pressure2);
 //		deviceManager.add(barometer1, true /* spawn thread */);
 //		deviceManager.add(barometer2, true /* spawn thread */);
 //		deviceManager.add(imu, true /* spawn thread */);
 		
 //		deviceManager.add(ping, true /* spawn thread */);
-		deviceManager.add(receiver, true /* spawn thread */);
+//		deviceManager.add(receiver, true /* spawn thread */);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
-	}
-	
-	@Override
-	public void onReceivedPacket(byte[] data, InetAddress inetAddress, int port) {
-		String text = new String(data);
-		setServerText(text);
-		
-		if (text.startsWith("LAUNCH")) {
-			setState(true);
-		}
 	}
 	
 //	@Override
@@ -192,15 +170,6 @@ public class MainActivity extends IOIOActivity implements UDPServerListener {
 			@Override
 			public void run() {
 				serverStatusTextView.setText(text);
-			}
-		});
-	}
-	
-	private void setState(final boolean on) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				buttonToggleButton.setChecked(on);
 			}
 		});
 	}

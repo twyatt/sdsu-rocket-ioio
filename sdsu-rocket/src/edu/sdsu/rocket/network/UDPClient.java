@@ -13,13 +13,8 @@ public class UDPClient {
 	private int port;
 	private DatagramSocket socket;
 	
-	public UDPClient(String host, int port) {
-		try {
-			inetAddress = InetAddress.getByName(host);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public UDPClient(InetAddress inetAddress, int port) {
+		this.inetAddress = inetAddress;
 		this.port = port;
 		
 		try {
@@ -28,6 +23,10 @@ public class UDPClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public UDPClient(String host, int port) throws UnknownHostException {
+		this(InetAddress.getByName(host), port);
 	}
 
 	public void send(String text) {

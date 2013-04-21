@@ -1,5 +1,6 @@
 package edu.sdsu.rocket.control.devices;
 
+import edu.sdsu.rocket.control.App;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -39,7 +40,17 @@ public class P51500AA1365V implements Device {
 	@Override
 	public void loop() {
 		// TODO Auto-generated method stub
-		
+		try {
+			float v = input.getVoltage();
+			float p = readPressure();
+			App.log.i(App.TAG, "V: " + v + ", P: " + p);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConnectionLostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/*

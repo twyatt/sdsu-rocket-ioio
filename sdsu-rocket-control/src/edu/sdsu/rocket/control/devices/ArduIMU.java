@@ -14,7 +14,10 @@ import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.control.Debug;
 
 /**
- * HMC5883L I2C magnetometer
+ * Arduino based IMU
+ * 
+ * MPU-6000 Accelerometer
+ * HMC5883L Magnetometer (I2C)
  */
 public class ArduIMU implements Device {
 
