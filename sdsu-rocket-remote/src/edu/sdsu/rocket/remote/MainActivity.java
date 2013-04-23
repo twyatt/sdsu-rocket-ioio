@@ -1,5 +1,7 @@
 package edu.sdsu.rocket.remote;
 
+import java.net.UnknownHostException;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -26,7 +28,12 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-		client = new UDPClient(HOST, PORT);
+		try {
+			client = new UDPClient(HOST, PORT);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

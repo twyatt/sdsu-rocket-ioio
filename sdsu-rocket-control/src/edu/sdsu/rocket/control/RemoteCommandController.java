@@ -10,7 +10,7 @@ import edu.sdsu.rocket.control.network.UDPServer.UDPServerListener;
 
 public class RemoteCommandController implements UDPServerListener {
 
-	private static final String COMMAND_DELIMITER = "\n";
+	private static final String COMMAND_DELIMITER = ";";
 
 	private static final String COMMAND_LAUNCH = "LAUNCH";
 	private static final String COMMAND_ADMIN  = "ADMIN";
@@ -69,12 +69,8 @@ public class RemoteCommandController implements UDPServerListener {
 			// FIXME implement
 		} else if (command.equalsIgnoreCase(COMMAND_ADMIN)) {
 			administrator = inetAddress;
-		} else if (command.equalsIgnoreCase(COMMAND_UDP_LOG_ON)) {
-			if (administrator != null) {
-				App.log = new UDPLog(administrator, UDP_LOG_PORT);
-			}
-		} else if (command.equalsIgnoreCase(COMMAND_UDP_LOG_OFF)) {
-			App.log = new AndroidLog();
+			App.log = new UDPLog(administrator, UDP_LOG_PORT);
+			App.log.i(App.TAG, "Logging to " + inetAddress.getHostAddress() + ":" + UDP_LOG_PORT);
 		} else {
 			// TODO log unrecognized command
 		}

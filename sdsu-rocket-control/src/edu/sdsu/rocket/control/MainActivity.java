@@ -12,17 +12,21 @@ import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.UARTPing;
 import edu.sdsu.rocket.control.devices.UARTReceiver;
+import edu.sdsu.rocket.control.objectives.FillTanksObjective;
+import edu.sdsu.rocket.control.objectives.LaunchObjective;
 
 public class MainActivity extends IOIOActivity {
 
-	public final static int PORT = 12161;
+	public final static int PORT = 12161; // remote command port
 	
 	private DeviceManager deviceManager;
+	private ObjectiveController objectiveController;
 	private RemoteCommandController remoteCommand;
 	
 	private TextView ioioStatusTextView;
 	private TextView serverStatusTextView;
 	private TextView debugTextView;
+
 
 	@Override
 	protected IOIOLooper createIOIOLooper() {
@@ -41,8 +45,14 @@ public class MainActivity extends IOIOActivity {
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
+		// TODO prevent device sleep
+		
 		deviceManager = new DeviceManager();
 		setupDevices();
+		
+//		objectiveController = new ObjectiveController();
+//		objectiveController.add(new FillTanksObjective());
+//		objectiveController.add(new LaunchObjective());
 		
 		remoteCommand = new RemoteCommandController();
 		remoteCommand.listen(PORT);
@@ -119,11 +129,11 @@ public class MainActivity extends IOIOActivity {
 //		servo = new PS050(3, 100);
 		
 //		deviceManager.add(ignitor);
-		deviceManager.add(pressure1);
+//		deviceManager.add(pressure1);
 //		deviceManager.add(pressure2);
 //		deviceManager.add(barometer1, true /* spawn thread */);
 //		deviceManager.add(barometer2, true /* spawn thread */);
-//		deviceManager.add(imu, true /* spawn thread */);
+		deviceManager.add(imu, true /* spawn thread */);
 		
 //		deviceManager.add(ping, true /* spawn thread */);
 //		deviceManager.add(receiver, true /* spawn thread */);

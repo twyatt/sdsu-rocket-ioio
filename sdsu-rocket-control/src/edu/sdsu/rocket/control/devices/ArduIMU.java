@@ -9,9 +9,10 @@ import ioio.lib.api.exception.ConnectionLostException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.StringTokenizer;
 
 import edu.sdsu.rocket.control.App;
-import edu.sdsu.rocket.control.Debug;
 
 /**
  * Arduino based IMU
@@ -21,12 +22,16 @@ import edu.sdsu.rocket.control.Debug;
  */
 public class ArduIMU implements Device {
 
+	private static final String VALUES_DELIMITER = "\n";
+
 	private ArduIMUListener listener;
 	
 	private Uart uart;
 	private int rxPin;
 
 	private InputStream in;
+
+	private String buffer = "";
 
 	public interface ArduIMUListener {
 		public void onArduIMUValues(String values);
@@ -48,23 +53,30 @@ public class ArduIMU implements Device {
 
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
-		App.log.i(App.TAG, "starting uart read");
+//		App.log.i(App.TAG, "starting uart read");
+		
 		byte[] buffer = new byte[16];
-		int read;
 		
 		try {
 			in.read(buffer);
-//			while ((read = in.read()) != -1) {
-////				int s = ((read&0xff)<<24)+((read&0xff00)<<8)+((read&0xff0000)>>8)+((read>>24)&0xff);
-////				App.log.i(App.TAG, "in=" + s);
-//				App.log.i(App.TAG, "in=" + read);
-//			}
-		} catch (IOException e1) {
+		} catch (IOException ioException) {
 			App.log.i(App.TAG, "uart read failed");
-			e1.printStackTrace();
-			return;
+			ioException.printStackTrace();
+			Thread.sleep(1000);
+			return; // TODO disable device instead
 		}
-		App.log.i(App.TAG, "debug=" + Debug.bytesToHex(buffer));
+		
+		try {
+			String text = new String(buffer, "US-ASCII");
+			onReceivedText(text);
+		} catch (UnsupportedEncodingException encodingException) {
+			App.log.i(App.TAG, "unsupported encoding");
+			encodingException.printStackTrace();
+			Thread.sleep(1000);
+			return; // TODO disable device instead
+		}
+		
+//		App.log.i(App.TAG, "debug=" + Debug.bytesToHex(buffer));
 		
 //		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 //		StringBuilder builder = new StringBuilder();
@@ -85,20 +97,52 @@ public class ArduIMU implements Device {
 //			listener.onArduIMUValues(builder.toString());
 //		}
 		
-		if (listener != null) {
-			String values;
-			try {
-				values = new String(buffer, "US-ASCII");
-			} catch (UnsupportedEncodingException e) {
-				App.log.i(App.TAG, "unsupported encoding");
-				e.printStackTrace();
-				return;
+		Thread.sleep(8 / 60); // 8Hz
+	}
+
+	private void onReceivedText(String text) {
+		buffer += text;
+		
+		if (buffer.contains(VALUES_DELIMITER)) {
+			String parse;
+			
+			if (buffer.endsWith(VALUES_DELIMITER)) {
+				parse = buffer;
+				buffer = "";
+			} else {
+				int lastIndexOf = buffer.lastIndexOf(VALUES_DELIMITER);
+				parse = buffer.substring(0, lastIndexOf);
+				buffer = buffer.substring(lastIndexOf + 1);
 			}
 			
-			listener.onArduIMUValues(values);
+			StringTokenizer tokenizer = new StringTokenizer(parse, VALUES_DELIMITER);
+			while (tokenizer.hasMoreTokens()) {
+				parseValues(tokenizer.nextToken());
+			}
+		}
+	}
+
+	private void parseValues(String values) {
+		values = values.trim();
+		
+		if (!values.startsWith("!!!")) { // not values
+			App.log.i(App.TAG, "not imu values: '" + values.substring(0, 3) + "'");
+//			return;
 		}
 		
-		Thread.sleep(1000);
+		// strip trailing text that we don't use
+		if (values.endsWith("***")) {
+			App.log.i(App.TAG, "stripping imu ***");
+			values = values.substring(0, values.length() - 3);
+		}
+		if (values.contains("*$PGCMD")) {
+			App.log.i(App.TAG, "stripping imu cmd");
+			values = values.substring(0, values.indexOf("*$PGCMD"));
+		}
+		
+		if (listener != null) {
+			listener.onArduIMUValues(values);
+		}
 	}
 
 	/*
