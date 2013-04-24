@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-import edu.sdsu.rocket.logging.Log;
+import edu.sdsu.rocket.control.App;
 
 
 public class UDPServer {
@@ -31,7 +31,7 @@ public class UDPServer {
 		try {
 			socket = new DatagramSocket(port);
 		} catch (SocketException e) {
-			Log.e("Failed to initialize UDP socket on port " + port + ".", e);
+			App.log.e(App.TAG, "Failed to initialize UDP socket on port " + port + ".", e);
 			return;
 		}
 		
@@ -40,7 +40,7 @@ public class UDPServer {
 			interruptibleUDPThread.start();
 		}
 		
-		Log.i("Listening on port " + port + ".");
+		App.log.i(App.TAG, "Listening on port " + port + ".");
 	}
 	
 	public void stop() {
@@ -52,7 +52,7 @@ public class UDPServer {
 	
 //	public void onReceivedPacket(byte[] data, InetAddress inetAddress, int port) {
 //		String string = new String(data);
-//		Log.i("onReceivedPacket: " + string);
+//		App.log.i("onReceivedPacket: " + string);
 //	}
 	
 	/**
@@ -81,10 +81,10 @@ public class UDPServer {
 					socket.receive(packet);
 				} catch (SocketException se) {
 					// http://www.cs.duke.edu/csed/java/jdk1.5/docs/api/java/net/DatagramSocket.html#close%28%29
-					Log.e("Ignoring SocketException thrown from receive(), probably due to the socket being closed.", se);
+					App.log.e(App.TAG, "Ignoring SocketException thrown from receive(), probably due to the socket being closed.", se);
 					return;
 				} catch (IOException ioe) {
-					Log.e("IO Exception thrown in UDP thread.", ioe);
+					App.log.e(App.TAG, "IO Exception thrown in UDP thread.", ioe);
 				}
 				
 				try {
@@ -110,7 +110,7 @@ public class UDPServer {
 						listener.onReceivedPacket(copyOf, inetAddress, port);
 					}
 				} catch (Exception e) {
-					Log.e("Unknown exception, possibly due to peer leaving after sending packet?", e);
+					App.log.e(App.TAG, "Unknown exception, possibly due to peer leaving after sending packet?", e);
 				}
 			}
 		}
@@ -119,7 +119,7 @@ public class UDPServer {
 		public void interrupt() {
 			super.interrupt();
 			
-			Log.i("Socket interrupted, closing.");
+			App.log.i(App.TAG, "Socket interrupted, closing.");
 			socket.close();
 		}
 	}

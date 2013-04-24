@@ -1,7 +1,7 @@
 package edu.sdsu.rocket.control;
 
 import edu.sdsu.rocket.control.logging.AndroidLog;
-import edu.sdsu.rocket.control.logging.Logger;
+import edu.sdsu.rocket.logging.Logger;
 
 public class App {
 

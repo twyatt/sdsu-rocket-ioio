@@ -5,6 +5,7 @@ import ioio.lib.util.android.IOIOActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
+import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.control.devices.ArduIMU;
 import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.DMO063;
@@ -12,15 +13,12 @@ import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.UARTPing;
 import edu.sdsu.rocket.control.devices.UARTReceiver;
-import edu.sdsu.rocket.control.objectives.FillTanksObjective;
-import edu.sdsu.rocket.control.objectives.LaunchObjective;
+import edu.sdsu.rocket.control.network.RemoteCommandController;
 
 public class MainActivity extends IOIOActivity {
 
-	public final static int PORT = 12161; // remote command port
-	
 	private DeviceManager deviceManager;
-	private ObjectiveController objectiveController;
+//	private ObjectiveController objectiveController;
 	private RemoteCommandController remoteCommand;
 	
 	private TextView ioioStatusTextView;
@@ -36,11 +34,8 @@ public class MainActivity extends IOIOActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
 		
-		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
-		serverStatusTextView = (TextView) findViewById(R.id.server_status);
-		debugTextView = (TextView) findViewById(R.id.debug);
+		setupUI();
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -54,9 +49,25 @@ public class MainActivity extends IOIOActivity {
 //		objectiveController.add(new FillTanksObjective());
 //		objectiveController.add(new LaunchObjective());
 		
-		remoteCommand = new RemoteCommandController();
-		remoteCommand.listen(PORT);
-		setServerText("Listening on port " + PORT + ".");
+		setupRemoteCommand();
+	}
+
+	private void setupUI() {
+		setContentView(R.layout.activity_main);
+		
+		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
+		serverStatusTextView = (TextView) findViewById(R.id.server_status);
+		debugTextView = (TextView) findViewById(R.id.debug);
+	}
+
+	private void setupRemoteCommand() {
+		int tcpPort = Network.TCP_PORT;
+		int udpPort = Network.UDP_PORT;
+		
+		remoteCommand = new RemoteCommandController(tcpPort, udpPort);
+		remoteCommand.start();
+		
+		setServerText("Listening on TCP port " + tcpPort + ", UDP port " + udpPort + ".");
 	}
 
 	private void setupDevices() {

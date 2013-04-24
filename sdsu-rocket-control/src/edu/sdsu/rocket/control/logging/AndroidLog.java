@@ -1,5 +1,6 @@
 package edu.sdsu.rocket.control.logging;
 
+import edu.sdsu.rocket.logging.Logger;
 import android.util.Log;
 
 public class AndroidLog implements Logger {
@@ -7,6 +8,11 @@ public class AndroidLog implements Logger {
 	@Override
 	public void i(String tag, String msg) {
 		Log.i(tag, msg);
+	}
+
+	@Override
+	public void e(String tag, String msg, Exception e) {
+		Log.e(tag, msg, e);
 	}
 
 }

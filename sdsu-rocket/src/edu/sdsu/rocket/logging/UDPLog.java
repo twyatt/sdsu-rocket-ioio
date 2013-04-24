@@ -1,4 +1,4 @@
-package edu.sdsu.rocket.control.logging;
+package edu.sdsu.rocket.logging;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -19,5 +19,11 @@ public class UDPLog implements Logger {
 	
 	public void i(String tag, String msg) {
 		client.send(tag + ": " + msg);
+	}
+
+	@Override
+	public void e(String tag, String msg, Exception e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

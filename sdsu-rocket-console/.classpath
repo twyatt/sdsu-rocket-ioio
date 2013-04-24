@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="libs/kryonet-2.18-all.jar"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/sdsu-rocket"/>
+	<classpathentry kind="lib" path="/sdsu-rocket/libs/kryonet-2.18-all.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
