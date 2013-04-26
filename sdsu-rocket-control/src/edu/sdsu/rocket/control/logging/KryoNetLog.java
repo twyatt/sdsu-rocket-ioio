@@ -44,14 +44,18 @@ public class KryoNetLog implements Logger {
 		sendLog(log);
 	}
 
-
 	@Override
 	public void e(String tag, String msg, Exception e) {
+		e(tag, msg + "\n\n" + e.getMessage());
+	}
+	
+	@Override
+	public void e(String tag, String msg) {
 		LogMessage log = new LogMessage();
 		
 		log.level = Network.LOG_LEVEL_ERROR;
 		log.tag = tag;
-		log.message = msg + "\n\n" + e.getMessage();
+		log.message = msg;
 		
 		sendLog(log);
 	}

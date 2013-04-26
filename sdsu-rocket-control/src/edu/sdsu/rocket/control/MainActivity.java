@@ -14,19 +14,19 @@ import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.DMO063;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
-import edu.sdsu.rocket.control.devices.UARTPing;
-import edu.sdsu.rocket.control.devices.UARTReceiver;
+import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.control.network.RemoteCommandController;
+import edu.sdsu.rocket.control.objectives.FillTanksObjective;
+import edu.sdsu.rocket.control.objectives.LaunchObjective;
 
 public class MainActivity extends IOIOActivity {
 
 	private DeviceManager deviceManager;
-//	private ObjectiveController objectiveController;
+	private ObjectiveController objectiveController;
 	private RemoteCommandController remoteCommand;
 	
 	private TextView ioioStatusTextView;
 	private TextView serverStatusTextView;
-	private TextView debugTextView;
 
 
 	@Override
@@ -45,14 +45,19 @@ public class MainActivity extends IOIOActivity {
 		
 		// TODO prevent device sleep
 		
+		Rocket rocket = new Rocket();
+		
 		deviceManager = new DeviceManager();
 		setupDevices();
-		
-//		objectiveController = new ObjectiveController();
-//		objectiveController.add(new FillTanksObjective());
-//		objectiveController.add(new LaunchObjective());
+		setupObjectives(rocket);
 		
 		setupRemoteCommand();
+	}
+
+	private void setupObjectives(Rocket rocket) {
+		objectiveController = new ObjectiveController(rocket);
+		objectiveController.add("fill", new FillTanksObjective());
+		objectiveController.add("launch", new LaunchObjective());
 	}
 
 	private void setupUI() {
@@ -60,14 +65,13 @@ public class MainActivity extends IOIOActivity {
 		
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
 		serverStatusTextView = (TextView) findViewById(R.id.server_status);
-		debugTextView = (TextView) findViewById(R.id.debug);
 	}
 
 	private void setupRemoteCommand() {
 		int tcpPort = Network.TCP_PORT;
 		int udpPort = Network.UDP_PORT;
 		
-		remoteCommand = new RemoteCommandController(tcpPort, udpPort);
+		remoteCommand = new RemoteCommandController(tcpPort, udpPort, objectiveController);
 		remoteCommand.start();
 		
 		String ip = getIpAddr();
@@ -121,23 +125,6 @@ public class MainActivity extends IOIOActivity {
 			@Override
 			public void onArduIMUValues(String values) {
 				App.log.i(App.TAG, "uart_rx=" + values);
-			}
-		});
-		
-		UARTPing ping = new UARTPing(10 /* TX pin */, 1000 /* thread sleep */);
-		
-		UARTReceiver receiver = new UARTReceiver(12 /* RX pin */);
-		receiver.setListener(new UARTReceiver.UARTReceiverListener() {
-			@Override
-			public void onUARTMessage(final String response) {
-				App.log.i(App.TAG, "uart response=" + response);
-				
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						debugTextView.setText(response);
-					}
-				});
 			}
 		});
 		

@@ -2,24 +2,22 @@ package edu.sdsu.rocket.control.network;
 
 import java.io.IOException;
 
-import android.annotation.SuppressLint;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.Network.AuthenticationRequest;
-import edu.sdsu.rocket.Network.LaunchRequest;
+import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.LoggingRequest;
+import edu.sdsu.rocket.Network.SetObjectiveRequest;
 import edu.sdsu.rocket.control.App;
+import edu.sdsu.rocket.control.ObjectiveController;
 import edu.sdsu.rocket.control.logging.KryoNetLog;
 
 public class RemoteCommandController {
 
-	// FIXME replace and kryo debug JARs with non-debug versions
+	// FIXME replace kryo debug JARs with non-debug versions
 	
 	private static final String AUTHENTICATION_KEY = "gimme$";
 
@@ -31,10 +29,13 @@ public class RemoteCommandController {
 	
 	private int tcpPort;
 	private int udpPort;
+
+	private ObjectiveController objectiveController;
 	
-	public RemoteCommandController(int tcpPort, int udpPort) {
+	public RemoteCommandController(int tcpPort, int udpPort, ObjectiveController objectiveController) {
 		this.tcpPort = tcpPort;
 		this.udpPort = udpPort;
+		this.objectiveController = objectiveController;
 	}
 	
 	public int getTcpPort() {
@@ -75,8 +76,12 @@ public class RemoteCommandController {
 					onAuthenticationRequest(connection, (AuthenticationRequest)object);
 				}
 				
-				if (object instanceof LaunchRequest) {
-					onLaunchRequest(connection, (LaunchRequest)object);
+				if (object instanceof SetObjectiveRequest) {
+					onSetObjectiveRequest(connection, (SetObjectiveRequest)object);
+				}
+				
+				if (object instanceof CommandRequest) {
+					onCommandRequest(connection, (CommandRequest)object);
 				}
 			}
 			
@@ -93,6 +98,14 @@ public class RemoteCommandController {
 		App.log.i(App.TAG, "Listening on TCP port " + tcpPort + ", UDP port " + udpPort + ".");
 	}
 	
+	protected void onCommandRequest(Connection connection, CommandRequest command) {
+		if (isAuthenticated(connection)) {
+			objectiveController.command(command.command);
+		} else {
+			App.log.i(App.TAG, "Ignoring '" + command.command + "' command from " + connection.getRemoteAddressTCP() + ".");
+		}
+	}
+
 	protected void onAuthenticationRequest(Connection connection, AuthenticationRequest authentication) {
 		if (connection instanceof RemoteCommandConnection) {
 			if (AUTHENTICATION_KEY.equals(authentication.key)) {
@@ -121,16 +134,29 @@ public class RemoteCommandController {
 		}
 	}
 	
-	protected void onLaunchRequest(Connection connection, LaunchRequest object) {
-		if (connection instanceof RemoteCommandConnection) {
-			if (((RemoteCommandConnection)connection).isAuthenticated) {
-				App.log.i(App.TAG, "Initiating launch request from " + connection.getRemoteAddressTCP() + ".");
-			} else {
-				App.log.i(App.TAG, "Ignoring launch request from " + connection.getRemoteAddressTCP() + ".");
-			}
+	/**
+	 * Sets the active objective.
+	 * Requires that the connection be authenticated.
+	 * 
+	 * @param connection
+	 * @param setObjective
+	 */
+	protected void onSetObjectiveRequest(Connection connection, SetObjectiveRequest setObjective) {
+		if (isAuthenticated(connection)) {
+			objectiveController.set(setObjective.name);
+		} else {
+			App.log.i(App.TAG, "Ignoring set objective request from " + connection.getRemoteAddressTCP() + ".");
 		}
 	}
 
+	public static boolean isAuthenticated(Connection connection) {
+		if (connection instanceof RemoteCommandConnection) {
+			return ((RemoteCommandConnection)connection).isAuthenticated;
+		}
+		
+		return false;
+	}
+	
 	public class RemoteCommandConnection extends Connection {
 		public boolean isAuthenticated;
 	}

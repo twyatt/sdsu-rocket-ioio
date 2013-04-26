@@ -11,6 +11,11 @@ public class AndroidLog implements Logger {
 	}
 
 	@Override
+	public void e(String tag, String msg) {
+		Log.e(tag, msg);
+	}
+	
+	@Override
 	public void e(String tag, String msg, Exception e) {
 		Log.e(tag, msg, e);
 	}

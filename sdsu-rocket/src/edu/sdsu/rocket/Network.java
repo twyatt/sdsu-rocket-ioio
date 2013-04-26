@@ -21,7 +21,8 @@ public class Network {
 		kyro.register(AuthenticationRequest.class);
 		kyro.register(LoggingRequest.class);
 		kyro.register(LogMessage.class);
-		kyro.register(LaunchRequest.class);
+		kyro.register(SetObjectiveRequest.class);
+		kyro.register(CommandRequest.class);
 	}
 	
 	static public class AuthenticationRequest {
@@ -38,6 +39,12 @@ public class Network {
 		public String message;
 	}
 	
-	static public class LaunchRequest {}
+	static public class SetObjectiveRequest {
+		public String name;
+	}
+	
+	static public class CommandRequest {
+		public String command;
+	}
 	
 }

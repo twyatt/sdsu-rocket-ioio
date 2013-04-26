@@ -1,5 +1,19 @@
 package edu.sdsu.rocket.control.objectives;
 
-public class FillTanksObjective {
+import edu.sdsu.rocket.control.models.Rocket;
+
+public class FillTanksObjective implements Objective {
+
+	@Override
+	public void command(Rocket rocket, String command) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void loop(Rocket rocket) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

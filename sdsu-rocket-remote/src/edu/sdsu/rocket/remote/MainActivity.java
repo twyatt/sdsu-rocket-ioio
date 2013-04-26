@@ -20,7 +20,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import edu.sdsu.rocket.Network;
-import edu.sdsu.rocket.Network.LaunchRequest;
+import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.LogMessage;
 
 public class MainActivity extends Activity {
@@ -163,7 +163,7 @@ public class MainActivity extends Activity {
 				
 				try {
 					System.out.println("Reconnecting ...");
-					client.reconnect(CONNECT_TIMEOUT);
+					client.reconnect(CONNECT_TIMEOUT); // FIXME cannot be on connect thread
 				} catch (IOException e) {
 					e.printStackTrace();
 					return;
@@ -179,8 +179,9 @@ public class MainActivity extends Activity {
 		button.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				LaunchRequest launchRequest = new LaunchRequest();
-				client.sendTCP(launchRequest);
+				CommandRequest commandRequest = new CommandRequest();
+				commandRequest.command = "launch";
+				client.sendTCP(commandRequest);
 			}
 		});
 	}

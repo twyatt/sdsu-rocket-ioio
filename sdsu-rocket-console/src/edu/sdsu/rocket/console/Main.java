@@ -2,17 +2,24 @@ package edu.sdsu.rocket.console;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import edu.sdsu.rocket.Network;
+import edu.sdsu.rocket.Network.AuthenticationRequest;
+import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.LogMessage;
 import edu.sdsu.rocket.Network.LoggingRequest;
+import edu.sdsu.rocket.Network.SetObjectiveRequest;
 
 public class Main {
 	
+	private static final int CONNECT_TIMEOUT = 10000; // milliseconds
+	private static final int DISCOVER_TIMEOUT = 5000; // milliseconds
+
 	private static Client client = new Client();
 	
 	// TODO change to array
@@ -24,7 +31,9 @@ public class Main {
 		
 		setup();
 		if (!connect()) {
-			return;
+			if (!connect("192.168.1.7")) {
+				return;
+			}
 		}
 		
 		try {
@@ -38,26 +47,41 @@ public class Main {
 		loggingRequest.enable = true;
 		client.sendTCP(loggingRequest);
 		
-//		try {
-//			Thread.sleep(1000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//			return;
-//		}
-//		
-//		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
-//		authenticationRequest.key = "gimme$";
-//		client.sendTCP(authenticationRequest);
-//		
-//		try {
-//			Thread.sleep(1000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//			return;
-//		}
-//		
-//		LaunchRequest launchRequest = new LaunchRequest();
-//		client.sendTCP(launchRequest);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		System.err.println("Sending authentication key.");
+		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
+		authenticationRequest.key = "gimme$";
+		client.sendTCP(authenticationRequest);
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		System.err.println("Sending set objective request.");
+		SetObjectiveRequest setObjectiveRequest = new SetObjectiveRequest();
+		setObjectiveRequest.name = "launch";
+		client.sendTCP(setObjectiveRequest);
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		System.err.println("Sending launch request.");
+		CommandRequest commandRequest = new CommandRequest();
+		commandRequest.command = "launch";
+		client.sendTCP(commandRequest);
 		
 		loop();
 	}
@@ -66,24 +90,37 @@ public class Main {
 		System.out.println("Searching for host.");
 		
 		int udpPort = Network.UDP_PORT;
-		int timeout = 10000; // milliseconds
-		InetAddress address = client.discoverHost(udpPort, timeout);
+		InetAddress address = client.discoverHost(udpPort, DISCOVER_TIMEOUT);
 		
 		if (address != null) {
-			System.out.println("Connecting to " + address + ".");
-			
-			try {
-				client.connect(timeout, address, Network.TCP_PORT, Network.UDP_PORT);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			}
-			
-			return true;
+			return connect(address);
 		} else {
 			System.err.println("Failed to discover host.");
 			return false;
 		}
+	}
+	
+	private static boolean connect(String host) {
+		try {
+			InetAddress inetAddress = InetAddress.getByName(host);
+			return connect(inetAddress);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	private static boolean connect(InetAddress address) {
+		System.out.println("Connecting to " + address + ".");
+		
+		try {
+			client.connect(CONNECT_TIMEOUT, address, Network.TCP_PORT, Network.UDP_PORT);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		return true;
 	}
 
 	private static void loop() {
