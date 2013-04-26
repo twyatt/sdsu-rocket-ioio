@@ -4,7 +4,7 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">SDSU Rocket</string>
     <string name="ioio_status">Waiting for IOIO.</string>
-    <string name="server_status">Starting UDP server.</string>
+    <string name="server_status">Starting server.</string>
     <string name="button_state">State</string>
 
 </resources>

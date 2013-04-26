@@ -1,20 +1,15 @@
-package edu.sdsu.rocket.logging;
+package edu.sdsu.rocket.control.logging;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import com.esotericsoftware.kryonet.Connection;
 
+import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.Network.LogMessage;
+import edu.sdsu.rocket.logging.Logger;
 
 public class KryoNetLog implements Logger {
-	
-	public static final int LEVEL_TRACE = 1;
-	public static final int LEVEL_DEBUG = 2;
-	public static final int LEVEL_INFO  = 3;
-	public static final int LEVEL_WARN  = 4;
-	public static final int LEVEL_ERROR = 5;
-	public static final int LEVEL_NONE  = 6;
 	
 	private Set<Connection> connections = new HashSet<Connection>();
 
@@ -42,7 +37,7 @@ public class KryoNetLog implements Logger {
 	public void i(String tag, String msg) {
 		LogMessage log = new LogMessage();
 		
-		log.level = LEVEL_INFO;
+		log.level = Network.LOG_LEVEL_INFO;
 		log.tag = tag;
 		log.message = msg;
 		
@@ -54,7 +49,7 @@ public class KryoNetLog implements Logger {
 	public void e(String tag, String msg, Exception e) {
 		LogMessage log = new LogMessage();
 		
-		log.level = LEVEL_ERROR;
+		log.level = Network.LOG_LEVEL_ERROR;
 		log.tag = tag;
 		log.message = msg + "\n\n" + e.getMessage();
 		

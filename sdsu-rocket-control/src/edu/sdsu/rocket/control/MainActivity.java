@@ -2,6 +2,9 @@ package edu.sdsu.rocket.control;
 
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
+import android.annotation.SuppressLint;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
@@ -67,7 +70,8 @@ public class MainActivity extends IOIOActivity {
 		remoteCommand = new RemoteCommandController(tcpPort, udpPort);
 		remoteCommand.start();
 		
-		setServerText("Listening on TCP port " + tcpPort + ", UDP port " + udpPort + ".");
+		String ip = getIpAddr();
+		setServerText("tcp://" + ip + ":" + tcpPort + "\nudp://" + ip + ":" + udpPort);
 	}
 
 	private void setupDevices() {
@@ -176,6 +180,27 @@ public class MainActivity extends IOIOActivity {
 //		Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 //		startActivity(settingsIntent);
 //	}
+
+	/**
+	 * http://stackoverflow.com/questions/7975473/detect-wifi-ip-address-on-android
+	 * @return
+	 */
+	@SuppressLint("DefaultLocale")
+	public String getIpAddr() {
+		WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+		int ip = wifiInfo.getIpAddress();
+		
+		String ipString = String.format(
+			"%d.%d.%d.%d",
+			(ip & 0xff),
+			(ip >> 8 & 0xff),
+			(ip >> 16 & 0xff),
+			(ip >> 24 & 0xff)
+		);
+		
+		return ipString;
+	}
 	
 	private void setIOIOText(final String text) {
 		runOnUiThread(new Runnable() {

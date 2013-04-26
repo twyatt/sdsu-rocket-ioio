@@ -10,7 +10,8 @@
 	    android:layout_height="wrap_content"
 	    android:lines="2"
 	    android:text="@string/server_status"
-	    android:textSize="12pt"
+	    android:textSize="14sp"
+	    android:typeface="normal"
 	    tools:context=".MainActivity" />
 	
 	<TextView

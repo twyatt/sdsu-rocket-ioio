@@ -9,7 +9,6 @@ import ioio.lib.api.exception.ConnectionLostException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
 import edu.sdsu.rocket.control.App;
@@ -125,20 +124,20 @@ public class ArduIMU implements Device {
 	private void parseValues(String values) {
 		values = values.trim();
 		
-		if (!values.startsWith("!!!")) { // not values
-			App.log.i(App.TAG, "not imu values: '" + values.substring(0, 3) + "'");
-//			return;
-		}
-		
-		// strip trailing text that we don't use
-		if (values.endsWith("***")) {
-			App.log.i(App.TAG, "stripping imu ***");
-			values = values.substring(0, values.length() - 3);
-		}
-		if (values.contains("*$PGCMD")) {
-			App.log.i(App.TAG, "stripping imu cmd");
-			values = values.substring(0, values.indexOf("*$PGCMD"));
-		}
+//		if (!values.startsWith("!!!")) { // not values
+//			App.log.i(App.TAG, "not imu values: '" + values.substring(0, 3) + "'");
+////			return;
+//		}
+//		
+//		// strip trailing text that we don't use
+//		if (values.endsWith("***")) {
+//			App.log.i(App.TAG, "stripping imu ***");
+//			values = values.substring(0, values.length() - 3);
+//		}
+//		if (values.contains("*$PGCMD")) {
+//			App.log.i(App.TAG, "stripping imu cmd");
+//			values = values.substring(0, values.indexOf("*$PGCMD"));
+//		}
 		
 		if (listener != null) {
 			listener.onArduIMUValues(values);

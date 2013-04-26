@@ -10,27 +10,91 @@ import com.esotericsoftware.kryonet.Listener;
 import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.Network.LogMessage;
 import edu.sdsu.rocket.Network.LoggingRequest;
-import edu.sdsu.rocket.logging.KryoNetLog;
 
 public class Main {
 	
 	private static Client client = new Client();
+	
+	// TODO change to array
+	private static Runnable runnable;
 
-	public static void main (String[] argv) {
+	public static void main(String[] argv) {
+		// http://code.google.com/p/kryonet/issues/detail?id=29
+//		System.setProperty("java.net.preferIPv4Stack" , "true");
+		
 		setup();
-		connect();
+		if (!connect()) {
+			return;
+		}
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return;
+		}
 		
 		LoggingRequest loggingRequest = new LoggingRequest();
 		loggingRequest.enable = true;
 		client.sendTCP(loggingRequest);
 		
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//			return;
+//		}
+//		
+//		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
+//		authenticationRequest.key = "gimme$";
+//		client.sendTCP(authenticationRequest);
+//		
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//			return;
+//		}
+//		
+//		LaunchRequest launchRequest = new LaunchRequest();
+//		client.sendTCP(launchRequest);
+		
 		loop();
+	}
+	
+	private static boolean connect() {
+		System.out.println("Searching for host.");
+		
+		int udpPort = Network.UDP_PORT;
+		int timeout = 10000; // milliseconds
+		InetAddress address = client.discoverHost(udpPort, timeout);
+		
+		if (address != null) {
+			System.out.println("Connecting to " + address + ".");
+			
+			try {
+				client.connect(timeout, address, Network.TCP_PORT, Network.UDP_PORT);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			}
+			
+			return true;
+		} else {
+			System.err.println("Failed to discover host.");
+			return false;
+		}
 	}
 
 	private static void loop() {
 		while (true) {
 			try {
-				Thread.sleep(1000);
+				if (runnable != null) {
+					runnable.run();
+					runnable = null;
+				}
+				
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				return;
@@ -55,7 +119,7 @@ public class Main {
 				if (object instanceof LogMessage) {
 					LogMessage log = (LogMessage)object;
 					
-					if (log.level >= KryoNetLog.LEVEL_ERROR) {
+					if (log.level >= Network.LOG_LEVEL_ERROR) {
 						System.err.println("ERROR: " + log.message);
 					} else {
 						System.out.println("LOG: " + log.message);
@@ -65,37 +129,28 @@ public class Main {
 			
 			@Override
 			public void disconnected(Connection connection) {
-				System.out.println("Disconnected from " + connection.getRemoteAddressTCP());
+				System.out.println("Disconnected.");
 				
-				int timeout = 30000; // milliseconds
-				try {
-					System.out.println("Reconnecting ...");
-					client.reconnect(timeout);
-				} catch (IOException e) {
-					e.printStackTrace();
-					return;
-				}
+				postRunnable(new Runnable() {
+					@Override
+					public void run() {
+						int timeout = 30000; // milliseconds
+						
+						try {
+							System.out.println("Reconnecting ...");
+							client.reconnect(timeout);
+						} catch (IOException e) {
+							e.printStackTrace();
+							return;
+						}
+					}
+				});
 			}
 		});
 	}
-	
-	private static void connect() {
-		int udpPort = Network.UDP_PORT;
-		int timeout = 30000; // milliseconds
-		InetAddress address = client.discoverHost(udpPort, timeout);
-		
-		System.out.println("address = " + address);
-		
-		if (address == null) {
-			try {
-				System.out.println("Connecting ...");
-				client.connect(timeout, "192.168.1.108", Network.TCP_PORT, Network.UDP_PORT);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return;
-			}
-		}
+
+	public static void postRunnable(Runnable runnable) {
+		Main.runnable = runnable;
 	}
 	
 }
