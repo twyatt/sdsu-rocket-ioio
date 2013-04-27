@@ -11,6 +11,7 @@ public class LaunchObjective implements Objective {
 	public void command(Rocket rocket, String command) {
 		if (command.equalsIgnoreCase(LAUNCH_COMMAND)) {
 			App.log.i(App.TAG, "Initiating launch!");
+			rocket.ignitor.ignite();
 		}
 	}
 

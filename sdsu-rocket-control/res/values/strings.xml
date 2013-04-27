@@ -5,6 +5,7 @@
     <string name="title_activity_main">SDSU Rocket</string>
     <string name="ioio_status">Waiting for IOIO.</string>
     <string name="server_status">Starting server.</string>
+    <string name="server_connections">0 connections</string>
     <string name="button_state">State</string>
 
 </resources>

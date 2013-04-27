@@ -9,11 +9,9 @@ import ioio.lib.api.exception.ConnectionLostException;
  */
 public class PS050 implements Device {
 
-	private final int PWM_FREQ = 100; // Hz
-	
 	private PwmOutput pwm;
 	private int pwmPin;
-	private int pwmFrequency;
+	private int pwmFrequency; // Hz
 	private int pulseWidth;
 
 	public PS050(int pwmPin, int pwmFrequency) {
@@ -23,7 +21,7 @@ public class PS050 implements Device {
 	
 	@Override
 	public void setup(IOIO ioio) throws ConnectionLostException {
-		pwm = ioio.openPwmOutput(pwmPin, PWM_FREQ);
+		pwm = ioio.openPwmOutput(pwmPin, pwmFrequency);
 	}
 
 	@Override

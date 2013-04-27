@@ -28,8 +28,6 @@ public class MainActivity extends Activity {
 	public static final int DISCOVER_HOST_TIMEOUT = 10000; // milliseconds
 	public static final int CONNECT_TIMEOUT = 10000; // milliseconds
 	
-	private Client client = new Client();
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -172,20 +170,6 @@ public class MainActivity extends Activity {
 		});
 	}
 	
-	private void setupUI() {
-		setContentView(R.layout.activity_main);
-		
-		final Button button = (Button) findViewById(R.id.button_launch);
-		button.setOnClickListener(new Button.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				CommandRequest commandRequest = new CommandRequest();
-				commandRequest.command = "launch";
-				client.sendTCP(commandRequest);
-			}
-		});
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

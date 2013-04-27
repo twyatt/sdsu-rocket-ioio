@@ -21,7 +21,7 @@ public class RemoteCommandController {
 	
 	private static final String AUTHENTICATION_KEY = "gimme$";
 
-	private Server server = new Server() {
+	public Server server = new Server() {
 		protected Connection newConnection() {
 			return new RemoteCommandConnection();
 		};

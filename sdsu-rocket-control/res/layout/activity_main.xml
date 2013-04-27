@@ -11,8 +11,15 @@
 	    android:lines="2"
 	    android:text="@string/server_status"
 	    android:textSize="14sp"
-	    android:typeface="normal"
-	    tools:context=".MainActivity" />
+	/>
+
+	<TextView
+	    android:id="@+id/server_connections"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:text="@string/server_connections"
+	    android:textAppearance="?android:attr/textAppearanceLarge"
+	/>
 	
 	<TextView
 	    android:id="@+id/ioio_status"
@@ -21,6 +28,6 @@
 	    android:lines="3"
 	    android:text="@string/ioio_status"
 	    android:textSize="12pt"
-	    tools:context=".MainActivity" />
+	/>
 
 </LinearLayout>
