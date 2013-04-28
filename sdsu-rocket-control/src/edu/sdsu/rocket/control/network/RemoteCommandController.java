@@ -12,6 +12,7 @@ import edu.sdsu.rocket.Network.AuthenticationResponse;
 import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.LoggingRequest;
 import edu.sdsu.rocket.Network.SetObjectiveRequest;
+import edu.sdsu.rocket.Network.SetObjectiveResponse;
 import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.control.ObjectiveController;
 import edu.sdsu.rocket.control.logging.KryoNetLog;
@@ -148,11 +149,20 @@ public class RemoteCommandController {
 	 * @param setObjective
 	 */
 	protected void onSetObjectiveRequest(Connection connection, SetObjectiveRequest setObjective) {
+		SetObjectiveResponse response = new SetObjectiveResponse();
+		
 		if (isAuthenticated(connection)) {
-			objectiveController.set(setObjective.name);
+			boolean success = objectiveController.set(setObjective.name);
+			if (!success) {
+				App.log.i(App.TAG, "Failed to set to " + setObjective.name + " objective request from " + connection.getRemoteAddressTCP() + ".");
+			}
+			response.success = success;
 		} else {
 			App.log.i(App.TAG, "Ignoring set objective request from " + connection.getRemoteAddressTCP() + ".");
+			response.success = false;
 		}
+		
+		connection.sendTCP(response);
 	}
 
 	public static boolean isAuthenticated(Connection connection) {

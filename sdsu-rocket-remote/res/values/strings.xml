@@ -22,7 +22,7 @@
 
     <!-- Launch Activity -->
     <string name="title_activity_launch">Launch Objective</string>
-    <string name="text_launch">Launch!</string>
+    <string name="action_launch">Launch</string>
     <string name="title_activity_objectives">ObjectivesActivity</string>
     <string name="hello_world">Hello world!</string>
 

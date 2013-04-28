@@ -1,26 +1,71 @@
 package edu.sdsu.rocket.remote;
 
 import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
 
 import edu.sdsu.rocket.Network.CommandRequest;
+import edu.sdsu.rocket.Network.SetObjectiveRequest;
+import edu.sdsu.rocket.Network.SetObjectiveResponse;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.os.Build;
 
 public class LaunchActivity extends Activity {
-
-	Client client = ClientSingleton.getInstance();
 	
+	private Client client;
+	private Listener clientListener;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setupUI();
+		
+		client = ClientSingleton.getInstance();
+		clientListener = new Listener() {
+			@Override
+			public void received(Connection connection, Object object) {
+				if (object instanceof SetObjectiveResponse) {
+					SetObjectiveResponse response = (SetObjectiveResponse)object;
+					onSetObjectiveResponse(response);
+				}
+			}
+		};
+		client.addListener(clientListener);
+		
+		SetObjectiveRequest setObjectiveRequest = new SetObjectiveRequest();
+		setObjectiveRequest.name = "launch";
+		client.sendTCP(setObjectiveRequest);
+	}
+	
+	protected void onSetObjectiveResponse(final SetObjectiveResponse response) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (response.success) {
+					Toast.makeText(getApplicationContext(), "Set launch objective.", Toast.LENGTH_SHORT).show();
+				} else {
+					Toast.makeText(getApplicationContext(), "Failed to set launch objective.", Toast.LENGTH_LONG).show();
+					finish();
+				}
+			}
+		});
+	}
+
+	@Override
+	protected void onDestroy() {
+		if (client != null && clientListener != null) {
+			client.removeListener(clientListener);
+		}
+		
+		super.onDestroy();
 	}
 	
 	private void setupUI() {

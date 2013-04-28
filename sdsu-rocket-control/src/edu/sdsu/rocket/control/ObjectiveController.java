@@ -31,14 +31,16 @@ public class ObjectiveController extends Thread {
 	 * 
 	 * @param name
 	 */
-	public void set(String name) {
+	public boolean set(String name) {
 		if (objectives.containsKey(name)) {
 			Objective objective = objectives.get(name);
 			active = objective;
 			
 			App.log.i(App.TAG, "Objective set to '" + name + "'.");
+			return true;
 		} else {
 			App.log.i(App.TAG, "Objective '" + name + "' not found.");
+			return false;
 		}
 	}
 	

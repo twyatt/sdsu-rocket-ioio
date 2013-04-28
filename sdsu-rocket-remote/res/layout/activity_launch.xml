@@ -13,7 +13,7 @@
         android:id="@+id/button_launch"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:text="@string/text_launch"
+        android:text="@string/action_launch"
         android:textColor="@color/black"
         android:textSize="48sp" />
 

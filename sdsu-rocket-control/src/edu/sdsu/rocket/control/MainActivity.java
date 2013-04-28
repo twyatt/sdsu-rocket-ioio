@@ -83,6 +83,7 @@ public class MainActivity extends IOIOActivity {
 			public void connected(Connection connection) {
 				int count = remoteCommand.server.getConnections().length;
 				updateTextView(connectionCountTextView, String.valueOf(count) + " connections");
+				App.log.i(App.TAG, "Connection count: " + count);
 			}
 			@Override
 			public void disconnected(Connection connection) {
@@ -101,7 +102,7 @@ public class MainActivity extends IOIOActivity {
 //		deviceManager.add(rocket.pressure2);
 //		deviceManager.add(rocket.barometer1, true /* spawn thread */);
 //		deviceManager.add(rocket.barometer2, true /* spawn thread */);
-		deviceManager.add(rocket.imu, true /* spawn thread */);
+//		deviceManager.add(rocket.imu, true /* spawn thread */);
 	}
 
 	@Override

@@ -12,8 +12,16 @@
         android:id="@+id/button_connect_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:text="@string/action_connect" />
+
+    <Button
+        android:id="@+id/button_launch_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_connect_activity"
+        android:layout_centerHorizontal="true"
+        android:text="@string/action_launch" />
 
 </RelativeLayout>

@@ -23,6 +23,7 @@ public class Network {
 		kyro.register(LoggingRequest.class);
 		kyro.register(LogMessage.class);
 		kyro.register(SetObjectiveRequest.class);
+		kyro.register(SetObjectiveResponse.class);
 		kyro.register(CommandRequest.class);
 	}
 	
@@ -46,6 +47,10 @@ public class Network {
 	
 	static public class SetObjectiveRequest {
 		public String name;
+	}
+	
+	static public class SetObjectiveResponse {
+		public boolean success;
 	}
 	
 	static public class CommandRequest {
