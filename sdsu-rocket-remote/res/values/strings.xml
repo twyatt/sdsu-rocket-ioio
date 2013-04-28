@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SDSU Rocket Remote</string>
-    <string name="action_settings">Settings</string>
-    <string name="text_launch">Launch!</string>
-
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
+    <!-- Main Activity -->
+    <string name="app_name">SDSU Rocket Remote</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Connect Activity -->
+    <string name="title_activity_connect">Connect</string>
+    <string name="prompt_host">Host</string>
+    <string name="prompt_key">Key</string>
+    <string name="action_connect">Connect</string>
+    <string name="connect_progress_connecting">Connecting&#8230;</string>
+    <string name="connect_progress_discoverying_host">Searching for host&#8230;</string>
+    <string name="connect_progress_authenticating">Authenticating&#8230;</string>
+    <string name="error_incorrect_key">This key is incorrect</string>
+    <string name="error_discover_host_failed">Failed to discover host</string>
+    <string name="error_unable_to_connect">Failed to connect to host</string>
+
+    <!-- Launch Activity -->
     <string name="title_activity_launch">Launch Objective</string>
+    <string name="text_launch">Launch!</string>
+    <string name="title_activity_objectives">ObjectivesActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

@@ -26,18 +26,62 @@ public class Rocket {
 	public ArduIMU imu;
 	
 	public Rocket() {
-		ignitor = new DMO063(3 /* pin */, 3000L /* duration (milliseconds) */);
+		/*
+		 * IOIO Pin Overview:
+		 * 
+		 * 1 = MS5611 SDA
+		 * 2 = MS5611 SCL
+		 * 3 = BMP085 EOC
+		 * 4 = BMP085 SDA
+		 * 5 = BMP085 SCL
+		 * 10 = ArduIMU TX
+		 * 13 = Servo PWM LOX = Screw-down Connector #5 Port #3
+		 * 14 = Servo PWM Ethanol = Screw-down Connector #6 Port #3
+		 * 19 = DMO063 #1 Control +
+		 * 20 = DMO063 #2 Control +
+		 * 21 = DMO063 #3 Control +
+		 * 41 = P51500AA1365V #1 White Wire (Screw-down Connector #1 Port #3)
+		 * 42 = P51500AA1365V #2 White Wire (Screw-down Connector #2 Port #3)
+		 * 43 = P51500AA1365V #3 White Wire (Screw-down Connector #3 Port #3)
+		 * 
+		 * 3.3V = MS5611 VCC
+		 *        BMP085 VCC
+		 * 3.3V GND = MS5611 GND
+		 *            BMP085 GND
+		 *            DMO063 #1 Control -
+		 *            DMO063 #2 Control -
+		 *            DMO063 #3 Control -
+		 * 
+		 * 5V = P51500AA1365V #1 Red Wire (Screw-down Connector #1 Port #1)
+		 *      P51500AA1365V #2 Red Wire (Screw-down Connector #2 Port #1)
+		 *      P51500AA1365V #3 Red Wire (Screw-down Connector #3 Port #1)
+		 *      Servo Signal VCC LOX (Screw-down Connector #5 Port #1)
+		 *      Servo Signal VCC Ethanol (Screw-down Connector #6 Port #1)
+		 *      10k Resistor #1
+		 *      10k Resistor #2
+		 * 5V GND = P51500AA1365V #1 Black Wire (Screw-down Connector #1 Port #2)
+		 *          P51500AA1365V #1 Black Wire (Screw-down Connector #2 Port #2)
+		 *          P51500AA1365V #1 Black Wire (Screw-down Connector #3 Port #2)
+		 *          Servo Signal GND LOX (Screw-down Connector #5 Port #2)
+		 *          Servo Signal GND Ethanol (Screw-down Connector #6 Port #2)
+		 * 
+		 * 10k Resistor #1 = Screw-down Connector #5 Port #3
+		 * 10k Resistor #2 = Screw-down Connector #6 Port #3
+		 */
 		
-		// max voltage for pin 35 = 3.3V
-		tankPressureLOX     = new P51500AA1365V(35 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
-		tankPressureEthanol = new P51500AA1365V(36 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
-		tankPressureEngine  = new P51500AA1365V(40 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
+		ignitor = new DMO063(19 /* pin */, 3000L /* duration (milliseconds) */);
+		
+		// max voltage for analog input = 3.3V
+		tankPressureLOX     = new P51500AA1365V(41 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
+		tankPressureEthanol = new P51500AA1365V(42 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
+		tankPressureEngine  = new P51500AA1365V(43 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
 		
 		servoLOX = new PS050(3 /* pin */, 100 /* frequency */);
 //		servoEthanol = new PS050(3 /* pin */, 100 /* frequency */); // FIXME which pin?
 		
 		// TODO test oversampling of 3 (max)
 		// twiNum 0 = pin 4 (SDA) and 5 (SCL)
+		// VCC = 3.3V
 		barometer1 = new BMP085(0 /* twiNum */, 3 /* eocPin */, 0 /* oversampling */);
 		barometer1.setListener(new BMP085.BMP085Listener() {
 			@Override
@@ -51,7 +95,9 @@ public class Rocket {
 			}
 		});
 		
-		barometer2 = new MS5611(0 /* twiNum */, MS5611.ADD_CSB_LOW /* address */, 30 /* sample rate */);
+		// twiNum 1 = pin 1 (SDA) and 2 (SCL)
+		// VCC = 3.3V
+		barometer2 = new MS5611(1 /* twiNum */, MS5611.ADD_CSB_LOW /* address */, 30 /* sample rate */);
 		barometer2.setListener(new MS5611.MS5611Listener() {
 			@Override
 			public void onMS5611Values(float pressure /* mbar */, float temperature /* C */) {

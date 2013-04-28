@@ -19,6 +19,7 @@ public class Network {
 		Kryo kyro = endPoint.getKryo();
 		
 		kyro.register(AuthenticationRequest.class);
+		kyro.register(AuthenticationResponse.class);
 		kyro.register(LoggingRequest.class);
 		kyro.register(LogMessage.class);
 		kyro.register(SetObjectiveRequest.class);
@@ -27,6 +28,10 @@ public class Network {
 	
 	static public class AuthenticationRequest {
 		public String key;
+	}
+	
+	static public class AuthenticationResponse {
+		public boolean success;
 	}
 	
 	static public class LoggingRequest {

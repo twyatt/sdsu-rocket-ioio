@@ -8,6 +8,7 @@ import com.esotericsoftware.kryonet.Server;
 
 import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.Network.AuthenticationRequest;
+import edu.sdsu.rocket.Network.AuthenticationResponse;
 import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.LoggingRequest;
 import edu.sdsu.rocket.Network.SetObjectiveRequest;
@@ -48,7 +49,6 @@ public class RemoteCommandController {
 	
 	public void start() {
 		Network.register(server);
-		
 		server.start();
 		
 		try {
@@ -91,7 +91,7 @@ public class RemoteCommandController {
 					((KryoNetLog)App.log).removeConnection(connection);
 				}
 				
-				App.log.i(App.TAG, "Connection closed for " + connection.getRemoteAddressTCP() + ".");
+				App.log.i(App.TAG, "Connection closed for ID " + connection.getID() + ".");
 			}
 		});
 		
@@ -108,12 +108,18 @@ public class RemoteCommandController {
 
 	protected void onAuthenticationRequest(Connection connection, AuthenticationRequest authentication) {
 		if (connection instanceof RemoteCommandConnection) {
+			AuthenticationResponse response = new AuthenticationResponse();
+			
 			if (AUTHENTICATION_KEY.equals(authentication.key)) {
 				((RemoteCommandConnection)connection).isAuthenticated = true;
+				response.success = true;
 				App.log.i(App.TAG, "Successfully authenticated " + connection.getRemoteAddressTCP() + ".");
 			} else {
+				response.success = false;
 				App.log.i(App.TAG, "Failed to authenticate " + connection.getRemoteAddressTCP() + ".");
 			}
+			
+			connection.sendTCP(response);
 		}
 	}
 

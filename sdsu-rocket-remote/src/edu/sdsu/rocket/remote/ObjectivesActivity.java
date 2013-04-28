@@ -1,41 +1,20 @@
 package edu.sdsu.rocket.remote;
 
-import com.esotericsoftware.kryonet.Client;
-
-import edu.sdsu.rocket.Network.CommandRequest;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.os.Build;
 
-public class LaunchActivity extends Activity {
+public class ObjectivesActivity extends Activity {
 
-	Client client = ClientSingleton.getInstance();
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setupUI();
-	}
-	
-	private void setupUI() {
-		setContentView(R.layout.activity_launch);
-		
-		final Button button = (Button) findViewById(R.id.button_launch);
-		button.setOnClickListener(new Button.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				CommandRequest commandRequest = new CommandRequest();
-				commandRequest.command = "launch";
-				client.sendTCP(commandRequest);
-			}
-		});
-		
+		setContentView(R.layout.activity_objectives);
+		// Show the Up button in the action bar.
 		setupActionBar();
 	}
 
@@ -52,7 +31,7 @@ public class LaunchActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.launch, menu);
+		getMenuInflater().inflate(R.menu.objectives, menu);
 		return true;
 	}
 

@@ -32,6 +32,23 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.sdsu.rocket.control.MainActivity" />
         </activity>
+        <activity
+            android:name="edu.sdsu.rocket.remote.ConnectActivity"
+            android:label="@string/title_activity_connect"
+            android:parentActivityName="edu.sdsu.rocket.remote.MainActivity"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.sdsu.rocket.remote.MainActivity" />
+        </activity>
+        <activity
+            android:name="edu.sdsu.rocket.remote.ObjectivesActivity"
+            android:label="@string/title_activity_objectives"
+            android:parentActivityName="edu.sdsu.rocket.remote.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.sdsu.rocket.remote.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
