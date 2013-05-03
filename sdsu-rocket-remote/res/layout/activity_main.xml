@@ -14,14 +14,27 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:textSize="24sp"
         android:text="@string/action_connect" />
+
+    <Button
+        android:id="@+id/button_fill_tanks_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_connect_activity"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="Fill Tanks"
+        android:textSize="24sp" />
 
     <Button
         android:id="@+id/button_launch_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button_connect_activity"
+        android:layout_below="@+id/button_fill_tanks_activity"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:textSize="24sp"
         android:text="@string/action_launch" />
 
 </RelativeLayout>

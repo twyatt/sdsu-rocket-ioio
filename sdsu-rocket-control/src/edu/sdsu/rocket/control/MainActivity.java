@@ -47,9 +47,11 @@ public class MainActivity extends IOIOActivity {
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
-		// TODO prevent device sleep
+		// FIXME prevent device sleep
 		
+		App.start();
 		rocket = new Rocket();
+		App.data = new DataLogger(rocket);
 		
 		deviceManager = new DeviceManager();
 		setupDevices();
@@ -60,8 +62,8 @@ public class MainActivity extends IOIOActivity {
 
 	private void setupObjectives(Rocket rocket) {
 		objectiveController = new ObjectiveController(rocket);
-		objectiveController.add("fill", new FillTanksObjective());
-		objectiveController.add("launch", new LaunchObjective());
+		objectiveController.add(Network.FILL_TANKS_OBJECTIVE, new FillTanksObjective());
+		objectiveController.add(Network.LAUNCH_OBJECTIVE, new LaunchObjective());
 	}
 
 	private void setupUI() {
@@ -100,6 +102,7 @@ public class MainActivity extends IOIOActivity {
 //		deviceManager.add(rocket.ignitor);
 //		deviceManager.add(rocket.pressure1);
 //		deviceManager.add(rocket.pressure2);
+		deviceManager.add(rocket.servoLOX);
 //		deviceManager.add(rocket.barometer1, true /* spawn thread */);
 //		deviceManager.add(rocket.barometer2, true /* spawn thread */);
 //		deviceManager.add(rocket.imu, true /* spawn thread */);

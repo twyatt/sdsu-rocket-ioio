@@ -12,7 +12,7 @@ import edu.sdsu.rocket.control.App;
 public class BMP085 implements Device {
 	
 	public interface BMP085Listener {
-		public void onBMP085Values(float pressure, double temperature);
+		public void onBMP085Values(float pressure /* Pa */, double temperature /* C */);
 	}
 	
 	
@@ -61,7 +61,7 @@ public class BMP085 implements Device {
 	private BMP085Listener listener;
 	
 	private TwiMaster twi;
-	private int twiNum;
+	public final int twiNum;
 	
 	private DigitalInput eoc;
 	private int eocPin;

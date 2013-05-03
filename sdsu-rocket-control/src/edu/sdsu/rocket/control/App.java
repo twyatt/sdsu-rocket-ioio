@@ -12,5 +12,21 @@ public class App {
 	public static final String TAG = "SDSURocketControl";
 	
 	public static Logger log = new AndroidLog();
+	public static DataLogger data;
+
+	private static long startTime;
+	
+	public static void start() {
+		startTime = getNanoTime();
+	}
+	
+	public static long getNanoTime() {
+		return System.nanoTime();
+	}
+	
+	public static float elapsedTime() {
+		long time = System.nanoTime();
+		return (time - startTime) / 1000000000.0f;
+	}
 	
 }

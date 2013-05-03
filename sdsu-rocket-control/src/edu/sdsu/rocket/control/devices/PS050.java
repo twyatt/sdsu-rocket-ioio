@@ -1,7 +1,9 @@
 package edu.sdsu.rocket.control.devices;
 
+import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.PwmOutput;
+import ioio.lib.api.DigitalOutput.Spec.Mode;
 import ioio.lib.api.exception.ConnectionLostException;
 
 /**
@@ -21,7 +23,7 @@ public class PS050 implements Device {
 	
 	@Override
 	public void setup(IOIO ioio) throws ConnectionLostException {
-		pwm = ioio.openPwmOutput(pwmPin, pwmFrequency);
+		pwm = ioio.openPwmOutput(new DigitalOutput.Spec(pwmPin, Mode.OPEN_DRAIN), pwmFrequency);
 	}
 
 	@Override
@@ -29,6 +31,16 @@ public class PS050 implements Device {
 		// TODO check if lastPulseWidth != pulseWidth to decide if we should call setPulseWidth?
 		pwm.setPulseWidth(pulseWidth);
 		Thread.sleep(100);
+	}
+	
+	public void open() {
+//		setPositionPercent(100);
+		pulseWidth = 500 + 200;
+	}
+	
+	public void close() {
+//		setPositionPercent(0);
+		pulseWidth = 500 + 1000 - 200;
 	}
 	
 	/**

@@ -14,6 +14,20 @@ public class Network {
 	
 	public static final int UDP_PORT = 47050;
 	public static final int TCP_PORT = 47250;
+	
+	public static final String AUTHENTICATION_KEY = "a";
+	
+	public static final String LAUNCH_OBJECTIVE = "launch";
+	public static final String LAUNCH_COMMAND = "launch";
+	public static final String ABORT_COMMAND = "abort";
+	
+	public static final String FILL_TANKS_OBJECTIVE = "tanks";
+	public static final String OPEN_LOX_TANK_COMMAND = "openlox";
+	public static final String CYCLE_LOX_TANK_COMMAND = "cyclelox";
+	public static final String CLOSE_LOX_TANK_COMMAND = "closelox";
+	public static final String OPEN_ETHANOL_TANK = "openeth";
+	public static final String CYCLE_ETHANOL_TANK = "cycleeth";
+	public static final String CLOSE_ETHANOL_TANK = "closeeth";
 
 	static public void register(EndPoint endPoint) {
 		Kryo kyro = endPoint.getKryo();

@@ -21,8 +21,6 @@ public class RemoteCommandController {
 
 	// FIXME replace kryo debug JARs with non-debug versions
 	
-	private static final String AUTHENTICATION_KEY = "gimme$";
-
 	public Server server = new Server() {
 		protected Connection newConnection() {
 			return new RemoteCommandConnection();
@@ -111,7 +109,7 @@ public class RemoteCommandController {
 		if (connection instanceof RemoteCommandConnection) {
 			AuthenticationResponse response = new AuthenticationResponse();
 			
-			if (AUTHENTICATION_KEY.equals(authentication.key)) {
+			if (Network.AUTHENTICATION_KEY.equals(authentication.key)) {
 				((RemoteCommandConnection)connection).isAuthenticated = true;
 				response.success = true;
 				App.log.i(App.TAG, "Successfully authenticated " + connection.getRemoteAddressTCP() + ".");

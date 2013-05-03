@@ -5,6 +5,12 @@ import edu.sdsu.rocket.control.models.Rocket;
 public class FlightObjective implements Objective {
 
 	@Override
+	public void start(Rocket rocket) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public void command(Rocket rocket, String command) {
 		// TODO Auto-generated method stub
 		
@@ -12,6 +18,12 @@ public class FlightObjective implements Objective {
 
 	@Override
 	public void loop(Rocket rocket) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stop(Rocket rocket) {
 		// TODO Auto-generated method stub
 		
 	}

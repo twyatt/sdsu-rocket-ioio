@@ -1,5 +1,6 @@
 package edu.sdsu.rocket.remote;
 
+import edu.sdsu.rocket.Network;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,6 +33,16 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
+				startActivity(intent);
+			}
+		});
+		
+		Button fillTanks = (Button)findViewById(R.id.button_fill_tanks_activity);
+		fillTanks.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(MainActivity.this, ObjectiveActivity.class);
+				intent.putExtra(ObjectiveActivity.EXTRA_OBJECTIVE, Network.FILL_TANKS_OBJECTIVE);
 				startActivity(intent);
 			}
 		});

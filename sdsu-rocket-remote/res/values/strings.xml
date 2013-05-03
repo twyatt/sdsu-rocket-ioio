@@ -25,5 +25,8 @@
     <string name="action_launch">Launch</string>
     <string name="title_activity_objectives">ObjectivesActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_fill_tanks">FillTanksActivity</string>
+    <string name="title_activity_command_list">CommandListActivity</string>
+    <string name="title_activity_objective">ObjectiveActivity</string>
 
 </resources>

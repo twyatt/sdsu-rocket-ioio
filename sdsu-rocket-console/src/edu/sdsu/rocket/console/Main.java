@@ -31,7 +31,7 @@ public class Main {
 		
 		setup();
 		if (!connect()) {
-			if (!connect("192.168.1.7")) {
+			if (!connect("192.168.1.3")) {
 				return;
 			}
 		}
@@ -56,32 +56,32 @@ public class Main {
 		
 		System.err.println("Sending authentication key.");
 		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
-		authenticationRequest.key = "gimme$";
+		authenticationRequest.key = Network.AUTHENTICATION_KEY;
 		client.sendTCP(authenticationRequest);
 		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		System.err.println("Sending set objective request.");
-		SetObjectiveRequest setObjectiveRequest = new SetObjectiveRequest();
-		setObjectiveRequest.name = "launch";
-		client.sendTCP(setObjectiveRequest);
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		System.err.println("Sending launch request.");
-		CommandRequest commandRequest = new CommandRequest();
-		commandRequest.command = "launch";
-		client.sendTCP(commandRequest);
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//			return;
+//		}
+//		
+//		System.err.println("Sending set objective request.");
+//		SetObjectiveRequest setObjectiveRequest = new SetObjectiveRequest();
+//		setObjectiveRequest.name = "launch";
+//		client.sendTCP(setObjectiveRequest);
+//		
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//			return;
+//		}
+//		
+//		System.err.println("Sending launch request.");
+//		CommandRequest commandRequest = new CommandRequest();
+//		commandRequest.command = "launch";
+//		client.sendTCP(commandRequest);
 		
 		loop();
 	}

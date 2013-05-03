@@ -346,6 +346,7 @@ public class ConnectActivity extends Activity {
 	}
 
 	public void authenticate() {
+		// FIXME crashes on Android API > 10 because network on main thread
 		connectStatusMessageView.setText(R.string.connect_progress_authenticating);
 		
 		AuthenticationRequest request = new AuthenticationRequest();
