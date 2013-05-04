@@ -1,5 +1,6 @@
 package edu.sdsu.rocket.control.devices;
 
+import edu.sdsu.rocket.control.App;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;

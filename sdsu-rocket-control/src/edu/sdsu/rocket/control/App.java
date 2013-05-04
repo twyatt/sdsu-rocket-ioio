@@ -13,6 +13,7 @@ public class App {
 	
 	public static Logger log = new AndroidLog();
 	public static DataLogger data;
+	public static ObjectiveController objective;
 
 	private static long startTime;
 	

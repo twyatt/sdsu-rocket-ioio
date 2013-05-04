@@ -14,9 +14,13 @@ public class DeviceManager implements IOIOLooper {
 	private ArrayList<Device> devices = new ArrayList<Device>();
 	private ArrayList<DeviceThread> threads = new ArrayList<DeviceThread>();
 	
+	/**
+	 * Sleep duration between IOIO thread loops (milliseconds).
+	 */
 	private int sleep;
 	
 	/**
+	 * Creates a device manager.
 	 * 
 	 * @param threadSleep Sleep duration between IOIO thread loops (milliseconds).
 	 */
@@ -25,27 +29,23 @@ public class DeviceManager implements IOIOLooper {
 	}
 	
 	/**
-	 * Adds a device on the IOIO thread.
+	 * Adds a device on the IOIO thread to the device manager.
 	 * 
 	 * @param device
 	 */
 	public void add(Device device) {
+		App.log.i(App.TAG, "Device manager adding device: " + device.info());
 		this.devices.add(device);
 	}
 	
 	/**
-	 * Adds a device and spawns a thread for it.
+	 * Adds a device a device thread to the device manager.
 	 * 
 	 * @param device
-	 * @param threadSleep Sleep duration between thread loops (milliseconds).
 	 */
-	public void add(Device device, int threadSleep) {
-		App.log.i(App.TAG, "Spawning thread for device: " + device.info());
-		
-		DeviceThread thread = new DeviceThread(device, threadSleep);
+	public void add(DeviceThread thread) {
+		App.log.i(App.TAG, "Device manager adding thread for device: " + thread.device.info());
 		threads.add(thread);
-		
-		// TODO allow devices to be added after setup
 	}
 	
 	/**

@@ -28,6 +28,8 @@ public class Network {
 	public static final String OPEN_ETHANOL_TANK = "openeth";
 	public static final String CYCLE_ETHANOL_TANK = "cycleeth";
 	public static final String CLOSE_ETHANOL_TANK = "closeeth";
+	
+	public static final String FLIGHT_OBJECTIVE = "flight";
 
 	static public void register(EndPoint endPoint) {
 		Kryo kyro = endPoint.getKryo();

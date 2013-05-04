@@ -1,9 +1,13 @@
 package edu.sdsu.rocket.control;
 
+import java.io.IOException;
+
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -16,9 +20,11 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import edu.sdsu.rocket.Network;
+import edu.sdsu.rocket.control.devices.DeviceThread;
 import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.control.network.RemoteCommandController;
 import edu.sdsu.rocket.control.objectives.FillTanksObjective;
+import edu.sdsu.rocket.control.objectives.FlightObjective;
 import edu.sdsu.rocket.control.objectives.LaunchObjective;
 
 public class MainActivity extends IOIOActivity {
@@ -26,15 +32,15 @@ public class MainActivity extends IOIOActivity {
 	private Rocket rocket;
 	
 	private DeviceManager deviceManager;
-	private ObjectiveController objectiveController;
 	private RemoteCommandController remoteCommand;
 	
 	private TextView serverStatusTextView;
 	private TextView connectionCountTextView;
 
+	private Thread objectiveThread;
 	private PowerManager.WakeLock wakelock;
 
-
+	
 	@Override
 	protected IOIOLooper createIOIOLooper() {
 		return deviceManager;
@@ -45,6 +51,7 @@ public class MainActivity extends IOIOActivity {
 		App.start();
 		
 		super.onCreate(savedInstanceState);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setupUI();
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
@@ -62,19 +69,31 @@ public class MainActivity extends IOIOActivity {
 		setupDevices();
 		setupObjectives(rocket);
 		
-		setupRemoteCommand();
+		setupRemoteCommand(App.objective);
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 	}
 	
 	@Override
 	protected void onDestroy() {
+		objectiveThread.interrupt();
 		wakelock.release();
 		super.onDestroy();
 	}
 
 	private void setupObjectives(Rocket rocket) {
-		objectiveController = new ObjectiveController(rocket);
-		objectiveController.add(Network.FILL_TANKS_OBJECTIVE, new FillTanksObjective());
-		objectiveController.add(Network.LAUNCH_OBJECTIVE, new LaunchObjective());
+		App.objective = new ObjectiveController(rocket, 250 /* thread sleep in milliseconds */);
+		App.objective.add(Network.FILL_TANKS_OBJECTIVE, new FillTanksObjective());
+		App.objective.add(Network.LAUNCH_OBJECTIVE, new LaunchObjective());
+		App.objective.add(Network.FLIGHT_OBJECTIVE, new FlightObjective());
+		objectiveThread = new Thread(App.objective);
+		
+		App.log.i(App.TAG, "Starting objective thread.");
+		objectiveThread.start();
 	}
 
 	private void setupUI() {
@@ -84,12 +103,19 @@ public class MainActivity extends IOIOActivity {
 		connectionCountTextView = (TextView) findViewById(R.id.server_connections);
 	}
 
-	private void setupRemoteCommand() {
+	private void setupRemoteCommand(ObjectiveController objectiveController) {
 		int tcpPort = Network.TCP_PORT;
 		int udpPort = Network.UDP_PORT;
 		
 		remoteCommand = new RemoteCommandController(tcpPort, udpPort, objectiveController);
-		remoteCommand.start();
+		try {
+			remoteCommand.start();
+		} catch (IOException e) {
+			updateTextView(serverStatusTextView, "Failed to bind server.");
+			e.printStackTrace();
+			return;
+		}
+		
 		remoteCommand.server.addListener(new Listener() {
 			@Override
 			public void connected(Connection connection) {
@@ -110,12 +136,37 @@ public class MainActivity extends IOIOActivity {
 
 	private void setupDevices() {
 //		deviceManager.add(rocket.ignitor);
-//		deviceManager.add(rocket.pressure1);
-//		deviceManager.add(rocket.pressure2);
-		deviceManager.add(rocket.servoLOX);
-//		deviceManager.add(rocket.barometer1, true /* spawn thread */);
-//		deviceManager.add(rocket.barometer2, true /* spawn thread */);
-//		deviceManager.add(rocket.imu, true /* spawn thread */);
+//		deviceManager.add(rocket.breakWire);
+//		
+//		deviceManager.add(
+//			new DeviceThread(rocket.tankPressureLOX)
+//				.setThreadSleep(500)
+//		);
+//		deviceManager.add(
+//			new DeviceThread(rocket.tankPressureEthanol)
+//				.setThreadSleep(500)
+//		);
+//		deviceManager.add(
+//			new DeviceThread(rocket.tankPressureEngine)
+//				.setThreadSleep(500)
+//		);
+//		
+//		deviceManager.add(rocket.servoLOX);
+//		deviceManager.add(rocket.servoEthanol);
+//		
+		deviceManager.add(
+			new DeviceThread(rocket.barometer1)
+				.setThreadSleep(200 /* milliseconds */)
+		);
+		deviceManager.add(
+			new DeviceThread(rocket.barometer2)
+				.setThreadSleep(200 /* milliseconds */)
+		);
+		
+//		deviceManager.add(
+//			new DeviceThread(rocket.imu)
+//				.setThreadFrequency(8 /* Hz */)
+//		);
 	}
 
 	@Override

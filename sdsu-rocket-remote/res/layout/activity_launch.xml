@@ -12,8 +12,20 @@
     <Button
         android:id="@+id/button_launch"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_abort"
+        android:layout_alignParentTop="true"
         android:text="@string/action_launch"
+        android:textColor="@color/black"
+        android:textSize="48sp" />
+
+    <Button
+        android:id="@+id/button_abort"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/button_launch"
+        android:layout_alignParentBottom="true"
+        android:text="@string/action_abort"
         android:textColor="@color/black"
         android:textSize="48sp" />
 

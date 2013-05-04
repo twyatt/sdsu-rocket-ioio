@@ -11,17 +11,10 @@ public class DeviceThread extends Thread {
 	/**
 	 * Duration to sleep between thread loops in milliseconds.
 	 */
-	private int sleep;
+	private int sleep = 1000; // default is 1000 ms delay (1 Hz)
 
-	/**
-	 * Creates a device thread.
-	 * 
-	 * @param device
-	 * @param sleep  Duration to sleep between thread loops (milliseconds).
-	 */
-	public DeviceThread(Device device, int sleep) {
+	public DeviceThread(Device device) {
 		this.device = device;
-		setThreadSleep(sleep);
 	}
 	
 	/**
@@ -29,9 +22,9 @@ public class DeviceThread extends Thread {
 	 * 
 	 * @param frequency Loop frequency (Hz).
 	 */
-	public void setThreadFrequency(int frequency) {
-		// rounding by adding 0.5f before casting to int
-		setThreadSleep((int) (frequency / 60f + 0.5f));
+	public DeviceThread setThreadFrequency(float frequency) {
+		setThreadSleep(Math.round(1000f / frequency));
+		return this;
 	}
 	
 	/**
@@ -39,8 +32,9 @@ public class DeviceThread extends Thread {
 	 * 
 	 * @param sleep Thread loop sleep duration (milliseconds).
 	 */
-	public void setThreadSleep(int sleep) {
+	public DeviceThread setThreadSleep(int sleep) {
 		this.sleep = sleep;
+		return this;
 	}
 	
 	public void setup(IOIO ioio) throws ConnectionLostException {

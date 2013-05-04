@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.SetObjectiveRequest;
 import edu.sdsu.rocket.Network.SetObjectiveResponse;
@@ -71,12 +72,22 @@ public class LaunchActivity extends Activity {
 	private void setupUI() {
 		setContentView(R.layout.activity_launch);
 		
-		final Button button = (Button) findViewById(R.id.button_launch);
-		button.setOnClickListener(new Button.OnClickListener() {
+		final Button launchButton = (Button)findViewById(R.id.button_launch);
+		launchButton.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				CommandRequest commandRequest = new CommandRequest();
-				commandRequest.command = "launch";
+				commandRequest.command = Network.LAUNCH_COMMAND;
+				client.sendTCP(commandRequest);
+			}
+		});
+		
+		final Button abortButton = (Button)findViewById(R.id.button_abort);
+		abortButton.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				CommandRequest commandRequest = new CommandRequest();
+				commandRequest.command = Network.ABORT_COMMAND;
 				client.sendTCP(commandRequest);
 			}
 		});

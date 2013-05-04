@@ -46,16 +46,11 @@ public class RemoteCommandController {
 		return udpPort;
 	}
 	
-	public void start() {
+	public void start() throws IOException {
 		Network.register(server);
 		server.start();
 		
-		try {
-			server.bind(tcpPort, udpPort);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		server.bind(tcpPort, udpPort);
 		
 		server.addListener(new Listener() {
 			@Override

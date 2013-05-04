@@ -18,8 +18,11 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         android:allowBackup="true">
+        
+        <!-- http://stackoverflow.com/questions/1512045/how-to-disable-orientation-change-in-android -->
         <activity
             android:name="edu.sdsu.rocket.control.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

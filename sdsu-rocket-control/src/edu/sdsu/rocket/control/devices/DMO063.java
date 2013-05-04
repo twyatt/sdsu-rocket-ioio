@@ -58,7 +58,6 @@ public class DMO063 implements Device {
 		output.write(value);
 	}
 	
-
 	/*
 	 * Device interface methods.
 	 */

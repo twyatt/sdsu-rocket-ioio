@@ -51,6 +51,7 @@ public class DataLogger {
 						App.log.e(App.TAG, "Output stream not available for " + BAROMETER1 + ".");
 					} else {
 						try {
+							stream.writeFloat(App.elapsedTime());
 							stream.writeFloat(pressure);
 							stream.writeDouble(temperature);
 						} catch (IOException e) {
@@ -84,6 +85,7 @@ public class DataLogger {
 						App.log.e(App.TAG, "Output stream not available for " + BAROMETER2 + ".");
 					} else {
 						try {
+							stream.writeFloat(App.elapsedTime());
 							stream.writeFloat(pressure);
 							stream.writeFloat(temperature);
 						} catch (IOException e) {
@@ -126,6 +128,7 @@ public class DataLogger {
 						App.log.e(App.TAG, "Output stream not available for " + LOX_PRESSURE + ".");
 					} else {
 						try {
+							stream.writeFloat(App.elapsedTime());
 							stream.writeFloat(voltage);
 						} catch (IOException e) {
 							App.log.e(App.TAG, "Failed to write " + LOX_PRESSURE + " values to output stream.");
@@ -152,6 +155,7 @@ public class DataLogger {
 						App.log.e(App.TAG, "Output stream not available for " + ETHANOL_PRESSURE + ".");
 					} else {
 						try {
+							stream.writeFloat(App.elapsedTime());
 							stream.writeFloat(voltage);
 						} catch (IOException e) {
 							App.log.e(App.TAG, "Failed to write " + ETHANOL_PRESSURE + " values to output stream.");
@@ -178,6 +182,7 @@ public class DataLogger {
 						App.log.e(App.TAG, "Output stream not available for " + ENGINE_PRESSURE + ".");
 					} else {
 						try {
+							stream.writeFloat(App.elapsedTime());
 							stream.writeFloat(voltage);
 						} catch (IOException e) {
 							App.log.e(App.TAG, "Failed to write " + ENGINE_PRESSURE + " values to output stream.");
@@ -204,6 +209,7 @@ public class DataLogger {
 						App.log.e(App.TAG, "Output stream not available for " + IMU + ".");
 					} else {
 						try {
+							stream.writeFloat(App.elapsedTime());
 							stream.writeChars(values);
 						} catch (IOException e) {
 							App.log.e(App.TAG, "Failed to write " + IMU + " values to output stream.");
@@ -254,7 +260,8 @@ public class DataLogger {
 	
 	private DataOutputStream makeStream(String name, int bufferSize) {
 		File sd = Environment.getExternalStorageDirectory();
-		File file = new File(sd, name + ".sensor");
+		File file = new File(sd, name + "-" + App.getNanoTime() + ".sensor");
+		App.log.i(App.TAG, "Making output stream for: " + file.getAbsolutePath());
 		BufferedOutputStream stream = null;
 		
 		try {
@@ -276,7 +283,11 @@ public class DataLogger {
 		}
 		
 		App.log.i(App.TAG, "Created output stream for " + name + ".");
-		return new DataOutputStream(stream);
+		
+		DataOutputStream dataOutputStream = new DataOutputStream(stream);
+		out.put(name, dataOutputStream);
+		
+		return dataOutputStream;
 	}
 	
 }

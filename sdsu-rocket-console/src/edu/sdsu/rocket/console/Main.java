@@ -10,10 +10,8 @@ import com.esotericsoftware.kryonet.Listener;
 
 import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.Network.AuthenticationRequest;
-import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.LogMessage;
 import edu.sdsu.rocket.Network.LoggingRequest;
-import edu.sdsu.rocket.Network.SetObjectiveRequest;
 
 public class Main {
 	
@@ -30,8 +28,12 @@ public class Main {
 //		System.setProperty("java.net.preferIPv4Stack" , "true");
 		
 		setup();
+		go();
+	}
+
+	private static void go() {
 		if (!connect()) {
-			if (!connect("192.168.1.3")) {
+			if (!connect("192.168.1.6")) {
 				return;
 			}
 		}
@@ -47,18 +49,6 @@ public class Main {
 		loggingRequest.enable = true;
 		client.sendTCP(loggingRequest);
 		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		System.err.println("Sending authentication key.");
-		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
-		authenticationRequest.key = Network.AUTHENTICATION_KEY;
-		client.sendTCP(authenticationRequest);
-		
 //		try {
 //			Thread.sleep(1000);
 //		} catch (InterruptedException e) {
@@ -66,22 +56,10 @@ public class Main {
 //			return;
 //		}
 //		
-//		System.err.println("Sending set objective request.");
-//		SetObjectiveRequest setObjectiveRequest = new SetObjectiveRequest();
-//		setObjectiveRequest.name = "launch";
-//		client.sendTCP(setObjectiveRequest);
-//		
-//		try {
-//			Thread.sleep(1000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//			return;
-//		}
-//		
-//		System.err.println("Sending launch request.");
-//		CommandRequest commandRequest = new CommandRequest();
-//		commandRequest.command = "launch";
-//		client.sendTCP(commandRequest);
+//		System.err.println("Sending authentication key.");
+//		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
+//		authenticationRequest.key = Network.AUTHENTICATION_KEY;
+//		client.sendTCP(authenticationRequest);
 		
 		loop();
 	}
@@ -167,21 +145,35 @@ public class Main {
 			@Override
 			public void disconnected(Connection connection) {
 				System.out.println("Disconnected.");
+				reconnect();
+			}
+		});
+	}
+	
+	private static void reconnect() {
+		postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("Reconnecting ...");
 				
-				postRunnable(new Runnable() {
-					@Override
-					public void run() {
-						int timeout = 30000; // milliseconds
-						
-						try {
-							System.out.println("Reconnecting ...");
-							client.reconnect(timeout);
-						} catch (IOException e) {
-							e.printStackTrace();
-							return;
-						}
-					}
-				});
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				go();
+				
+//				int timeout = 30000; // milliseconds
+//				
+//				try {
+//					System.out.println("Reconnecting ...");
+//					client.reconnect(timeout);
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//					return;
+//				}
 			}
 		});
 	}

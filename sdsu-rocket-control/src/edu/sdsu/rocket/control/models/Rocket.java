@@ -2,6 +2,7 @@ package edu.sdsu.rocket.control.models;
 
 import edu.sdsu.rocket.control.devices.ArduIMU;
 import edu.sdsu.rocket.control.devices.BMP085;
+import edu.sdsu.rocket.control.devices.BreakWire;
 import edu.sdsu.rocket.control.devices.DMO063;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
@@ -10,6 +11,9 @@ import edu.sdsu.rocket.control.devices.PS050;
 public class Rocket {
 
 	public DMO063 ignitor;
+	public BreakWire breakWire;
+	public DMO063 fuelValveOpen;
+	public DMO063 fuelValveClose;
 	
 	public P51500AA1365V tankPressureLOX;
 	public P51500AA1365V tankPressureEthanol;
@@ -33,17 +37,19 @@ public class Rocket {
 		 * 4 = BMP085 SDA
 		 * 5 = BMP085 SCL
 		 * 10 = ArduIMU TX
-		 * 13 = Servo PWM LOX = Screw-down Connector #5 Port #3
-		 * 14 = Servo PWM Ethanol = Screw-down Connector #6 Port #3
+		 * 13 = Servo PWM LOX Orange Wire (Screw-down Connector #5 Port #3)
+		 * 14 = Servo PWM Ethanol Orange Wire (Screw-down Connector #6 Port #3)
 		 * 19 = DMO063 #1 Control +
 		 * 20 = DMO063 #2 Control +
 		 * 21 = DMO063 #3 Control +
+		 * 34 = Break Wire -
 		 * 41 = P51500AA1365V #1 White Wire (Screw-down Connector #1 Port #3)
 		 * 42 = P51500AA1365V #2 White Wire (Screw-down Connector #2 Port #3)
 		 * 43 = P51500AA1365V #3 White Wire (Screw-down Connector #3 Port #3)
 		 * 
 		 * 3.3V = MS5611 VCC
 		 *        BMP085 VCC
+		 *        Break Wire +
 		 * 3.3V GND = MS5611 GND
 		 *            BMP085 GND
 		 *            DMO063 #1 Control -
@@ -53,15 +59,15 @@ public class Rocket {
 		 * 5V = P51500AA1365V #1 Red Wire (Screw-down Connector #1 Port #1)
 		 *      P51500AA1365V #2 Red Wire (Screw-down Connector #2 Port #1)
 		 *      P51500AA1365V #3 Red Wire (Screw-down Connector #3 Port #1)
-		 *      Servo Signal VCC LOX (Screw-down Connector #5 Port #1)
-		 *      Servo Signal VCC Ethanol (Screw-down Connector #6 Port #1)
+		 *      Servo Signal VCC LOX Red Wire (Screw-down Connector #5 Port #1)
+		 *      Servo Signal VCC Ethanol Red Wire (Screw-down Connector #6 Port #1)
 		 *      10k Resistor #1
 		 *      10k Resistor #2
 		 * 5V GND = P51500AA1365V #1 Black Wire (Screw-down Connector #1 Port #2)
 		 *          P51500AA1365V #1 Black Wire (Screw-down Connector #2 Port #2)
 		 *          P51500AA1365V #1 Black Wire (Screw-down Connector #3 Port #2)
-		 *          Servo Signal GND LOX (Screw-down Connector #5 Port #2)
-		 *          Servo Signal GND Ethanol (Screw-down Connector #6 Port #2)
+		 *          Servo Signal GND LOX Brown Wire (Screw-down Connector #5 Port #2)
+		 *          Servo Signal GND Ethanol Brown Wire (Screw-down Connector #6 Port #2)
 		 * 
 		 * 10k Resistor #1 = Screw-down Connector #5 Port #3
 		 * 10k Resistor #2 = Screw-down Connector #6 Port #3
@@ -71,6 +77,9 @@ public class Rocket {
 		 */
 		
 		ignitor = new DMO063(19 /* pin */, 3000L /* duration (milliseconds) */);
+		fuelValveOpen = new DMO063(20 /* pin */, 1500L /* duration (milliseconds) */);
+		fuelValveClose = new DMO063(21 /* pin */, 1500L /* duration (milliseconds) */);
+		breakWire = new BreakWire(34 /* pin */);
 		
 		// FIXME calibrate
 		// max voltage for analog input = 3.3V

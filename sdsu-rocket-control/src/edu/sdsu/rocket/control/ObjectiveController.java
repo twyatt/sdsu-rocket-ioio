@@ -6,15 +6,18 @@ import java.util.Map;
 import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.control.objectives.Objective;
 
-public class ObjectiveController extends Thread {
+public class ObjectiveController implements Runnable {
 
 	private Rocket rocket;
 	
 	Map<String, Objective> objectives = new HashMap<String, Objective>();
 	private Objective active;
 
-	public ObjectiveController(Rocket rocket) {
+	private long sleep;
+
+	public ObjectiveController(Rocket rocket, int threadSleep) {
 		this.rocket = rocket;
+		sleep = threadSleep;
 	}
 	
 	public void add(String name, Objective objective) {
@@ -34,7 +37,12 @@ public class ObjectiveController extends Thread {
 	public boolean set(String name) {
 		if (objectives.containsKey(name)) {
 			Objective objective = objectives.get(name);
+			
+			if (active != null) {
+				active.stop(rocket);
+			}
 			active = objective;
+			active.start(rocket);
 			
 			App.log.i(App.TAG, "Objective set to '" + name + "'.");
 			return true;
@@ -64,26 +72,28 @@ public class ObjectiveController extends Thread {
 	@Override
 	public void run() {
 		while (true) {
-			active.loop(rocket);
+			if (active != null) {
+				active.loop(rocket);
+			}
 			
 			try {
-				Thread.sleep(100);
+				Thread.sleep(sleep);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
-	
-	public void close() {
-		interrupt();
-		
-		try {
-			join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	
+//	public void close() {
+//		interrupt();
+//		
+//		try {
+//			join();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 }

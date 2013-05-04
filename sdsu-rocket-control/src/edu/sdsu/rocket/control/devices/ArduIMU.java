@@ -21,7 +21,9 @@ import edu.sdsu.rocket.control.App;
  */
 public class ArduIMU implements Device {
 
+	private static final int BUFFER_SIZE = 256;
 	private static final String VALUES_DELIMITER = "\n";
+//	private static final String VALUES_DELIMITER = "!!!VER";
 
 	private ArduIMUListener listener;
 	
@@ -54,12 +56,12 @@ public class ArduIMU implements Device {
 	public void loop() throws ConnectionLostException, InterruptedException {
 //		App.log.i(App.TAG, "starting uart read");
 		
-		byte[] buffer = new byte[16];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		
 		try {
 			in.read(buffer);
 		} catch (IOException ioException) {
-			App.log.i(App.TAG, "uart read failed");
+			App.log.i(App.TAG, "IMU uart read failed.");
 			ioException.printStackTrace();
 			Thread.sleep(1000);
 			return; // TODO disable device instead
@@ -69,7 +71,7 @@ public class ArduIMU implements Device {
 			String text = new String(buffer, "US-ASCII");
 			onReceivedText(text);
 		} catch (UnsupportedEncodingException encodingException) {
-			App.log.i(App.TAG, "unsupported encoding");
+			App.log.i(App.TAG, "IMU unsupported encoding.");
 			encodingException.printStackTrace();
 			Thread.sleep(1000);
 			return; // TODO disable device instead
@@ -95,31 +97,35 @@ public class ArduIMU implements Device {
 //		if (listener != null) {
 //			listener.onArduIMUValues(builder.toString());
 //		}
-		
-		Thread.sleep(8 / 60); // 8Hz
 	}
 
 	private void onReceivedText(String text) {
-		buffer += text;
-		
-		if (buffer.contains(VALUES_DELIMITER)) {
-			String parse;
-			
-			if (buffer.endsWith(VALUES_DELIMITER)) {
-				parse = buffer;
-				buffer = "";
-			} else {
-				int lastIndexOf = buffer.lastIndexOf(VALUES_DELIMITER);
-				parse = buffer.substring(0, lastIndexOf);
-				buffer = buffer.substring(lastIndexOf + 1);
-			}
-			
-			StringTokenizer tokenizer = new StringTokenizer(parse, VALUES_DELIMITER);
-			while (tokenizer.hasMoreTokens()) {
-				parseValues(tokenizer.nextToken());
-			}
+		if (listener != null) {
+			listener.onArduIMUValues(text);
 		}
 	}
+	
+//	private void onReceivedText(String text) {
+//		buffer += text;
+//		
+//		if (buffer.contains(VALUES_DELIMITER)) {
+//			String parse;
+//			
+//			if (buffer.endsWith(VALUES_DELIMITER)) {
+//				parse = buffer;
+//				buffer = "";
+//			} else {
+//				int lastIndexOf = buffer.lastIndexOf(VALUES_DELIMITER);
+//				parse = buffer.substring(0, lastIndexOf);
+//				buffer = buffer.substring(lastIndexOf + 1);
+//			}
+//			
+//			StringTokenizer tokenizer = new StringTokenizer(parse, VALUES_DELIMITER);
+//			while (tokenizer.hasMoreTokens()) {
+//				parseValues(tokenizer.nextToken());
+//			}
+//		}
+//	}
 
 	private void parseValues(String values) {
 		values = values.trim();
