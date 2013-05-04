@@ -8,6 +8,7 @@ import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.view.Menu;
 import android.widget.TextView;
 
@@ -28,9 +29,10 @@ public class MainActivity extends IOIOActivity {
 	private ObjectiveController objectiveController;
 	private RemoteCommandController remoteCommand;
 	
-	private TextView ioioStatusTextView;
 	private TextView serverStatusTextView;
 	private TextView connectionCountTextView;
+
+	private PowerManager.WakeLock wakelock;
 
 
 	@Override
@@ -40,24 +42,33 @@ public class MainActivity extends IOIOActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		App.start();
 		
+		super.onCreate(savedInstanceState);
 		setupUI();
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
-		// FIXME prevent device sleep
+		// prevent device from sleeping
+		PowerManager powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
+		wakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, App.TAG);
+		wakelock.acquire();
 		
-		App.start();
 		rocket = new Rocket();
 		App.data = new DataLogger(rocket);
 		
-		deviceManager = new DeviceManager();
+		deviceManager = new DeviceManager(200 /* ioio thread sleep */);
 		setupDevices();
 		setupObjectives(rocket);
 		
 		setupRemoteCommand();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		wakelock.release();
+		super.onDestroy();
 	}
 
 	private void setupObjectives(Rocket rocket) {
@@ -69,7 +80,6 @@ public class MainActivity extends IOIOActivity {
 	private void setupUI() {
 		setContentView(R.layout.activity_main);
 		
-		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
 		serverStatusTextView = (TextView) findViewById(R.id.server_status);
 		connectionCountTextView = (TextView) findViewById(R.id.server_connections);
 	}

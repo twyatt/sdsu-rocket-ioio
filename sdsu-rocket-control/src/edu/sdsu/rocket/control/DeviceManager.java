@@ -14,19 +14,36 @@ public class DeviceManager implements IOIOLooper {
 	private ArrayList<Device> devices = new ArrayList<Device>();
 	private ArrayList<DeviceThread> threads = new ArrayList<DeviceThread>();
 	
-	public void add(Device device) {
-		add(device, false);
+	private int sleep;
+	
+	/**
+	 * 
+	 * @param threadSleep Sleep duration between IOIO thread loops (milliseconds).
+	 */
+	public DeviceManager(int threadSleep) {
+		this.sleep = threadSleep;
 	}
 	
-	public void add(Device device, boolean spawnThread) {
-		if (spawnThread) {
-			App.log.i(App.TAG, "Spawning thread for device: " + device.info());
-			
-			DeviceThread thread = new DeviceThread(device);
-			threads.add(thread);
-		} else {
-			this.devices.add(device);
-		}
+	/**
+	 * Adds a device on the IOIO thread.
+	 * 
+	 * @param device
+	 */
+	public void add(Device device) {
+		this.devices.add(device);
+	}
+	
+	/**
+	 * Adds a device and spawns a thread for it.
+	 * 
+	 * @param device
+	 * @param threadSleep Sleep duration between thread loops (milliseconds).
+	 */
+	public void add(Device device, int threadSleep) {
+		App.log.i(App.TAG, "Spawning thread for device: " + device.info());
+		
+		DeviceThread thread = new DeviceThread(device, threadSleep);
+		threads.add(thread);
 		
 		// TODO allow devices to be added after setup
 	}
@@ -74,25 +91,22 @@ public class DeviceManager implements IOIOLooper {
 		} catch (ConnectionLostException e) {
 			e.printStackTrace();
 			App.log.i(App.TAG, "Connection lost with IOIO during loop");
-			return;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			App.log.i(App.TAG, "Interrupted exception during IOIO loop");
-			return;
 		}
 		
 		try {
-			Thread.sleep(100);
+			Thread.sleep(sleep);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			App.log.i(App.TAG, "Thread sleep exception during IOIO loop");
-			return;
 		}
 	}
 	
 	@Override
 	public void disconnected() {
-		App.log.i(App.TAG, "IOIO disconnect");
+		App.log.i(App.TAG, "IOIO disconnected");
 		
 		for (DeviceThread thread : threads) {
 			thread.close();

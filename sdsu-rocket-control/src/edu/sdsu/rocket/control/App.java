@@ -24,6 +24,11 @@ public class App {
 		return System.nanoTime();
 	}
 	
+	/**
+	 * Returns number of seconds since start() was called.
+	 * 
+	 * @return Seconds since start.
+	 */
 	public static float elapsedTime() {
 		long time = System.nanoTime();
 		return (time - startTime) / 1000000000.0f;
