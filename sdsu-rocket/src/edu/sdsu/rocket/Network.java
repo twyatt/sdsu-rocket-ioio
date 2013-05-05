@@ -41,6 +41,8 @@ public class Network {
 		kyro.register(SetObjectiveRequest.class);
 		kyro.register(SetObjectiveResponse.class);
 		kyro.register(CommandRequest.class);
+		kyro.register(SensorRequest.class);
+		kyro.register(SensorResponse.class);
 	}
 	
 	static public class AuthenticationRequest {
@@ -71,6 +73,17 @@ public class Network {
 	
 	static public class CommandRequest {
 		public String command;
+	}
+	
+	static public class SensorRequest {}
+	
+	static public class SensorResponse {
+		public float loxTransducerVoltage;
+		public float loxTransducerPressure;
+		public float ethanolTransducerVoltage;
+		public float ethanolTransducerPressure;
+		public float engineTransducerVoltage;
+		public float engineTransducerPressure;
 	}
 	
 }

@@ -46,6 +46,15 @@ public class MainActivity extends Activity {
 				startActivity(intent);
 			}
 		});
+		
+		Button sensorsButton = (Button)findViewById(R.id.button_sensors_activity);
+		sensorsButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(MainActivity.this, SensorActivity.class);
+				startActivity(intent);
+			}
+		});
 	}
 	
 	@Override

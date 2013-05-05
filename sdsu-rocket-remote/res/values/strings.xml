@@ -29,5 +29,6 @@
     <string name="title_activity_fill_tanks">FillTanksActivity</string>
     <string name="title_activity_command_list">CommandListActivity</string>
     <string name="title_activity_objective">ObjectiveActivity</string>
+    <string name="title_activity_sensor">SensorActivity</string>
 
 </resources>

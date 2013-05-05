@@ -139,7 +139,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, LOX_PRESSURE + " = " + rocket.tankPressureLOX.getPressure(voltage) + " PSI");
+					App.log.i(App.TAG, LOX_PRESSURE + " = " + rocket.tankPressureLOX.getPressure() + " PSI");
 				}
 			}
 		});
@@ -166,7 +166,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, ETHANOL_PRESSURE + " = " + rocket.tankPressureEthanol.getPressure(voltage) + " PSI");
+					App.log.i(App.TAG, ETHANOL_PRESSURE + " = " + rocket.tankPressureEthanol.getPressure() + " PSI");
 				}
 			}
 		});
@@ -193,7 +193,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, ENGINE_PRESSURE + " = " + rocket.tankPressureEngine.getPressure(voltage) + " PSI");
+					App.log.i(App.TAG, ENGINE_PRESSURE + " = " + rocket.tankPressureEngine.getPressure() + " PSI");
 				}
 			}
 		});
@@ -270,16 +270,6 @@ public class DataLogger {
 			e.printStackTrace();
 			App.log.e(App.TAG, "Failed to create output stream for " + name + ".");
 			return null;
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException e) {
-					App.log.e(App.TAG, "Failed to close failed output stream for " + name + ".");
-					e.printStackTrace();
-					return null;
-				}
-			}
 		}
 		
 		App.log.i(App.TAG, "Created output stream for " + name + ".");

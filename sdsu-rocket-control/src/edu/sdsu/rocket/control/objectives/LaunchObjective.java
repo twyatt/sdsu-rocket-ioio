@@ -39,7 +39,8 @@ public class LaunchObjective implements Objective {
 		waitForIgnitionConfirmationActive = true;
 		
 		App.log.i(App.TAG, "Igniting model rocket motor!");
-		rocket.ignitor.ignite();
+//		rocket.ignitor.ignite();
+		rocket.fuelValve.ignite();
 	}
 	
 	public void abortLaunch(Rocket rocket) {

@@ -12,8 +12,7 @@ public class Rocket {
 
 	public DMO063 ignitor;
 	public BreakWire breakWire;
-	public DMO063 fuelValveOpen;
-	public DMO063 fuelValveClose;
+	public DMO063 fuelValve;
 	
 	public P51500AA1365V tankPressureLOX;
 	public P51500AA1365V tankPressureEthanol;
@@ -36,13 +35,13 @@ public class Rocket {
 		 * 3 = BMP085 EOC
 		 * 4 = BMP085 SDA
 		 * 5 = BMP085 SCL
+		 * 9 = Break Wire -
 		 * 10 = ArduIMU TX
 		 * 13 = Servo PWM LOX Orange Wire (Screw-down Connector #5 Port #3)
 		 * 14 = Servo PWM Ethanol Orange Wire (Screw-down Connector #6 Port #3)
 		 * 19 = DMO063 #1 Control +
 		 * 20 = DMO063 #2 Control +
 		 * 21 = DMO063 #3 Control +
-		 * 34 = Break Wire -
 		 * 41 = P51500AA1365V #1 White Wire (Screw-down Connector #1 Port #3)
 		 * 42 = P51500AA1365V #2 White Wire (Screw-down Connector #2 Port #3)
 		 * 43 = P51500AA1365V #3 White Wire (Screw-down Connector #3 Port #3)
@@ -77,9 +76,8 @@ public class Rocket {
 		 */
 		
 		ignitor = new DMO063(19 /* pin */, 3000L /* duration (milliseconds) */);
-		fuelValveOpen = new DMO063(20 /* pin */, 1500L /* duration (milliseconds) */);
-		fuelValveClose = new DMO063(21 /* pin */, 1500L /* duration (milliseconds) */);
-		breakWire = new BreakWire(34 /* pin */);
+		fuelValve = new DMO063(20 /* pin */, 5000L /* duration (milliseconds) */);
+		breakWire = new BreakWire(9 /* pin */);
 		
 		// FIXME calibrate
 		// max voltage for analog input = 3.3V

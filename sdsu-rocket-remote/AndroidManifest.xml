@@ -15,7 +15,6 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
         <activity
             android:name="edu.sdsu.rocket.remote.MainActivity"
             android:label="@string/app_name" >
@@ -25,7 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name="edu.sdsu.rocket.remote.LaunchActivity"
             android:label="@string/title_activity_launch"
@@ -34,7 +32,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.sdsu.rocket.control.MainActivity" />
         </activity>
-        
         <activity
             android:name="edu.sdsu.rocket.remote.ConnectActivity"
             android:label="@string/title_activity_connect"
@@ -44,10 +41,17 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.sdsu.rocket.remote.MainActivity" />
         </activity>
-        
         <activity
             android:name="edu.sdsu.rocket.remote.ObjectiveActivity"
             android:label="@string/title_activity_objective"
+            android:parentActivityName="edu.sdsu.rocket.remote.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.sdsu.rocket.remote.MainActivity" />
+        </activity>
+        <activity
+            android:name="edu.sdsu.rocket.remote.SensorActivity"
+            android:label="@string/title_activity_sensor"
             android:parentActivityName="edu.sdsu.rocket.remote.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

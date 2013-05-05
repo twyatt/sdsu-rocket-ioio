@@ -62,7 +62,9 @@ public class MainActivity extends IOIOActivity {
 		wakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, App.TAG);
 		wakelock.acquire();
 		
-		rocket = new Rocket();
+		App.rocket = new Rocket();
+		rocket = App.rocket;
+		
 		App.data = new DataLogger(rocket);
 		
 		deviceManager = new DeviceManager(200 /* ioio thread sleep */);
@@ -136,33 +138,34 @@ public class MainActivity extends IOIOActivity {
 
 	private void setupDevices() {
 //		deviceManager.add(rocket.ignitor);
+//		deviceManager.add(rocket.fuelValve);
 //		deviceManager.add(rocket.breakWire);
 //		
-//		deviceManager.add(
-//			new DeviceThread(rocket.tankPressureLOX)
-//				.setThreadSleep(500)
-//		);
-//		deviceManager.add(
-//			new DeviceThread(rocket.tankPressureEthanol)
-//				.setThreadSleep(500)
-//		);
-//		deviceManager.add(
-//			new DeviceThread(rocket.tankPressureEngine)
-//				.setThreadSleep(500)
-//		);
+		deviceManager.add(
+			new DeviceThread(rocket.tankPressureLOX)
+				.setThreadSleep(500)
+		);
+		deviceManager.add(
+			new DeviceThread(rocket.tankPressureEthanol)
+				.setThreadSleep(500)
+		);
+		deviceManager.add(
+			new DeviceThread(rocket.tankPressureEngine)
+				.setThreadSleep(500)
+		);
 //		
 //		deviceManager.add(rocket.servoLOX);
 //		deviceManager.add(rocket.servoEthanol);
 //		
-		deviceManager.add(
-			new DeviceThread(rocket.barometer1)
-				.setThreadSleep(200 /* milliseconds */)
-		);
-		deviceManager.add(
-			new DeviceThread(rocket.barometer2)
-				.setThreadSleep(200 /* milliseconds */)
-		);
-		
+//		deviceManager.add(
+//			new DeviceThread(rocket.barometer1)
+//				.setThreadSleep(200 /* milliseconds */)
+//		);
+//		deviceManager.add(
+//			new DeviceThread(rocket.barometer2)
+//				.setThreadSleep(200 /* milliseconds */)
+//		);
+//		
 //		deviceManager.add(
 //			new DeviceThread(rocket.imu)
 //				.setThreadFrequency(8 /* Hz */)

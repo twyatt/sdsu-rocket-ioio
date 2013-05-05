@@ -15,6 +15,8 @@ public class P51500AA1365V implements Device {
 		public void onP51500AA1365VValue(float voltage);
 	}
 	
+	public float voltage;
+	
 	private P51500AA1365VListener listener;
 	
 	private AnalogInput input;
@@ -37,7 +39,7 @@ public class P51500AA1365V implements Device {
 		input = ioio.openAnalogInput(pin);
 	}
 	
-	public float getPressure(float voltage) {
+	public float getPressure() {
 		float psi = slope * voltage + bias;
 		return psi;
 	}
@@ -45,10 +47,10 @@ public class P51500AA1365V implements Device {
 	@Override
 	public void loop() {
 		try {
-			float v = input.getVoltage();
+			voltage = input.getVoltage();
 			
 			if (listener != null) {
-				listener.onP51500AA1365VValue(v);
+				listener.onP51500AA1365VValue(voltage);
 			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block

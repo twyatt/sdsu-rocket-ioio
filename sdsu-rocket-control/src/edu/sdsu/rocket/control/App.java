@@ -1,6 +1,7 @@
 package edu.sdsu.rocket.control;
 
 import edu.sdsu.rocket.control.logging.AndroidLog;
+import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.logging.Logger;
 
 public class App {
@@ -10,6 +11,8 @@ public class App {
 	 * {@link http://developer.android.com/reference/android/util/Log.html}
 	 */
 	public static final String TAG = "SDSURocketControl";
+	
+	public static Rocket rocket;
 	
 	public static Logger log = new AndroidLog();
 	public static DataLogger data;

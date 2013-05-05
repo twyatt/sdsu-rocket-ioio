@@ -11,11 +11,14 @@ import edu.sdsu.rocket.Network.AuthenticationRequest;
 import edu.sdsu.rocket.Network.AuthenticationResponse;
 import edu.sdsu.rocket.Network.CommandRequest;
 import edu.sdsu.rocket.Network.LoggingRequest;
+import edu.sdsu.rocket.Network.SensorRequest;
+import edu.sdsu.rocket.Network.SensorResponse;
 import edu.sdsu.rocket.Network.SetObjectiveRequest;
 import edu.sdsu.rocket.Network.SetObjectiveResponse;
 import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.control.ObjectiveController;
 import edu.sdsu.rocket.control.logging.KryoNetLog;
+import edu.sdsu.rocket.control.models.Rocket;
 
 public class RemoteCommandController {
 
@@ -77,6 +80,10 @@ public class RemoteCommandController {
 				if (object instanceof CommandRequest) {
 					onCommandRequest(connection, (CommandRequest)object);
 				}
+				
+				if (object instanceof SensorRequest) {
+					onSensorRequest(connection, (SensorRequest)object);
+				}
 			}
 			
 			@Override
@@ -92,6 +99,21 @@ public class RemoteCommandController {
 		App.log.i(App.TAG, "Listening on TCP port " + tcpPort + ", UDP port " + udpPort + ".");
 	}
 	
+	protected void onSensorRequest(Connection connection, SensorRequest request) {
+		Rocket rocket = App.rocket;
+		
+		if (rocket != null) {
+			SensorResponse response = new SensorResponse();
+			response.loxTransducerVoltage = rocket.tankPressureLOX.voltage;
+			response.loxTransducerPressure = rocket.tankPressureLOX.getPressure();
+			response.engineTransducerVoltage = rocket.tankPressureEngine.voltage;
+			response.engineTransducerPressure = rocket.tankPressureEngine.getPressure();
+			response.ethanolTransducerVoltage = rocket.tankPressureEthanol.voltage;
+			response.ethanolTransducerPressure = rocket.tankPressureEthanol.getPressure();
+			connection.sendUDP(response);
+		}
+	}
+
 	protected void onCommandRequest(Connection connection, CommandRequest command) {
 		if (isAuthenticated(connection)) {
 			objectiveController.command(command.command);
