@@ -12,7 +12,7 @@ import ioio.lib.api.exception.ConnectionLostException;
  */
 public class PS050 implements Device {
 
-	private static final float ACTION_DURATION = 5.0f; // seconds
+	private static final float ACTION_DURATION = 3.0f; // seconds
 	
 	private IOIO ioio;
 	

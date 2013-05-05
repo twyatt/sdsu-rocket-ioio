@@ -110,6 +110,7 @@ public class RemoteCommandController {
 			response.engineTransducerPressure = rocket.tankPressureEngine.getPressure();
 			response.ethanolTransducerVoltage = rocket.tankPressureEthanol.voltage;
 			response.ethanolTransducerPressure = rocket.tankPressureEthanol.getPressure();
+			response.breakWireIsBroken = rocket.breakWire.isBroken();
 			connection.sendUDP(response);
 		}
 	}

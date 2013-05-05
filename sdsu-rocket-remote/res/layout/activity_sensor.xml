@@ -37,43 +37,22 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/LOXPressureLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/loxPressure"
-        android:layout_alignBottom="@+id/loxPressure"
-        android:layout_alignParentLeft="true"
-        android:text="LOX:"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/EthanolPressureLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/ethanolPressure"
-        android:layout_alignBottom="@+id/ethanolPressure"
-        android:layout_alignLeft="@+id/textView1"
-        android:text="Ethanol:"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
         android:id="@+id/loxPressure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_alignRight="@+id/refresh"
         android:layout_below="@+id/refresh"
-        android:layout_toRightOf="@+id/EthanolPressureLabel"
         android:text="LOX Pressure"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/enginePressureLabel"
+        android:id="@+id/breakWire"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/enginePressure"
-        android:layout_alignBottom="@+id/enginePressure"
-        android:layout_alignLeft="@+id/EthanolPressureLabel"
-        android:text="Engine:"
+        android:layout_alignLeft="@+id/enginePressure"
+        android:layout_below="@+id/enginePressure"
+        android:text="Break wire status unknown"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

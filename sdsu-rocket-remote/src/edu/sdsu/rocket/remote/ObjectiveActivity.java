@@ -48,9 +48,9 @@ public class ObjectiveActivity extends Activity {
 			commands.put(Network.OPEN_LOX_TANK_COMMAND, "Open LOX Tank");
 			commands.put(Network.CYCLE_LOX_TANK_COMMAND, "Cycle LOX Tank");
 			commands.put(Network.CLOSE_LOX_TANK_COMMAND, "Close LOX Tank");
-			commands.put(Network.OPEN_ETHANOL_TANK, "Open Ethanol Tank");
-			commands.put(Network.CYCLE_ETHANOL_TANK, "Cycle Ethanol Tank");
-			commands.put(Network.CLOSE_ETHANOL_TANK, "Close Ethanol Tank");
+			commands.put(Network.OPEN_ETHANOL_TANK_COMMAND, "Open Ethanol Tank");
+			commands.put(Network.CYCLE_ETHANOL_TANK_COMMAND, "Cycle Ethanol Tank");
+			commands.put(Network.CLOSE_ETHANOL_TANK_COMMAND, "Close Ethanol Tank");
 		}
 		
 		return commands;

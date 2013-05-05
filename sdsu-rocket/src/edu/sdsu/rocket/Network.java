@@ -25,9 +25,9 @@ public class Network {
 	public static final String OPEN_LOX_TANK_COMMAND = "openlox";
 	public static final String CYCLE_LOX_TANK_COMMAND = "cyclelox";
 	public static final String CLOSE_LOX_TANK_COMMAND = "closelox";
-	public static final String OPEN_ETHANOL_TANK = "openeth";
-	public static final String CYCLE_ETHANOL_TANK = "cycleeth";
-	public static final String CLOSE_ETHANOL_TANK = "closeeth";
+	public static final String OPEN_ETHANOL_TANK_COMMAND = "openeth";
+	public static final String CYCLE_ETHANOL_TANK_COMMAND = "cycleeth";
+	public static final String CLOSE_ETHANOL_TANK_COMMAND = "closeeth";
 	
 	public static final String FLIGHT_OBJECTIVE = "flight";
 
@@ -84,6 +84,7 @@ public class Network {
 		public float ethanolTransducerPressure;
 		public float engineTransducerVoltage;
 		public float engineTransducerPressure;
+		public boolean breakWireIsBroken;
 	}
 	
 }
