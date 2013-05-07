@@ -84,7 +84,7 @@ public class RocketClient {
 			
 			try {
 				System.out.println("Connecting to " + address + ".");
-				kryonet.connect(connectTimeout, address, tcpPort);
+				kryonet.connect(connectTimeout, address, tcpPort, udpPort);
 				if (kryonet.isConnected()) {
 					return true;
 				} else {
@@ -104,7 +104,7 @@ public class RocketClient {
 		
 		try {
 			System.out.println("Connecting to " + address + ".");
-			kryonet.connect(connectTimeout, address, tcpPort);
+			kryonet.connect(connectTimeout, address, tcpPort, udpPort);
 		} catch (IOException e) {
 			System.err.println("Failed to connect to " + address + ".");
 		}
