@@ -76,7 +76,7 @@ public class Rocket {
 		 */
 		
 		ignitor = new DMO063(19 /* pin */, 3000L /* duration (milliseconds) */);
-		fuelValve = new DMO063(20 /* pin */, 5000L /* duration (milliseconds) */);
+		fuelValve = new DMO063(20 /* pin */, 10000L /* duration (milliseconds) */);
 		breakWire = new BreakWire(9 /* pin */);
 		
 		// FIXME calibrate
@@ -86,7 +86,7 @@ public class Rocket {
 		tankPressureEngine  = new P51500AA1365V(43 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
 		
 		servoLOX = new PS050(13 /* pin */, 100 /* frequency */);
-		servoEthanol = new PS050(14 /* pin */, 100 /* frequency */); // FIXME which pin?
+		servoEthanol = new PS050(14 /* pin */, 100 /* frequency */);
 		
 		// TODO test oversampling of 3 (max)
 		// twiNum 0 = pin 4 (SDA) and 5 (SCL)

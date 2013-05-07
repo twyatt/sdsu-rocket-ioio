@@ -36,12 +36,18 @@ public class DMO063 implements Device {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				value = false;
-				
-				timer.cancel();
-				timer = null;
+				cancel();
 			}
 		}, duration);
+	}
+	
+	public void cancel() {
+		value = false;
+		
+		if (timer != null) {
+			timer.cancel();
+			timer = null;
+		}
 	}
 
 	/**

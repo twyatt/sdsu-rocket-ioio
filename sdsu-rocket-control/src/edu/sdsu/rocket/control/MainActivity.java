@@ -137,10 +137,10 @@ public class MainActivity extends IOIOActivity {
 	}
 
 	private void setupDevices() {
-//		deviceManager.add(rocket.ignitor);
-//		deviceManager.add(rocket.fuelValve);
+		deviceManager.add(rocket.ignitor);
+		deviceManager.add(rocket.fuelValve);
 		deviceManager.add(rocket.breakWire);
-//		
+		
 		deviceManager.add(
 			new DeviceThread(rocket.tankPressureLOX)
 				.setThreadSleep(500)

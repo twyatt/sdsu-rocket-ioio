@@ -118,6 +118,14 @@ public class RemoteCommandController {
 	protected void onCommandRequest(Connection connection, CommandRequest command) {
 		if (isAuthenticated(connection)) {
 			objectiveController.command(command.command);
+			
+			if (Network.ABORT_COMMAND.equals(command.command)) {
+				// allow the abort command to close fuel valves no matter what objective is currently active
+				if (App.rocket != null) {
+					App.log.i(App.TAG, "Closing fuel valves!");
+					App.rocket.fuelValve.cancel();
+				}
+			}
 		} else {
 			App.log.i(App.TAG, "Ignoring '" + command.command + "' command from " + connection.getRemoteAddressTCP() + ".");
 		}

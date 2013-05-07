@@ -19,7 +19,7 @@ import edu.sdsu.rocket.control.models.Rocket;
 
 public class DataLogger {
 
-	private static boolean LOG = true;
+	private static boolean LOG = false;
 	
 	private static final String IMU = "imu";
 	private static final String BAROMETER1 = "baro1";

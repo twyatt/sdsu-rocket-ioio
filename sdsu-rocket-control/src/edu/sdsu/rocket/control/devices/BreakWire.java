@@ -16,7 +16,6 @@ public class BreakWire implements Device {
 	}
 	
 	public boolean isBroken() {
-		// FIXME this is untested, need to see if this is correct boolean
 		return isBroken;
 	}
 
