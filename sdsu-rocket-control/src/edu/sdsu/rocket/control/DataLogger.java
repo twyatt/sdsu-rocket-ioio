@@ -15,6 +15,7 @@ import edu.sdsu.rocket.control.devices.ArduIMU;
 import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
+import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
 import edu.sdsu.rocket.control.models.Rocket;
 
 public class DataLogger {
@@ -27,19 +28,24 @@ public class DataLogger {
 	private static final String ENGINE_PRESSURE = "eng";
 	private static final String LOX_PRESSURE = "lox";
 	private static final String ETHANOL_PRESSURE = "eth";
+	private static final String ACCELEROMETER = "accel";
 	
-	private static final int BAROMETER_BUFFER_SIZE = 128;
-	private static final int PRESSURE_BUFFER_SIZE = 64;
-	private static final int IMU_BUFFER_SIZE = 1024;
+	private static final int BAROMETER_BUFFER_SIZE = 512;
+	private static final int PRESSURE_BUFFER_SIZE = 512;
+	private static final int IMU_BUFFER_SIZE = 2048;
+	private static final int ACCELEROMETER_BUFFER_SIZE = 512;
 	
 	private boolean enabled;
 	public final Map<String, DataOutputStream> out = new HashMap<String, DataOutputStream>();
 
+	private Rocket rocket;
+
 	public DataLogger(final Rocket rocket) {
-		setup(rocket);
+		this.rocket = rocket;
+		setup();
 	}
 	
-	public void setup(final Rocket rocket) {
+	public void setup() {
 		makeStream(BAROMETER1, BAROMETER_BUFFER_SIZE);
 		rocket.barometer1.setListener(new BMP085.BMP085Listener() {
 			@Override
@@ -224,15 +230,46 @@ public class DataLogger {
 				}
 			}
 		});
+		
+		makeStream(ACCELEROMETER, ACCELEROMETER_BUFFER_SIZE);
+		rocket.accelerometer.setListener(new PhoneAccelerometer.PhoneAccelerometerListener() {
+			@Override
+			public void onPhoneAccelerometer(float x, float y, float z) {
+				if (enabled) {
+					DataOutputStream stream = out.get(ACCELEROMETER);
+					
+					if (stream == null) {
+						App.log.e(App.TAG, "Output stream not available for " + ACCELEROMETER + ".");
+					} else {
+						try {
+							stream.writeFloat(App.elapsedTime());
+							stream.writeFloat(x);
+							stream.writeFloat(y);
+							stream.writeFloat(z);
+						} catch (IOException e) {
+							App.log.e(App.TAG, "Failed to write " + ACCELEROMETER + " values to output stream.");
+							e.printStackTrace();
+							return;
+						}
+					}
+				}
+				
+				if (LOG) {
+					App.log.i(App.TAG, ACCELEROMETER + " = [" + rocket.accelerometer.x + ", " + rocket.accelerometer.y + ", " + rocket.accelerometer.z + "]");
+				}
+			}
+		});
 	}
 	
 	public void enable() {
 		enabled = true;
+		rocket.accelerometer.start();
 		App.log.i(App.TAG, "Enabled data logging.");
 	}
 	
 	public void disable() {
 		enabled = false;
+		rocket.accelerometer.stop();
 		App.log.i(App.TAG, "Disabled data logging.");
 	}
 	

@@ -1,9 +1,11 @@
 package edu.sdsu.rocket.control.models;
 
+import android.hardware.SensorManager;
 import edu.sdsu.rocket.control.devices.ArduIMU;
 import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.BreakWire;
 import edu.sdsu.rocket.control.devices.DMO063;
+import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.PS050;
@@ -25,6 +27,8 @@ public class Rocket {
 	public MS5611 barometer2;
 	
 	public ArduIMU imu;
+	
+	public PhoneAccelerometer accelerometer;
 	
 	public Rocket() {
 		/*
@@ -98,6 +102,13 @@ public class Rocket {
 		barometer2 = new MS5611(1 /* twiNum */, MS5611.ADD_CSB_LOW /* address */, 30 /* sample rate */);
 		
 		imu = new ArduIMU(10 /* RX pin */);
+		
+		/*
+		 * Devices internal to the Android phone (not connected via the IOIO).
+		 */
+		
+		accelerometer = new PhoneAccelerometer(SensorManager.SENSOR_DELAY_FASTEST);
+		
 	}
 	
 }

@@ -8,6 +8,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -137,25 +139,29 @@ public class MainActivity extends IOIOActivity {
 	}
 
 	private void setupDevices() {
-		deviceManager.add(rocket.ignitor);
-		deviceManager.add(rocket.fuelValve);
-		deviceManager.add(rocket.breakWire);
+		SensorManager sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+		Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		rocket.accelerometer.setDataSource(sensorManager, accelerometer);
 		
-		deviceManager.add(
-			new DeviceThread(rocket.tankPressureLOX)
-				.setThreadSleep(500)
-		);
-		deviceManager.add(
-			new DeviceThread(rocket.tankPressureEthanol)
-				.setThreadSleep(500)
-		);
-		deviceManager.add(
-			new DeviceThread(rocket.tankPressureEngine)
-				.setThreadSleep(500)
-		);
+//		deviceManager.add(rocket.ignitor);
+//		deviceManager.add(rocket.fuelValve);
+//		deviceManager.add(rocket.breakWire);
 //		
-		deviceManager.add(rocket.servoLOX);
-		deviceManager.add(rocket.servoEthanol);
+//		deviceManager.add(
+//			new DeviceThread(rocket.tankPressureLOX)
+//				.setThreadSleep(500)
+//		);
+//		deviceManager.add(
+//			new DeviceThread(rocket.tankPressureEthanol)
+//				.setThreadSleep(500)
+//		);
+//		deviceManager.add(
+//			new DeviceThread(rocket.tankPressureEngine)
+//				.setThreadSleep(500)
+//		);
+//		
+//		deviceManager.add(rocket.servoLOX);
+//		deviceManager.add(rocket.servoEthanol);
 //		
 //		deviceManager.add(
 //			new DeviceThread(rocket.barometer1)
