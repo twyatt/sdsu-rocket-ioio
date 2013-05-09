@@ -10,6 +10,7 @@ import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.Network.AuthenticationRequest;
 import edu.sdsu.rocket.Network.AuthenticationResponse;
 import edu.sdsu.rocket.Network.CommandRequest;
+import edu.sdsu.rocket.Network.DataCollectionRequest;
 import edu.sdsu.rocket.Network.LoggingRequest;
 import edu.sdsu.rocket.Network.SensorRequest;
 import edu.sdsu.rocket.Network.SensorResponse;
@@ -73,6 +74,10 @@ public class RemoteCommandController {
 					onAuthenticationRequest(connection, (AuthenticationRequest)object);
 				}
 				
+				if (object instanceof DataCollectionRequest) {
+					onDataCollectionRequest(connection, (DataCollectionRequest)object);
+				}
+				
 				if (object instanceof SetObjectiveRequest) {
 					onSetObjectiveRequest(connection, (SetObjectiveRequest)object);
 				}
@@ -99,6 +104,22 @@ public class RemoteCommandController {
 		App.log.i(App.TAG, "Listening on TCP port " + tcpPort + ", UDP port " + udpPort + ".");
 	}
 	
+	protected void onDataCollectionRequest(Connection connection, DataCollectionRequest request) {
+		if (isAuthenticated(connection)) {
+			if (App.data != null) {
+				if (request.enable) {
+					App.data.enable();
+				} else {
+//					App.data.flush();
+					App.data.disable();
+					App.data.close(); // TODO make it so enabling will re-open streams if needed
+				}
+			}
+		} else {
+			App.log.i(App.TAG, "Ignoring request to " + (request.enable ? "enable" : "disable") + " data collection from " + connection.getRemoteAddressTCP() + ".");
+		}
+	}
+
 	protected void onSensorRequest(Connection connection, SensorRequest request) {
 		Rocket rocket = App.rocket;
 		

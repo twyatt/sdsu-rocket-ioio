@@ -61,6 +61,13 @@ public class LaunchObjective implements Objective {
 		App.log.i(App.TAG, "Launch aborted!");
 	}
 	
+	private void openFuel(Rocket rocket) {
+		App.log.i(App.TAG, "Opening fuel valves!");
+		rocket.fuelValve.ignite();
+		
+		App.objective.set(Network.FLIGHT_OBJECTIVE);
+	}
+	
 	/*
 	 * Objective interface methods.
 	 */
@@ -80,7 +87,7 @@ public class LaunchObjective implements Objective {
 				App.log.i(App.TAG, "Countdown: " + Math.round(COUNTDOWN_DURATION - countdownElapsed));
 			}
 			
-			if (countdownElapsed >= COUNTDOWN_DURATION) {
+			if (countdownElapsed > COUNTDOWN_DURATION) {
 				igniteModelRocketMotor(rocket);
 			}
 		} else if (Mode.WAIT_FOR_BREAKWIRE.equals(mode)) {
@@ -94,20 +101,17 @@ public class LaunchObjective implements Objective {
 			}
 		} else if (Mode.FUEL_DELAY.equals(mode)) {
 			float delayElapsed = App.elapsedTime() - breakWireTime;
-			App.log.i(App.TAG, "Delay countdown: " + Math.round(LAUNCH_DELAY_AFTER_BREAKWIRE - delayElapsed));
+			
+			if (App.elapsedTime() - lastMessageTime >= 1f) {
+				lastMessageTime = App.elapsedTime();
+				App.log.i(App.TAG, "Delay countdown: " + Math.round(LAUNCH_DELAY_AFTER_BREAKWIRE - delayElapsed));
+			}
 			
 			if (delayElapsed > LAUNCH_DELAY_AFTER_BREAKWIRE) {
 				mode = Mode.STANDBY;
 				openFuel(rocket);
 			}
 		}
-	}
-
-	private void openFuel(Rocket rocket) {
-		App.log.i(App.TAG, "Opening fuel valves!");
-		
-		rocket.fuelValve.ignite();
-		App.objective.set(Network.FLIGHT_OBJECTIVE);
 	}
 
 	@Override

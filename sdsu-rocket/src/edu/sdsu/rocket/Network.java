@@ -37,6 +37,7 @@ public class Network {
 		kyro.register(AuthenticationRequest.class);
 		kyro.register(AuthenticationResponse.class);
 		kyro.register(LoggingRequest.class);
+		kyro.register(DataCollectionRequest.class);
 		kyro.register(LogMessage.class);
 		kyro.register(SetObjectiveRequest.class);
 		kyro.register(SetObjectiveResponse.class);
@@ -54,6 +55,10 @@ public class Network {
 	}
 	
 	static public class LoggingRequest {
+		public boolean enable;
+	}
+	
+	static public class DataCollectionRequest {
 		public boolean enable;
 	}
 	
