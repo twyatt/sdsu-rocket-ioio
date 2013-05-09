@@ -1,9 +1,11 @@
 package edu.sdsu.rocket.control;
 
-import java.io.IOException;
-
+import ioio.lib.api.IOIO;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
+
+import java.io.IOException;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -22,7 +24,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import edu.sdsu.rocket.Network;
-import edu.sdsu.rocket.control.devices.DeviceThread;
+import edu.sdsu.rocket.control.devices.DeviceRunnable;
 import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.control.network.RemoteCommandController;
 import edu.sdsu.rocket.control.objectives.FillTanksObjective;
@@ -31,13 +33,12 @@ import edu.sdsu.rocket.control.objectives.LaunchObjective;
 
 public class MainActivity extends IOIOActivity {
 
-	private Rocket rocket;
-	
 	private DeviceManager deviceManager;
 	private RemoteCommandController remoteCommand;
 	
 	private TextView serverStatusTextView;
 	private TextView connectionCountTextView;
+	private TextView ioioStatusTextView;
 
 	private Thread objectiveThread;
 	private PowerManager.WakeLock wakelock;
@@ -60,19 +61,31 @@ public class MainActivity extends IOIOActivity {
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
 		// prevent device from sleeping
-		PowerManager powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
+		PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, App.TAG);
 		wakelock.acquire();
 		
 		App.rocket = new Rocket();
-		rocket = App.rocket;
+		App.data = new DataLogger(App.rocket);
 		
-		App.data = new DataLogger(rocket);
+		deviceManager = new DeviceManager(200 /* IOIO thread sleep */);
+		deviceManager.setListener(new DeviceManager.DeviceManagerListener() {
+			@Override
+			public void incompatible() {
+				updateTextView(ioioStatusTextView, "IOIO incompatible.");
+			}
+			@Override
+			public void disconnected() {
+				updateTextView(ioioStatusTextView, "IOIO disconnected.");
+			}
+			@Override
+			public void connected(IOIO ioio) {
+				updateTextView(ioioStatusTextView, "IOIO connected.");
+			}
+		});
 		
-		deviceManager = new DeviceManager(200 /* ioio thread sleep */);
-		setupDevices();
-		setupObjectives(rocket);
-		
+		setupDevices(App.rocket);
+		setupObjectives(App.rocket);
 		setupRemoteCommand(App.objective);
 	}
 	
@@ -105,6 +118,7 @@ public class MainActivity extends IOIOActivity {
 		
 		serverStatusTextView = (TextView) findViewById(R.id.server_status);
 		connectionCountTextView = (TextView) findViewById(R.id.server_connections);
+		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
 	}
 
 	private void setupRemoteCommand(ObjectiveController objectiveController) {
@@ -138,44 +152,44 @@ public class MainActivity extends IOIOActivity {
 		updateTextView(serverStatusTextView, "tcp://" + ip + ":" + tcpPort + "\nudp://" + ip + ":" + udpPort);
 	}
 
-	private void setupDevices() {
-		SensorManager sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+	private void setupDevices(Rocket rocket) {
+		SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		rocket.accelerometer.setDataSource(sensorManager, accelerometer);
 		
-//		deviceManager.add(rocket.ignitor);
-//		deviceManager.add(rocket.fuelValve);
-//		deviceManager.add(rocket.breakWire);
-//		
-//		deviceManager.add(
-//			new DeviceThread(rocket.tankPressureLOX)
-//				.setThreadSleep(500)
-//		);
-//		deviceManager.add(
-//			new DeviceThread(rocket.tankPressureEthanol)
-//				.setThreadSleep(500)
-//		);
-//		deviceManager.add(
-//			new DeviceThread(rocket.tankPressureEngine)
-//				.setThreadSleep(500)
-//		);
-//		
-//		deviceManager.add(rocket.servoLOX);
-//		deviceManager.add(rocket.servoEthanol);
-//		
-//		deviceManager.add(
-//			new DeviceThread(rocket.barometer1)
-//				.setThreadSleep(200 /* milliseconds */)
-//		);
-//		deviceManager.add(
-//			new DeviceThread(rocket.barometer2)
-//				.setThreadSleep(200 /* milliseconds */)
-//		);
-//		
-//		deviceManager.add(
-//			new DeviceThread(rocket.imu)
-//				.setThreadFrequency(8 /* Hz */)
-//		);
+		deviceManager.add(rocket.ignitor);
+		deviceManager.add(rocket.fuelValve);
+		deviceManager.add(rocket.breakWire);
+		
+		deviceManager.add(
+			new DeviceRunnable(rocket.tankPressureLOX)
+				.setThreadSleep(500)
+		);
+		deviceManager.add(
+			new DeviceRunnable(rocket.tankPressureEthanol)
+				.setThreadSleep(500)
+		);
+		deviceManager.add(
+			new DeviceRunnable(rocket.tankPressureEngine)
+				.setThreadSleep(500)
+		);
+		
+		deviceManager.add(rocket.servoLOX);
+		deviceManager.add(rocket.servoEthanol);
+		
+		deviceManager.add(
+			new DeviceRunnable(rocket.barometer1)
+				.setThreadSleep(200 /* milliseconds */)
+		);
+		deviceManager.add(
+			new DeviceRunnable(rocket.barometer2)
+				.setThreadSleep(200 /* milliseconds */)
+		);
+		
+		deviceManager.add(
+			new DeviceRunnable(rocket.imu)
+				.setThreadFrequency(8 /* Hz */)
+		);
 	}
 
 	@Override

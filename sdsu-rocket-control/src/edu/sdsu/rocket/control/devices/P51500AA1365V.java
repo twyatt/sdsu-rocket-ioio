@@ -1,6 +1,5 @@
 package edu.sdsu.rocket.control.devices;
 
-import edu.sdsu.rocket.control.App;
 import ioio.lib.api.AnalogInput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
@@ -35,35 +34,27 @@ public class P51500AA1365V implements Device {
 		this.listener = listener;
 	}
 	
-	public void setup(IOIO ioio) throws ConnectionLostException {
-		input = ioio.openAnalogInput(pin);
-	}
-	
 	public float getPressure() {
 		float psi = slope * voltage + bias;
 		return psi;
-	}
-
-	@Override
-	public void loop() {
-		try {
-			voltage = input.getVoltage();
-			
-			if (listener != null) {
-				listener.onP51500AA1365VValue(voltage);
-			}
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConnectionLostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	/*
 	 * Device interface methods.
 	 */
+	
+	public void setup(IOIO ioio) throws ConnectionLostException {
+		input = ioio.openAnalogInput(pin);
+	}
+
+	@Override
+	public void loop() throws ConnectionLostException, InterruptedException {
+		voltage = input.getVoltage();
+		
+		if (listener != null) {
+			listener.onP51500AA1365VValue(voltage);
+		}
+	}
 	
 	@Override
 	public String info() {
