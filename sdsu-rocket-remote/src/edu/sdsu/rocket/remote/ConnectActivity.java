@@ -70,7 +70,7 @@ public class ConnectActivity extends Activity {
 			@Override
 			public void received(Connection connection, Object object) {
 				if (object instanceof AuthenticationResponse) {
-					AuthenticationResponse response = (AuthenticationResponse)object;
+					AuthenticationResponse response = (AuthenticationResponse) object;
 					onAuthenticationResponse(response);
 				}
 			}
@@ -188,7 +188,7 @@ public class ConnectActivity extends Activity {
 		
 		// store values at the time of the login attempt
 		App.host = hostView.getText().toString();
-		App.key = hostView.getText().toString();
+		App.key = keyView.getText().toString();
 		
 		// reset errors
 		hostView.setError(null);
@@ -315,7 +315,12 @@ public class ConnectActivity extends Activity {
 		 * throws exception when performing network on main thread).
 		 */
 		private void authenticate() {
-			connectStatusMessageView.setText(R.string.connect_progress_authenticating);
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					connectStatusMessageView.setText(R.string.connect_progress_authenticating);
+				}
+			});
 			AuthenticationRequest request = new AuthenticationRequest();
 			request.key = App.key;
 			client.sendTCP(request);
@@ -333,13 +338,15 @@ public class ConnectActivity extends Activity {
 				try {
 					client.connect(timeout, host, tcpPort, udpPort);
 					if (client.isConnected()) {
-						authenticate();
+						if (App.key != null && App.key.length() > 0) {
+							authenticate();
+						}
+						return true;
 					}
-					return true;
 				} catch (IOException e) {
 					e.printStackTrace();
-					return false;
 				}
+				return false;
 			}
 			
 			return false;
@@ -351,8 +358,8 @@ public class ConnectActivity extends Activity {
 			connectTask = null;
 
 			if (success) {
-				if (keyView.getText().length() > 0) {
-					authenticate();
+				if (App.key != null && App.key.length() > 0) {
+					// authenticating
 				} else {
 					Toast.makeText(getApplicationContext(), "Connection successful", Toast.LENGTH_LONG).show();
 					finish();

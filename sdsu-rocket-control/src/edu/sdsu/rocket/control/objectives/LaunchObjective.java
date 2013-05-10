@@ -47,14 +47,15 @@ public class LaunchObjective implements Objective {
 	}
 	
 	private void igniteModelRocketMotor(Rocket rocket) {
-		App.log.i(App.TAG, "Igniting model rocket motor!");
-		
+		App.log.i(App.TAG, "Waiting for break wire.");
 		mode = Mode.WAIT_FOR_BREAKWIRE;
-		rocket.ignitor.ignite();
+		
+		App.log.i(App.TAG, "Igniting model rocket motor!");
+		rocket.ignitor.activate();
 	}
 	
 	public void abortLaunch(Rocket rocket) {
-		rocket.fuelValve.cancel();
+		rocket.fuelValve.deactivate();
 		mode = Mode.STANDBY;
 		App.data.disable();
 		
@@ -63,7 +64,8 @@ public class LaunchObjective implements Objective {
 	
 	private void openFuel(Rocket rocket) {
 		App.log.i(App.TAG, "Opening fuel valves!");
-		rocket.fuelValve.ignite();
+		mode = Mode.STANDBY;
+		rocket.fuelValve.activate();
 		
 		App.objective.set(Network.FLIGHT_OBJECTIVE);
 	}
@@ -92,8 +94,6 @@ public class LaunchObjective implements Objective {
 			}
 		} else if (Mode.WAIT_FOR_BREAKWIRE.equals(mode)) {
 			// ignitor has been lit, now we need to check if ignitor break wire has been broken
-			App.log.i(App.TAG, "Waiting for break wire.");
-			
 			if (rocket.breakWire.isBroken()) {
 				App.log.i(App.TAG, "Break wire is BROKEN.");
 				breakWireTime = App.elapsedTime();
@@ -108,7 +108,6 @@ public class LaunchObjective implements Objective {
 			}
 			
 			if (delayElapsed > LAUNCH_DELAY_AFTER_BREAKWIRE) {
-				mode = Mode.STANDBY;
 				openFuel(rocket);
 			}
 		}

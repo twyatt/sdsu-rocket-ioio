@@ -3,51 +3,34 @@ package edu.sdsu.rocket.control.devices;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import edu.sdsu.rocket.control.App;
 
 public class DMO063 implements Device {
 
-	public long duration; // milliseconds
+	public float duration; // seconds
 	public boolean value;
 	
 	private DigitalOutput output;
 	private int pin;
 	
-	private Timer timer;
+	private float startTime;
 	
-	public DMO063(int pin, long duration) {
+	public DMO063(int pin, float duration) {
 		this.pin = pin;
 		setIgnitionDuration(duration);
 	}
 	
-	public void setIgnitionDuration(long duration) {
+	public void setIgnitionDuration(float duration) {
 		this.duration = duration;
 	}
 	
-	public void ignite() {
+	public void activate() {
 		value = true;
-		
-		if (timer != null) {
-			timer.cancel();
-		}
-		timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				cancel();
-			}
-		}, duration);
+		startTime = App.elapsedTime();
 	}
 	
-	public void cancel() {
+	public void deactivate() {
 		value = false;
-		
-		if (timer != null) {
-			timer.cancel();
-			timer = null;
-		}
 	}
 
 	/**
@@ -61,6 +44,11 @@ public class DMO063 implements Device {
 	
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
+		float elapsed = App.elapsedTime() - startTime;
+		if (elapsed > duration) {
+			value = false;
+		}
+		
 		output.write(value);
 	}
 	

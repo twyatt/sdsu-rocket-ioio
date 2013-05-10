@@ -79,8 +79,8 @@ public class Rocket {
 		 * DMO063 #1 DC Load - = Screw-down Connector #4 Port #2
 		 */
 		
-		ignitor = new DMO063(19 /* pin */, 3000L /* duration (milliseconds) */);
-		fuelValve = new DMO063(20 /* pin */, 10000L /* duration (milliseconds) */);
+		ignitor = new DMO063(19 /* pin */, 3.0f /* duration (seconds) */);
+		fuelValve = new DMO063(20 /* pin */, 10.0f /* duration (seconds) */);
 		breakWire = new BreakWire(9 /* pin */);
 		
 		// FIXME calibrate
