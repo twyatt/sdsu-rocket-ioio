@@ -108,8 +108,14 @@ public class ConnectActivity extends Activity {
 		setupActionBar();
 
 		hostView = (EditText)findViewById(R.id.host);
+		if (App.host != null) {
+			hostView.setText(App.host);
+		}
 		
 		keyView = (EditText)findViewById(R.id.key);
+		if (App.key != null) {
+			keyView.setText(App.key);
+		}
 		keyView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			@Override
 			public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -181,7 +187,8 @@ public class ConnectActivity extends Activity {
 		}
 		
 		// store values at the time of the login attempt
-		String host = hostView.getText().toString();
+		App.host = hostView.getText().toString();
+		App.key = hostView.getText().toString();
 		
 		// reset errors
 		hostView.setError(null);
@@ -197,7 +204,7 @@ public class ConnectActivity extends Activity {
 			// connect task
 			connectStatusMessageView.setText(R.string.connect_progress_connecting);
 			
-			connectTask = new ConnectTask(client, host, Network.TCP_PORT, Network.UDP_PORT);
+			connectTask = new ConnectTask(client, App.host, Network.TCP_PORT, Network.UDP_PORT);
 			connectTask.execute(Integer.valueOf(DISCOVER_HOST_TIMEOUT));
 		}
 		
@@ -303,6 +310,21 @@ public class ConnectActivity extends Activity {
 			this.udpPort = udpPort;
 		}
 		
+		/**
+		 * Be sure not to call this from the main thread (Android API > 10
+		 * throws exception when performing network on main thread).
+		 */
+		private void authenticate() {
+			connectStatusMessageView.setText(R.string.connect_progress_authenticating);
+			AuthenticationRequest request = new AuthenticationRequest();
+			request.key = App.key;
+			client.sendTCP(request);
+		}
+		
+		/*
+		 * AsyncTask methods.
+		 */
+		
 		@Override
 		protected Boolean doInBackground(Integer... params) {
 			if (params != null) {
@@ -310,6 +332,9 @@ public class ConnectActivity extends Activity {
 				
 				try {
 					client.connect(timeout, host, tcpPort, udpPort);
+					if (client.isConnected()) {
+						authenticate();
+					}
 					return true;
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -319,6 +344,7 @@ public class ConnectActivity extends Activity {
 			
 			return false;
 		}
+
 
 		@Override
 		protected void onPostExecute(final Boolean success) {
@@ -343,15 +369,7 @@ public class ConnectActivity extends Activity {
 			connectTask = null;
 			showProgress(false);
 		}
-	}
-
-	public void authenticate() {
-		// FIXME crashes on Android API > 10 because network on main thread
-		connectStatusMessageView.setText(R.string.connect_progress_authenticating);
 		
-		AuthenticationRequest request = new AuthenticationRequest();
-		request.key = keyView.getText().toString();
-		client.sendTCP(request);
 	}
 	
 }

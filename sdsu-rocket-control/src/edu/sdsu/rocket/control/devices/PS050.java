@@ -31,37 +31,13 @@ public class PS050 implements Device {
 		this.pwmFrequency = pwmFrequency;
 	}
 	
-	@Override
-	public void setup(IOIO ioio) throws ConnectionLostException {
-		this.ioio = ioio;
-	}
-
-	@Override
-	public void loop() throws ConnectionLostException, InterruptedException {
-		if (App.elapsedTime() - lastActionTime > ACTION_DURATION) {
-			if (pwm != null) {
-				pwm.close();
-				pwm = null;
-			}
-		} else {
-			if (pwm == null) {
-				pwm = ioio.openPwmOutput(new DigitalOutput.Spec(pwmPin, Mode.OPEN_DRAIN), pwmFrequency);
-			}
-			pwm.setPulseWidth(pulseWidth);
-		}
-	}
-	
 	public void open() {
 		setPositionPercent(90);
-//		pulseWidth = 500 + 200;
-		
 		lastActionTime = App.elapsedTime();
 	}
 	
 	public void close() {
 		setPositionPercent(10);
-//		pulseWidth = 500 + 1000 - 200;
-		
 		lastActionTime = App.elapsedTime();
 	}
 	
@@ -86,6 +62,26 @@ public class PS050 implements Device {
 	/*
 	 * Device interface methods.
 	 */
+	
+	@Override
+	public void setup(IOIO ioio) throws ConnectionLostException {
+		this.ioio = ioio;
+	}
+	
+	@Override
+	public void loop() throws ConnectionLostException, InterruptedException {
+		if (App.elapsedTime() - lastActionTime > ACTION_DURATION) {
+			if (pwm != null) {
+				pwm.close();
+				pwm = null;
+			}
+		} else {
+			if (pwm == null) {
+				pwm = ioio.openPwmOutput(new DigitalOutput.Spec(pwmPin, Mode.OPEN_DRAIN), pwmFrequency);
+			}
+			pwm.setPulseWidth(pulseWidth);
+		}
+	}
 	
 	@Override
 	public String info() {

@@ -5,14 +5,25 @@ import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.IOIOLooper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.sdsu.rocket.control.devices.Device;
-import edu.sdsu.rocket.control.devices.DeviceThread;
+import edu.sdsu.rocket.control.devices.DeviceRunnable;
 
 public class DeviceManager implements IOIOLooper {
 	
-	private ArrayList<Device> devices = new ArrayList<Device>();
-	private ArrayList<DeviceThread> threads = new ArrayList<DeviceThread>();
+	public interface DeviceManagerListener {
+		public void incompatible();
+		public void connected(IOIO ioio);
+		public void disconnected();
+	}
+	
+	private DeviceManagerListener listener;
+	
+	private List<Device> devices = new ArrayList<Device>();
+	private List<DeviceRunnable> runnables = new ArrayList<DeviceRunnable>();
+	
+	private List<Thread> threads = new ArrayList<Thread>();
 	
 	/**
 	 * Sleep duration between IOIO thread loops (milliseconds).
@@ -26,6 +37,10 @@ public class DeviceManager implements IOIOLooper {
 	 */
 	public DeviceManager(int threadSleep) {
 		this.sleep = threadSleep;
+	}
+	
+	public void setListener(DeviceManagerListener listener) {
+		this.listener = listener;
 	}
 	
 	/**
@@ -43,9 +58,9 @@ public class DeviceManager implements IOIOLooper {
 	 * 
 	 * @param device
 	 */
-	public void add(DeviceThread thread) {
-		App.log.i(App.TAG, "Device manager adding thread for device: " + thread.device.info());
-		threads.add(thread);
+	public void add(DeviceRunnable runnable) {
+		App.log.i(App.TAG, "Device manager adding runnable for device: " + runnable.device.info());
+		runnables.add(runnable);
 	}
 	
 	/**
@@ -55,62 +70,63 @@ public class DeviceManager implements IOIOLooper {
 	@Override
 	public void incompatible() {
 		App.log.i(App.TAG, "IOIO incompatible");
+		
+		if (listener != null) {
+			listener.incompatible();
+		}
 	}
 
 	@Override
-	public void setup(IOIO ioio) {
+	public void setup(IOIO ioio) throws ConnectionLostException, InterruptedException {
 		App.log.i(App.TAG, "IOIO setup");
 		
-		try {
-			for (Device device : devices) {
-				App.log.i(App.TAG, "Setting up device: " + device.info());
-				device.setup(ioio);
-			}
-			for (DeviceThread thread : threads) {
-				App.log.i(App.TAG, "Setting up device: " + thread.device.info());
-				thread.device.setup(ioio);
-			}
-		} catch (ConnectionLostException e) {
-			e.printStackTrace();
-			App.log.i(App.TAG, "Connection lost with IOIO during setup");
-			return;
+		if (listener != null) {
+			listener.connected(ioio);
 		}
 		
-		for (DeviceThread thread : threads) {
-			App.log.i(App.TAG, "Starting thread for device: " + thread.device.info());
+		for (Device device : devices) {
+			App.log.i(App.TAG, "Setting up device: " + device.info());
+			device.setup(ioio);
+		}
+		for (DeviceRunnable runnable : runnables) {
+			App.log.i(App.TAG, "Setting up threaded device: " + runnable.device.info());
+			runnable.device.setup(ioio);
+		}
+		
+		for (DeviceRunnable runnable : runnables) {
+			App.log.i(App.TAG, "Starting thread for device: " + runnable.device.info());
+			Thread thread = new Thread(runnable);
+			threads.add(thread);
 			thread.start();
 		}
 	}
 	
 	@Override
-	public void loop() {
-		try {
-			for (Device device : devices) {
-				device.loop();
-			}
-		} catch (ConnectionLostException e) {
-			e.printStackTrace();
-			App.log.i(App.TAG, "Connection lost with IOIO during loop");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			App.log.i(App.TAG, "Interrupted exception during IOIO loop");
+	public void loop() throws ConnectionLostException, InterruptedException {
+		for (Device device : devices) {
+			device.loop();
 		}
 		
-		try {
-			Thread.sleep(sleep);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			App.log.i(App.TAG, "Thread sleep exception during IOIO loop");
-		}
+		Thread.sleep(sleep);
 	}
 	
 	@Override
 	public void disconnected() {
 		App.log.i(App.TAG, "IOIO disconnected");
 		
-		for (DeviceThread thread : threads) {
-			thread.close();
+		if (listener != null) {
+			listener.disconnected();
 		}
+		
+		for (Thread thread : threads) {
+			thread.interrupt();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		threads.clear();
 	}
 
 }

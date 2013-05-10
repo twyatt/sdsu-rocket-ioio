@@ -66,12 +66,12 @@ public class ObjectiveController implements Runnable {
 	}
 	
 	/*
-	 * Thread interface methods.
+	 * Runnable interface methods.
 	 */
 	
 	@Override
 	public void run() {
-		while (true) {
+		while (!Thread.currentThread().isInterrupted()) {
 			if (active != null) {
 				active.loop(rocket);
 			}
@@ -79,22 +79,9 @@ public class ObjectiveController implements Runnable {
 			try {
 				Thread.sleep(sleep);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-				// TODO return; here?
 			}
 		}
 	}
-//	
-//	public void close() {
-//		interrupt();
-//		
-//		try {
-//			join();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
 	
 }
