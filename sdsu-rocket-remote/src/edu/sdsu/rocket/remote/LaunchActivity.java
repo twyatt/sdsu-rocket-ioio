@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.Build;
 
 public class LaunchActivity extends Activity {
@@ -38,11 +39,16 @@ public class LaunchActivity extends Activity {
 					onSetObjectiveResponse(response);
 				}
 			}
+			@Override
+			public void disconnected(Connection connection) {
+				Intent intent = new Intent(LaunchActivity.this, ConnectActivity.class);
+				startActivity(intent);
+			}
 		};
 		client.addListener(clientListener);
 		
 		SetObjectiveRequest setObjectiveRequest = new SetObjectiveRequest();
-		setObjectiveRequest.name = "launch";
+		setObjectiveRequest.name = Network.LAUNCH_OBJECTIVE;
 		client.sendTCP(setObjectiveRequest);
 	}
 	

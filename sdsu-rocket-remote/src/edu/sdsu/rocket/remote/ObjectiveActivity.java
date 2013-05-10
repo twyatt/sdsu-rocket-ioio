@@ -10,6 +10,7 @@ import com.esotericsoftware.kryonet.Listener;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -75,6 +76,11 @@ public class ObjectiveActivity extends Activity {
 					SetObjectiveResponse response = (SetObjectiveResponse)object;
 					onSetObjectiveResponse(response);
 				}
+			}
+			@Override
+			public void disconnected(Connection connection) {
+				Intent intent = new Intent(ObjectiveActivity.this, ConnectActivity.class);
+				startActivity(intent);
 			}
 		};
 		client.addListener(clientListener);

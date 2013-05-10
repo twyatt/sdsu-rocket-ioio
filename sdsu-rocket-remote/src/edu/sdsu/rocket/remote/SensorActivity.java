@@ -2,6 +2,7 @@ package edu.sdsu.rocket.remote;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -41,6 +42,11 @@ public class SensorActivity extends Activity {
 					SensorResponse response = (SensorResponse)object;
 					onSensorResponse(response);
 				}
+			}
+			@Override
+			public void disconnected(Connection connection) {
+				Intent intent = new Intent(SensorActivity.this, ConnectActivity.class);
+				startActivity(intent);
 			}
 		};
 		client.addListener(clientListener);
