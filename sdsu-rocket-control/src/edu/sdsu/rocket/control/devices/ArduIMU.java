@@ -48,7 +48,13 @@ public class ArduIMU implements Device {
 	
 	@Override
 	public void setup(IOIO ioio) throws ConnectionLostException {
-		uart = ioio.openUart(rxPin /* RX pin */, IOIO.INVALID_PIN /* TX pin */, 38400 /* baud */, Parity.NONE /* parity */, StopBits.ONE /* stopbits */);
+		uart = ioio.openUart(
+			rxPin /* RX pin */,
+			IOIO.INVALID_PIN /* TX pin */,
+			38400 /* baud */,
+			Parity.NONE /* parity */,
+			StopBits.ONE /* stopbits */
+		);
 		in = uart.getInputStream();
 	}
 

@@ -278,6 +278,7 @@ public class ConnectActivity extends Activity {
 
 			if (address != null) {
 				// found host, so we'll connect to it
+				// FIXME crashes on Android API > 10: NetworkOnMainThread exception
 				hostView.setText(address.getHostName());
 				attemptConnect();
 			} else {

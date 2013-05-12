@@ -79,15 +79,17 @@ public class Rocket {
 		 * DMO063 #1 DC Load - = Screw-down Connector #4 Port #2
 		 */
 		
-		ignitor = new DMO063(19 /* pin */, 3.0f /* duration (seconds) */);
+		// solid state relay on pin 19 seems to have failed
+//		ignitor = new DMO063(19 /* pin */, 3.0f /* duration (seconds) */);
+		ignitor = new DMO063(21 /* pin */, 3.0f /* duration (seconds) */);
 		fuelValve = new DMO063(20 /* pin */, 10.0f /* duration (seconds) */);
 		breakWire = new BreakWire(9 /* pin */);
 		
-		// FIXME calibrate
 		// max voltage for analog input = 3.3V
-		tankPressureLOX     = new P51500AA1365V(41 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
-		tankPressureEthanol = new P51500AA1365V(42 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
-		tankPressureEngine  = new P51500AA1365V(43 /* pin */, 175.94f /* slope */, -149.6f /* bias */);
+		// calibrated May 12, 2013
+		tankPressureLOX     = new P51500AA1365V(41 /* pin */, 179.0827f /* slope */, -145.268f /* bias */);
+		tankPressureEthanol = new P51500AA1365V(42 /* pin */, 181.8296f /* slope */, -144.22f /* bias */);
+		tankPressureEngine  = new P51500AA1365V(43 /* pin */, 179.7781f /* slope */, -140.324f /* bias */);
 		
 		servoLOX = new PS050(13 /* pin */, 100 /* frequency */);
 		servoEthanol = new PS050(14 /* pin */, 100 /* frequency */);
