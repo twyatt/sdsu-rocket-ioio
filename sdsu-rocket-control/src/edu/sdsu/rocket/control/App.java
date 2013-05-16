@@ -19,6 +19,15 @@ public class App {
 	public static ObjectiveController objective;
 
 	private static long startTime;
+
+	private static long instanceId = 0;
+	
+	public static long getInstanceId() {
+		if (instanceId == 0) {
+			instanceId = System.currentTimeMillis();
+		}
+		return instanceId;
+	}
 	
 	public static void start() {
 		startTime = getNanoTime();

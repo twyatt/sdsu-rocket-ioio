@@ -22,14 +22,16 @@ public class DataLogger {
 
 	private static boolean LOG = false;
 	
-	private static final String IMU = "imu";
-	private static final String BAROMETER1 = "baro1";
-	private static final String BAROMETER2 = "baro2";
-	private static final String ENGINE_PRESSURE = "eng";
-	private static final String LOX_PRESSURE = "lox";
-	private static final String ETHANOL_PRESSURE = "eth";
-	private static final String ACCELEROMETER = "accel";
+	public static final String STATUS = "status";
+	public static final String IMU = "imu";
+	public static final String BAROMETER1 = "baro1";
+	public static final String BAROMETER2 = "baro2";
+	public static final String ENGINE_PRESSURE = "eng";
+	public static final String LOX_PRESSURE = "lox";
+	public static final String ETHANOL_PRESSURE = "eth";
+	public static final String ACCELEROMETER = "accel";
 	
+	private static final int STATUS_BUFFER_SIZE = 1024;
 	private static final int BAROMETER_BUFFER_SIZE = 512;
 	private static final int PRESSURE_BUFFER_SIZE = 512;
 	private static final int IMU_BUFFER_SIZE = 2048;
@@ -46,6 +48,8 @@ public class DataLogger {
 	}
 	
 	public void setup() {
+		makeStream(STATUS, STATUS_BUFFER_SIZE);
+		
 		makeStream(BAROMETER1, BAROMETER_BUFFER_SIZE);
 		rocket.barometer1.setListener(new BMP085.BMP085Listener() {
 			@Override
@@ -216,6 +220,7 @@ public class DataLogger {
 					} else {
 						try {
 							stream.writeFloat(App.elapsedTime());
+							stream.writeInt(values.length());
 							stream.writeChars(values);
 						} catch (IOException e) {
 							App.log.e(App.TAG, "Failed to write " + IMU + " values to output stream.");
@@ -262,11 +267,30 @@ public class DataLogger {
 	}
 	
 	public void enable() {
+		logTime();
+		
 		enabled = true;
 		rocket.accelerometer.start();
 		App.log.i(App.TAG, "Enabled data logging.");
 	}
 	
+	private void logTime() {
+		DataOutputStream stream = out.get(STATUS);
+		
+		if (stream == null) {
+			App.log.e(App.TAG, "Output stream not available for " + STATUS + ".");
+		} else {
+			try {
+				stream.writeLong(System.currentTimeMillis());
+				stream.writeFloat(App.elapsedTime());
+			} catch (IOException e) {
+				App.log.e(App.TAG, "Failed to write " + STATUS + " values to output stream.");
+				e.printStackTrace();
+				return;
+			}
+		}
+	}
+
 	public void disable() {
 		enabled = false;
 		rocket.accelerometer.stop();
@@ -296,8 +320,17 @@ public class DataLogger {
 	}
 	
 	private DataOutputStream makeStream(String name, int bufferSize) {
+		// FIXME /mnt/sdcard/sd_external for Galaxy S2
 		File sd = Environment.getExternalStorageDirectory();
-		File file = new File(sd, name + "-" + App.getNanoTime() + ".sensor");
+		File path = new File(sd, "sensors");
+		File file;
+		if (path.isDirectory() || path.mkdirs()) {
+			file = new File(path, name + "-" + App.getInstanceId() + ".sensor");
+		} else {
+			// failed to create dir, just use the SD root
+			file = new File(sd, name + "-" + App.getInstanceId() + ".sensor");
+		}
+		
 		App.log.i(App.TAG, "Making output stream for: " + file.getAbsolutePath());
 		BufferedOutputStream stream = null;
 		
