@@ -237,6 +237,9 @@ public class MS5611 implements Device {
 	private int TEMP;
 	private long dT;
 	
+	public float pressure;
+	public float temperature;
+	
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
 		// for some reason it does not work using shifts on long variables
@@ -290,11 +293,11 @@ public class MS5611 implements Device {
 		SENS -= sens2;
 		PRES = (int)(((D1 * SENS) / 2097152L /* 2^21 */ - OFF) / 32768L /* 2^15 */);
 
-		float pressure = (float)PRES / 100f; // mbar
-		float temperature = (float)TEMP / 100f; // degrees C
+		pressure = (float)PRES / 100f; // mbar
+		temperature = (float)TEMP / 100f; // degrees C
 		
 		if (listener != null) {
-			listener.onMS5611Values(pressure, temperature);
+			listener.onMS5611Values(pressure /* mbar */, temperature /* C */);
 		}
 
 		loop_count++;

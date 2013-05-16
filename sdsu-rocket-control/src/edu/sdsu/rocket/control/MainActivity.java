@@ -10,7 +10,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
@@ -24,7 +23,6 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import edu.sdsu.rocket.Network;
-import edu.sdsu.rocket.control.devices.DeviceRunnable;
 import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.control.network.RemoteCommandController;
 import edu.sdsu.rocket.control.objectives.FillTanksObjective;
@@ -84,7 +82,8 @@ public class MainActivity extends IOIOActivity {
 			}
 		});
 		
-		setupDevices(App.rocket);
+		SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		App.rocket.setupDevices(deviceManager, sensorManager);
 		setupObjectives(App.rocket);
 		setupRemoteCommand(App.objective);
 	}
@@ -150,46 +149,6 @@ public class MainActivity extends IOIOActivity {
 		
 		String ip = getIpAddr();
 		updateTextView(serverStatusTextView, "tcp://" + ip + ":" + tcpPort + "\nudp://" + ip + ":" + udpPort);
-	}
-
-	private void setupDevices(Rocket rocket) {
-		SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		rocket.accelerometer.setDataSource(sensorManager, accelerometer);
-		
-		deviceManager.add(rocket.ignitor);
-		deviceManager.add(rocket.fuelValve);
-		deviceManager.add(rocket.breakWire);
-		
-		deviceManager.add(
-			new DeviceRunnable(rocket.tankPressureLOX)
-				.setThreadSleep(500)
-		);
-		deviceManager.add(
-			new DeviceRunnable(rocket.tankPressureEthanol)
-				.setThreadSleep(500)
-		);
-		deviceManager.add(
-			new DeviceRunnable(rocket.tankPressureEngine)
-				.setThreadSleep(500)
-		);
-		
-		deviceManager.add(rocket.servoLOX);
-		deviceManager.add(rocket.servoEthanol);
-		
-		deviceManager.add(
-			new DeviceRunnable(rocket.barometer1)
-				.setThreadSleep(200 /* milliseconds */)
-		);
-		deviceManager.add(
-			new DeviceRunnable(rocket.barometer2)
-				.setThreadSleep(200 /* milliseconds */)
-		);
-		
-		deviceManager.add(
-			new DeviceRunnable(rocket.imu)
-				.setThreadFrequency(8 /* Hz */)
-		);
 	}
 
 	@Override

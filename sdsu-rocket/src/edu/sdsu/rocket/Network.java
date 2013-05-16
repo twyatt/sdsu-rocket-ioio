@@ -85,11 +85,20 @@ public class Network {
 	static public class SensorResponse {
 		public float loxTransducerVoltage;
 		public float loxTransducerPressure;
+		
 		public float ethanolTransducerVoltage;
 		public float ethanolTransducerPressure;
+		
 		public float engineTransducerVoltage;
 		public float engineTransducerPressure;
+		
 		public boolean breakWireIsBroken;
+		
+		public int barometer1Pressure;
+		public double barometer1Temperature;
+		
+		public float barometer2Pressure;
+		public float barometer2Temperature;
 	}
 	
 }

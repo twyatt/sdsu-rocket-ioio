@@ -55,4 +55,22 @@
         android:text="Break wire status unknown"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
+    <TextView
+        android:id="@+id/baro1Reading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/breakWire"
+        android:layout_below="@+id/breakWire"
+        android:text="Barometer 1"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/baro2Reading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/baro1Reading"
+        android:layout_below="@+id/baro1Reading"
+        android:text="Barometer 2"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </RelativeLayout>

@@ -1,17 +1,26 @@
 package edu.sdsu.rocket.control.models;
 
+import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import edu.sdsu.rocket.control.DeviceManager;
 import edu.sdsu.rocket.control.devices.ArduIMU;
 import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.BreakWire;
 import edu.sdsu.rocket.control.devices.DMO063;
-import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
+import edu.sdsu.rocket.control.devices.DeviceRunnable;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.PS050;
+import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
 
 public class Rocket {
 
+	public enum SensorPriority {
+		SENSOR_PRIORITY_LOW,
+		SENSOR_PRIORITY_MEDIUM,
+		SENSOR_PRIORITY_HIGH,
+	}
+	
 	public DMO063 ignitor;
 	public BreakWire breakWire;
 	public DMO063 fuelValve;
@@ -29,6 +38,13 @@ public class Rocket {
 	public ArduIMU imu;
 	
 	public PhoneAccelerometer accelerometer;
+	
+	public DeviceRunnable tankPressureLOXRunnable;
+	public DeviceRunnable tankPressureEthanolRunnable;
+	public DeviceRunnable tankPressureEngineRunnable;
+	public DeviceRunnable barometer1Runnable;
+	public DeviceRunnable barometer2Runnable;
+	public DeviceRunnable imuRunnable;
 	
 	public Rocket() {
 		/*
@@ -81,6 +97,7 @@ public class Rocket {
 		
 		// solid state relay on pin 19 seems to have failed
 //		ignitor = new DMO063(19 /* pin */, 3.0f /* duration (seconds) */);
+		
 		ignitor = new DMO063(21 /* pin */, 3.0f /* duration (seconds) */);
 		fuelValve = new DMO063(20 /* pin */, 10.0f /* duration (seconds) */);
 		breakWire = new BreakWire(9 /* pin */);
@@ -94,10 +111,9 @@ public class Rocket {
 		servoLOX = new PS050(13 /* pin */, 100 /* frequency */);
 		servoEthanol = new PS050(14 /* pin */, 100 /* frequency */);
 		
-		// TODO test oversampling of 3 (max)
 		// twiNum 0 = pin 4 (SDA) and 5 (SCL)
 		// VCC = 3.3V
-		barometer1 = new BMP085(0 /* twiNum */, 3 /* eocPin */, 0 /* oversampling */);
+		barometer1 = new BMP085(0 /* twiNum */, 3 /* eocPin */, 3 /* oversampling */);
 		
 		// twiNum 1 = pin 1 (SDA) and 2 (SCL)
 		// VCC = 3.3V
@@ -111,6 +127,61 @@ public class Rocket {
 		
 		accelerometer = new PhoneAccelerometer(SensorManager.SENSOR_DELAY_FASTEST);
 		
+	}
+	
+	public void setupDevices(DeviceManager deviceManager, SensorManager sensorManager) {
+		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		accelerometer.setDataSource(sensorManager, accelerometerSensor);
+		
+		deviceManager.add(ignitor);
+		deviceManager.add(fuelValve);
+		deviceManager.add(breakWire);
+		
+		tankPressureLOXRunnable = new DeviceRunnable(tankPressureLOX);
+		deviceManager.add(tankPressureLOXRunnable);
+		
+		tankPressureEthanolRunnable = new DeviceRunnable(tankPressureEthanol);
+		deviceManager.add(tankPressureEthanolRunnable);
+		
+		tankPressureEngineRunnable = new DeviceRunnable(tankPressureEngine);
+		deviceManager.add(tankPressureEngineRunnable);
+		
+		deviceManager.add(servoLOX);
+		deviceManager.add(servoEthanol);
+		
+		barometer1Runnable = new DeviceRunnable(barometer1);
+		deviceManager.add(barometer1Runnable);
+		
+		barometer2Runnable = new DeviceRunnable(barometer2);
+		deviceManager.add(barometer2Runnable);
+		
+		imuRunnable = new DeviceRunnable(imu);
+		deviceManager.add(imuRunnable);
+	}
+
+	public void setSensorPriority(SensorPriority priority) {
+		if (SensorPriority.SENSOR_PRIORITY_HIGH.equals(priority)) {
+			tankPressureLOXRunnable.setThreadSleep(5 /* milliseconds */);
+			tankPressureEthanolRunnable.setThreadSleep(5 /* milliseconds */);
+			tankPressureEngineRunnable.setThreadSleep(1 /* milliseconds */);
+			barometer1Runnable.setThreadSleep(1 /* milliseconds */);
+			barometer2Runnable.setThreadSleep(1 /* milliseconds */);
+			imuRunnable.setThreadFrequency(8 /* Hz */);
+		} else if (SensorPriority.SENSOR_PRIORITY_MEDIUM.equals(priority)) {
+			tankPressureLOXRunnable.setThreadSleep(50 /* milliseconds */);
+			tankPressureEthanolRunnable.setThreadSleep(50 /* milliseconds */);
+			tankPressureEngineRunnable.setThreadSleep(10 /* milliseconds */);
+			barometer1Runnable.setThreadSleep(10 /* milliseconds */);
+			barometer2Runnable.setThreadSleep(10 /* milliseconds */);
+			imuRunnable.setThreadFrequency(8 /* Hz */);
+		} else { // SENSOR_PRIORITY_LOW
+			tankPressureLOXRunnable.setThreadSleep(500 /* milliseconds */);
+			tankPressureEthanolRunnable.setThreadSleep(500 /* milliseconds */);
+			tankPressureEngineRunnable.setThreadSleep(500 /* milliseconds */);
+			barometer1Runnable.setThreadSleep(200 /* milliseconds */);
+			barometer2Runnable.setThreadSleep(200 /* milliseconds */);
+			imuRunnable.setThreadFrequency(8 /* Hz */);
+		}
 	}
 	
 }

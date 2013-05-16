@@ -78,6 +78,9 @@ public class BMP085 implements Device {
 	 */
 	private int ac5, ac6, mc, md;
 	
+	public int pressure;
+	public double temperature;
+	
 	
 	private static int readU16BE(byte[] data, int offset) {
 		return ((data[offset] & 0xff) << 8) | (data[offset + 1] & 0xff);
@@ -261,14 +264,14 @@ public class BMP085 implements Device {
 	public void loop() throws ConnectionLostException, InterruptedException {
 		readSensor(readTemperature, response, 2);
 		int b5 = getB5(readU16BE(response, 0));
-		double temperature_c = (double)((b5 + 8) >> 4) / 10.0;
+		temperature = (double)((b5 + 8) >> 4) / 10.0;
 
 		readSensor(readPressure, response, 3);
 		int up = readU24BE(response, 0) >> (8 - oversampling);
-		int pressure_pa = getPressure(up, b5);
+		pressure = getPressure(up, b5);
 
 		if (listener != null) {
-			listener.onBMP085Values(pressure_pa, temperature_c);
+			listener.onBMP085Values(pressure /* Pa */, temperature /* C */);
 		}
 	}
 

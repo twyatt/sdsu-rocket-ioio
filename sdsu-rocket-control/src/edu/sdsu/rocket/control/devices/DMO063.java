@@ -31,6 +31,18 @@ public class DMO063 implements Device {
 	
 	public void deactivate() {
 		value = false;
+		
+		if (output != null) {
+			/*
+			 * Since deactivating the DMO063 for the fuel valves is very
+			 * important we will try to write to the output right away.
+			 */
+			try {
+				output.write(value);
+			} catch (ConnectionLostException e) {
+//				e.printStackTrace();
+			}
+		}
 	}
 
 	/**

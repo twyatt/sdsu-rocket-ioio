@@ -3,6 +3,7 @@ package edu.sdsu.rocket.control.objectives;
 import edu.sdsu.rocket.Network;
 import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.control.models.Rocket;
+import edu.sdsu.rocket.control.models.Rocket.SensorPriority;
 
 public class LaunchObjective implements Objective {
 
@@ -56,6 +57,10 @@ public class LaunchObjective implements Objective {
 	
 	public void abortLaunch(Rocket rocket) {
 		rocket.fuelValve.deactivate();
+		rocket.servoLOX.open();
+		rocket.servoEthanol.open();
+		App.log.i(App.TAG, "Closing fuel valves and opening tank vents!");
+		
 		mode = Mode.STANDBY;
 		App.data.disable();
 		
@@ -76,7 +81,8 @@ public class LaunchObjective implements Objective {
 	
 	@Override
 	public void start(Rocket rocket) {
-		
+		App.log.i(App.TAG, "Setting sensor priority to low.");
+		rocket.setSensorPriority(SensorPriority.SENSOR_PRIORITY_LOW);
 	}
 
 	@Override

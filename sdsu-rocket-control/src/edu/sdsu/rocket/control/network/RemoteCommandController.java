@@ -125,13 +125,24 @@ public class RemoteCommandController {
 		
 		if (rocket != null) {
 			SensorResponse response = new SensorResponse();
+			
 			response.loxTransducerVoltage = rocket.tankPressureLOX.voltage;
 			response.loxTransducerPressure = rocket.tankPressureLOX.getPressure();
+			
 			response.engineTransducerVoltage = rocket.tankPressureEngine.voltage;
 			response.engineTransducerPressure = rocket.tankPressureEngine.getPressure();
+			
 			response.ethanolTransducerVoltage = rocket.tankPressureEthanol.voltage;
 			response.ethanolTransducerPressure = rocket.tankPressureEthanol.getPressure();
+			
+			response.barometer1Pressure = rocket.barometer1.pressure;
+			response.barometer1Temperature = rocket.barometer1.temperature;
+			
+			response.barometer2Pressure = rocket.barometer2.pressure;
+			response.barometer2Temperature = rocket.barometer2.temperature;
+			
 			response.breakWireIsBroken = rocket.breakWire.isBroken();
+			
 			connection.sendUDP(response);
 		}
 	}
@@ -141,9 +152,14 @@ public class RemoteCommandController {
 			objectiveController.command(command.command);
 			
 			if (Network.ABORT_COMMAND.equals(command.command)) {
-				// allow the abort command to close fuel valves no matter what objective is currently active
+				/*
+				 * Allow the abort command to close fuel valves and open tank
+				 * vents no matter what objective is currently active.
+				 */
 				if (App.rocket != null) {
-					App.log.i(App.TAG, "Closing fuel valves!");
+					App.log.i(App.TAG, "Closing fuel valves and opening tank vents!");
+					App.rocket.servoLOX.open();
+					App.rocket.servoEthanol.open();
 					App.rocket.fuelValve.deactivate();
 				}
 				
