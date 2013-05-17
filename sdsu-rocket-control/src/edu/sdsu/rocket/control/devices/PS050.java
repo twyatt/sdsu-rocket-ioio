@@ -37,7 +37,7 @@ public class PS050 implements Device {
 	}
 	
 	public void close() {
-		setPositionPercent(10);
+		setPositionPercent(25);
 		lastActionTime = App.elapsedTime();
 	}
 	
