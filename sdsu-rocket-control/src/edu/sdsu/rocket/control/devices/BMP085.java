@@ -262,13 +262,19 @@ public class BMP085 implements Device {
 	}
 
 	public void loop() throws ConnectionLostException, InterruptedException {
-		readSensor(readTemperature, response, 2);
-		int b5 = getB5(readU16BE(response, 0));
-		temperature = (double)((b5 + 8) >> 4) / 10.0;
-
-		readSensor(readPressure, response, 3);
-		int up = readU24BE(response, 0) >> (8 - oversampling);
-		pressure = getPressure(up, b5);
+		try {
+			readSensor(readTemperature, response, 2);
+			int b5 = getB5(readU16BE(response, 0));
+			temperature = (double)((b5 + 8) >> 4) / 10.0;
+	
+			readSensor(readPressure, response, 3);
+			int up = readU24BE(response, 0) >> (8 - oversampling);
+			pressure = getPressure(up, b5);
+		} catch (ArithmeticException e) {
+			// fuck that's bad, oh well
+			App.log.e(App.TAG, "Divide by zero on BMP085.", e);
+			return;
+		}
 
 		if (listener != null) {
 			listener.onBMP085Values(pressure /* Pa */, temperature /* C */);

@@ -135,11 +135,8 @@ public class RemoteCommandController {
 			response.ethanolTransducerVoltage = rocket.tankPressureEthanol.voltage;
 			response.ethanolTransducerPressure = rocket.tankPressureEthanol.getPressure();
 			
-			response.barometer1Pressure = rocket.barometer1.pressure;
-			response.barometer1Temperature = rocket.barometer1.temperature;
-			
-			response.barometer2Pressure = rocket.barometer2.pressure;
-			response.barometer2Temperature = rocket.barometer2.temperature;
+			response.barometerPressure = rocket.barometer.pressure;
+			response.barometerTemperature = rocket.barometer.temperature;
 			
 			response.breakWireIsBroken = rocket.breakWire.isBroken();
 			

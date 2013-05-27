@@ -22,7 +22,7 @@ public class Main {
 		String[] sensors = {
 			DataLogger.ACCELEROMETER,
 			DataLogger.BAROMETER1,
-			DataLogger.BAROMETER2,
+			DataLogger.BAROMETER,
 			DataLogger.ENGINE_PRESSURE,
 			DataLogger.ETHANOL_PRESSURE,
 			DataLogger.LOX_PRESSURE,
@@ -67,7 +67,7 @@ public class Main {
 				out.write("Timestamp (s),Voltage (V)\n");
 			} else if (DataLogger.BAROMETER1.equals(sensor)) {
 				out.write("Timestamp (s),Pressure (Pa),Temperature (C)\n");
-			} else if (DataLogger.BAROMETER2.equals(sensor)) {
+			} else if (DataLogger.BAROMETER.equals(sensor)) {
 				out.write("Timestamp (s),Pressure (mbar),Temperature (C)\n");
 			}
 		} catch (IOException e) {
@@ -110,7 +110,7 @@ public class Main {
 				} else if (DataLogger.BAROMETER1.equals(sensor)) {
 					values += "," + in.readFloat(); // pressure (Pa)
 					values += "," + in.readDouble(); // temperature (C)
-				} else if (DataLogger.BAROMETER2.equals(sensor)) {
+				} else if (DataLogger.BAROMETER.equals(sensor)) {
 					values += "," + in.readFloat(); // pressure (mbar)
 					values += "," + in.readFloat(); // temperature (C)
 				}

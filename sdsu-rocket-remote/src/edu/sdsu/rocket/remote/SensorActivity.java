@@ -28,8 +28,7 @@ public class SensorActivity extends Activity {
 	private TextView ethanolPressure;
 	private TextView loxPressure;
 	private TextView breakWire;
-	private TextView baro1Reading;
-	private TextView baro2Reading;
+	private TextView baroReading;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +69,7 @@ public class SensorActivity extends Activity {
 				ethanolPressure.setText("Ethanol\nV: " + response.ethanolTransducerVoltage + "\nP: " + response.ethanolTransducerPressure);
 				loxPressure.setText("LOX\nV: " + response.loxTransducerVoltage + "\nP: " + response.loxTransducerPressure);
 				breakWire.setText("Break wire is " + (response.breakWireIsBroken ? "" : "NOT") + " broken.");
-				baro1Reading.setText("Barometer 1\nP: " + response.barometer1Pressure + " Pa\nT: " + response.barometer1Temperature + " C");
-				baro2Reading.setText("Barometer 2\nP: " + response.barometer2Pressure + " mbar\nT: " + response.barometer2Temperature + " C");
+				baroReading.setText("Barometer\nP: " + response.barometerPressure + " mbar\nT: " + response.barometerTemperature + " C");
 			}
 		});
 	}
@@ -83,8 +81,7 @@ public class SensorActivity extends Activity {
 		ethanolPressure = (TextView)findViewById(R.id.ethanolPressure);
 		loxPressure = (TextView)findViewById(R.id.loxPressure);
 		breakWire = (TextView)findViewById(R.id.breakWire);
-		baro1Reading = (TextView)findViewById(R.id.baro1Reading);
-		baro2Reading = (TextView)findViewById(R.id.baro2Reading);
+		baroReading = (TextView)findViewById(R.id.baro2Reading);
 		
 		Button refreshButton = (Button)findViewById(R.id.refresh);
 		refreshButton.setOnClickListener(new View.OnClickListener() {

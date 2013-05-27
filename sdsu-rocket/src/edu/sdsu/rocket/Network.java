@@ -97,8 +97,8 @@ public class Network {
 		public int barometer1Pressure;
 		public double barometer1Temperature;
 		
-		public float barometer2Pressure;
-		public float barometer2Temperature;
+		public float barometerPressure;
+		public float barometerTemperature;
 	}
 	
 }
