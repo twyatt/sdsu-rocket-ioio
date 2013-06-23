@@ -2,6 +2,8 @@ package edu.sdsu.rocket.control;
 
 import edu.sdsu.rocket.control.logging.AndroidLog;
 import edu.sdsu.rocket.control.models.Rocket;
+import edu.sdsu.rocket.control.models.Statistics;
+import edu.sdsu.rocket.control.objectives.ObjectiveController;
 import edu.sdsu.rocket.logging.Logger;
 
 public class App {
@@ -11,12 +13,19 @@ public class App {
 	 * {@link http://developer.android.com/reference/android/util/Log.html}
 	 */
 	public static final String TAG = "SDSURocketControl";
+
+	/**
+	 * When set to false, logging of most exception stack traces will be
+	 * suppressed.
+	 */
+	public static final boolean DEBUG = true;
 	
 	public static Rocket rocket;
 	
 	public static Logger log = new AndroidLog();
-	public static DataLogger data;
+	public static Statistics stats = new Statistics();
 	public static ObjectiveController objective;
+	public static DataLogger data;
 
 	private static long startTime;
 

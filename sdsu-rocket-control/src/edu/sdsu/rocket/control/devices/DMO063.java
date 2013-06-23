@@ -72,5 +72,10 @@ public class DMO063 implements Device {
 	public String info() {
 		return this.getClass().getSimpleName() + ": pin=" + pin;
 	}
+
+	@Override
+	public void disconnected() {
+		// TODO Auto-generated method stub
+	}
 	
 }

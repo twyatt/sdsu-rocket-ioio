@@ -305,4 +305,9 @@ public class MS5611 implements Device {
 		Thread.sleep(sleep_time);
 	}
 
+	@Override
+	public void disconnected() {
+		// TODO Auto-generated method stub
+	}
+
 }

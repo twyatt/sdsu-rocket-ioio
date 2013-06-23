@@ -1,23 +1,51 @@
-package edu.sdsu.rocket.control;
+package edu.sdsu.rocket.control.objectives;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.control.models.Rocket;
-import edu.sdsu.rocket.control.objectives.Objective;
 
-public class ObjectiveController implements Runnable {
+public class ObjectiveController {
 
 	private Rocket rocket;
 	
 	Map<String, Objective> objectives = new HashMap<String, Objective>();
 	private Objective active;
 
-	private long sleep;
+	private Thread thread;
+	private long threadSleep;
 
-	public ObjectiveController(Rocket rocket, int threadSleep) {
+	public ObjectiveController(Rocket rocket, long threadSleep) {
 		this.rocket = rocket;
-		sleep = threadSleep;
+		this.threadSleep = threadSleep;
+	}
+	
+	public boolean start() {
+		if (thread != null) {
+			App.log.e(App.TAG, "Objective controller thread already started.");
+			return false;
+		}
+		
+		thread = new Thread(new ObjectiveControllerRunnable(threadSleep));
+		thread.start();
+		
+		return true;
+	}
+	
+	public void stop() {
+		if (thread == null) {
+			App.log.e(App.TAG, "Unable to stop objective controller thread; thread not started.");
+			return;
+		}
+		
+		thread.interrupt();
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			// ignore
+		}
+		thread = null;
 	}
 	
 	public void add(String name, Objective objective) {
@@ -65,23 +93,28 @@ public class ObjectiveController implements Runnable {
 		}
 	}
 	
-	/*
-	 * Runnable interface methods.
-	 */
-	
-	@Override
-	public void run() {
-		while (!Thread.currentThread().isInterrupted()) {
-			if (active != null) {
-				active.loop(rocket);
-			}
-			
+	public class ObjectiveControllerRunnable implements Runnable {
+		
+		private long sleep;
+		
+		public ObjectiveControllerRunnable(long sleep) {
+			this.sleep = sleep;
+		}
+		
+		@Override
+		public void run() {
 			try {
-				Thread.sleep(sleep);
+				while (!Thread.currentThread().isInterrupted()) {
+					if (active != null) {
+						active.loop(rocket);
+					}
+					Thread.sleep(sleep);
+				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				// thread interrupted
 			}
 		}
+		
 	}
 	
 }

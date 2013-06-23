@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import android.os.Environment;
-import edu.sdsu.rocket.control.devices.ArduIMU;
-import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
@@ -23,9 +21,7 @@ public class DataLogger {
 	private static boolean LOG = false;
 	
 	public static final String STATUS = "status";
-	public static final String IMU = "imu";
-	public static final String BAROMETER1 = "baro1";
-	public static final String BAROMETER2 = "baro2";
+	public static final String BAROMETER = "baro";
 	public static final String ENGINE_PRESSURE = "eng";
 	public static final String LOX_PRESSURE = "lox";
 	public static final String ETHANOL_PRESSURE = "eth";
@@ -34,7 +30,6 @@ public class DataLogger {
 	private static final int STATUS_BUFFER_SIZE = 1024;
 	private static final int BAROMETER_BUFFER_SIZE = 512;
 	private static final int PRESSURE_BUFFER_SIZE = 512;
-	private static final int IMU_BUFFER_SIZE = 2048;
 	private static final int ACCELEROMETER_BUFFER_SIZE = 512;
 	
 	private boolean enabled;
@@ -47,59 +42,29 @@ public class DataLogger {
 		setup();
 	}
 	
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
 	public void setup() {
 		makeStream(STATUS, STATUS_BUFFER_SIZE);
 		
-		makeStream(BAROMETER1, BAROMETER_BUFFER_SIZE);
-		rocket.barometer1.setListener(new BMP085.BMP085Listener() {
-			@Override
-			public void onBMP085Values(float pressure /* Pa */, double temperature /* C */) {
-				if (enabled) {
-					DataOutputStream stream = out.get(BAROMETER1);
-					
-					if (stream == null) {
-						App.log.e(App.TAG, "Output stream not available for " + BAROMETER1 + ".");
-					} else {
-						try {
-							stream.writeFloat(App.elapsedTime());
-							stream.writeFloat(pressure);
-							stream.writeDouble(temperature);
-						} catch (IOException e) {
-							App.log.e(App.TAG, "Failed to write " + BAROMETER1 + " values to output stream.");
-							e.printStackTrace();
-							return;
-						}
-					}
-				}
-				
-				if (LOG) {
-					App.log.i(App.TAG, BAROMETER1 + " = P: " + pressure + " Pa, T: " + temperature + " C");
-					
-					float alt = BMP085.altitude(pressure, BMP085.p0);
-					alt = Units.convertMetersToFeet(alt);
-					double temp = Units.convertCelsiusToFahrenheit(temperature);
-					
-					App.log.i(App.TAG, BAROMETER1 + " = A: " + alt + " ft, T: " + temp + " F");
-				}
-			}
-		});
-		
-		makeStream(BAROMETER2, BAROMETER_BUFFER_SIZE);
-		rocket.barometer2.setListener(new MS5611.MS5611Listener() {
+		makeStream(BAROMETER, BAROMETER_BUFFER_SIZE);
+		rocket.barometer.setListener(new MS5611.MS5611Listener() {
 			@Override
 			public void onMS5611Values(float pressure /* mbar */, float temperature /* C */) {
 				if (enabled) {
-					DataOutputStream stream = out.get(BAROMETER2);
+					DataOutputStream stream = out.get(BAROMETER);
 					
 					if (stream == null) {
-						App.log.e(App.TAG, "Output stream not available for " + BAROMETER2 + ".");
+						App.log.e(App.TAG, "Output stream not available for " + BAROMETER + ".");
 					} else {
 						try {
 							stream.writeFloat(App.elapsedTime());
 							stream.writeFloat(pressure);
 							stream.writeFloat(temperature);
 						} catch (IOException e) {
-							App.log.e(App.TAG, "Failed to write " + BAROMETER2 + " values to output stream.");
+							App.log.e(App.TAG, "Failed to write " + BAROMETER + " values to output stream.");
 							e.printStackTrace();
 							return;
 						}
@@ -107,7 +72,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, BAROMETER2 + " = P: " + pressure + " mbar, T: " + temperature + " C");
+					App.log.i(App.TAG, BAROMETER + " = P: " + pressure + " mbar, T: " + temperature + " C");
 					
 					float temperatureK = temperature + 273.15f; // C -> K
 					double tempF = Units.convertCelsiusToFahrenheit(temperature);
@@ -122,7 +87,7 @@ public class DataLogger {
 //					float altitude = 145442.156f * (1f - (float)Math.pow((pressure / Psl) / (temperature / Tsl), b));
 					float altitude = (((float)Math.pow(Psl / pressure, 1f/5.257f) - 1f) * temperatureK) / 0.0065f;
 					
-					App.log.i(App.TAG, BAROMETER2 + " = A: " + altitude + " ft, T: " + tempF + " F");
+					App.log.i(App.TAG, BAROMETER + " = A: " + altitude + " ft, T: " + tempF + " F");
 				}
 			}
 		});
@@ -208,34 +173,6 @@ public class DataLogger {
 			}
 		});
 		
-		makeStream(IMU, IMU_BUFFER_SIZE);
-		rocket.imu.setListener(new ArduIMU.ArduIMUListener() {
-			@Override
-			public void onArduIMUValues(String values) {
-				if (enabled) {
-					DataOutputStream stream = out.get(IMU);
-					
-					if (stream == null) {
-						App.log.e(App.TAG, "Output stream not available for " + IMU + ".");
-					} else {
-						try {
-							stream.writeFloat(App.elapsedTime());
-							stream.writeInt(values.length());
-							stream.writeChars(values);
-						} catch (IOException e) {
-							App.log.e(App.TAG, "Failed to write " + IMU + " values to output stream.");
-							e.printStackTrace();
-							return;
-						}
-					}
-				}
-				
-				if (LOG) {
-					App.log.i(App.TAG, IMU + " = " + values);
-				}
-			}
-		});
-		
 		makeStream(ACCELEROMETER, ACCELEROMETER_BUFFER_SIZE);
 		rocket.accelerometer.setListener(new PhoneAccelerometer.PhoneAccelerometerListener() {
 			@Override
@@ -317,6 +254,13 @@ public class DataLogger {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void reset() {
+		disable();
+		close();
+		setup();
+		enable();
 	}
 	
 	private DataOutputStream makeStream(String name, int bufferSize) {

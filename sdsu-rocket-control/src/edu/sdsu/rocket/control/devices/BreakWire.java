@@ -34,4 +34,9 @@ public class BreakWire implements Device {
 		return this.getClass().getSimpleName() + ": pin=" + pin;
 	}
 
+	@Override
+	public void disconnected() {
+		// TODO Auto-generated method stub
+	}
+
 }

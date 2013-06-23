@@ -1,10 +1,10 @@
 package edu.sdsu.rocket.control.models;
 
+import ioio.lib.api.Uart.Parity;
+import ioio.lib.api.Uart.StopBits;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import edu.sdsu.rocket.control.DeviceManager;
-import edu.sdsu.rocket.control.devices.ArduIMU;
-import edu.sdsu.rocket.control.devices.BMP085;
 import edu.sdsu.rocket.control.devices.BreakWire;
 import edu.sdsu.rocket.control.devices.DMO063;
 import edu.sdsu.rocket.control.devices.DeviceRunnable;
@@ -12,6 +12,7 @@ import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.PS050;
 import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
+import edu.sdsu.rocket.control.devices.SB70;
 
 public class Rocket {
 
@@ -20,6 +21,9 @@ public class Rocket {
 		SENSOR_PRIORITY_MEDIUM,
 		SENSOR_PRIORITY_HIGH,
 	}
+	
+	public SB70 connectionSlow;
+	public SB70 connectionFast;
 	
 	public DMO063 ignitor;
 	public BreakWire breakWire;
@@ -32,19 +36,14 @@ public class Rocket {
 	public PS050 servoLOX;
 	public PS050 servoEthanol;
 	
-	public BMP085 barometer1;
-	public MS5611 barometer2;
-	
-	public ArduIMU imu;
+	public MS5611 barometer;
 	
 	public PhoneAccelerometer accelerometer;
 	
 	public DeviceRunnable tankPressureLOXRunnable;
 	public DeviceRunnable tankPressureEthanolRunnable;
 	public DeviceRunnable tankPressureEngineRunnable;
-	public DeviceRunnable barometer1Runnable;
-	public DeviceRunnable barometer2Runnable;
-	public DeviceRunnable imuRunnable;
+	public DeviceRunnable barometerRunnable;
 	
 	public Rocket() {
 		/*
@@ -56,7 +55,8 @@ public class Rocket {
 		 * 4 = BMP085 SDA
 		 * 5 = BMP085 SCL
 		 * 9 = Break Wire -
-		 * 10 = ArduIMU TX
+		 * 10 = UART Bridge TX
+		 * ? = UART Bridge RX
 		 * 13 = Servo PWM LOX Orange Wire (Screw-down Connector #5 Port #3)
 		 * 14 = Servo PWM Ethanol Orange Wire (Screw-down Connector #6 Port #3)
 		 * 19 = DMO063 #1 Control +
@@ -95,8 +95,8 @@ public class Rocket {
 		 * DMO063 #1 DC Load - = Screw-down Connector #4 Port #2
 		 */
 		
-		// solid state relay on pin 19 seems to have failed
-//		ignitor = new DMO063(19 /* pin */, 3.0f /* duration (seconds) */);
+		connectionSlow = new SB70( 9, 10,   9600, Parity.NONE, StopBits.ONE);
+		connectionFast = new SB70(45, 46, 115200, Parity.NONE, StopBits.ONE);
 		
 		ignitor = new DMO063(21 /* pin */, 3.0f /* duration (seconds) */);
 		fuelValve = new DMO063(20 /* pin */, 10.0f /* duration (seconds) */);
@@ -111,27 +111,23 @@ public class Rocket {
 		servoLOX = new PS050(13 /* pin */, 100 /* frequency */);
 		servoEthanol = new PS050(14 /* pin */, 100 /* frequency */);
 		
-		// twiNum 0 = pin 4 (SDA) and 5 (SCL)
-		// VCC = 3.3V
-		barometer1 = new BMP085(0 /* twiNum */, 3 /* eocPin */, 3 /* oversampling */);
-		
 		// twiNum 1 = pin 1 (SDA) and 2 (SCL)
 		// VCC = 3.3V
-		barometer2 = new MS5611(1 /* twiNum */, MS5611.ADD_CSB_LOW /* address */, 30 /* sample rate */);
-		
-		imu = new ArduIMU(10 /* RX pin */);
+		barometer = new MS5611(1 /* twiNum */, MS5611.ADD_CSB_LOW /* address */, 30 /* sample rate */);
 		
 		/*
 		 * Devices internal to the Android phone (not connected via the IOIO).
 		 */
 		
 		accelerometer = new PhoneAccelerometer(SensorManager.SENSOR_DELAY_FASTEST);
-		
 	}
 	
 	public void setupDevices(DeviceManager deviceManager, SensorManager sensorManager) {
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		accelerometer.setDataSource(sensorManager, accelerometerSensor);
+		
+		deviceManager.add(connectionSlow); // FIXME runnable
+		deviceManager.add(connectionFast); // FIXME runnable
 		
 		deviceManager.add(ignitor);
 		deviceManager.add(fuelValve);
@@ -149,14 +145,8 @@ public class Rocket {
 		deviceManager.add(servoLOX);
 		deviceManager.add(servoEthanol);
 		
-		barometer1Runnable = new DeviceRunnable(barometer1);
-		deviceManager.add(barometer1Runnable);
-		
-		barometer2Runnable = new DeviceRunnable(barometer2);
-		deviceManager.add(barometer2Runnable);
-		
-		imuRunnable = new DeviceRunnable(imu);
-		deviceManager.add(imuRunnable);
+		barometerRunnable = new DeviceRunnable(barometer);
+		deviceManager.add(barometerRunnable);
 	}
 
 	public void setSensorPriority(SensorPriority priority) {
@@ -164,23 +154,17 @@ public class Rocket {
 			tankPressureLOXRunnable.setThreadSleep(5 /* milliseconds */);
 			tankPressureEthanolRunnable.setThreadSleep(5 /* milliseconds */);
 			tankPressureEngineRunnable.setThreadSleep(1 /* milliseconds */);
-			barometer1Runnable.setThreadSleep(1 /* milliseconds */);
-			barometer2Runnable.setThreadSleep(1 /* milliseconds */);
-			imuRunnable.setThreadFrequency(8 /* Hz */);
+			barometerRunnable.setThreadSleep(1 /* milliseconds */);
 		} else if (SensorPriority.SENSOR_PRIORITY_MEDIUM.equals(priority)) {
 			tankPressureLOXRunnable.setThreadSleep(50 /* milliseconds */);
 			tankPressureEthanolRunnable.setThreadSleep(50 /* milliseconds */);
 			tankPressureEngineRunnable.setThreadSleep(10 /* milliseconds */);
-			barometer1Runnable.setThreadSleep(10 /* milliseconds */);
-			barometer2Runnable.setThreadSleep(10 /* milliseconds */);
-			imuRunnable.setThreadFrequency(8 /* Hz */);
+			barometerRunnable.setThreadSleep(10 /* milliseconds */);
 		} else { // SENSOR_PRIORITY_LOW
 			tankPressureLOXRunnable.setThreadSleep(500 /* milliseconds */);
 			tankPressureEthanolRunnable.setThreadSleep(500 /* milliseconds */);
 			tankPressureEngineRunnable.setThreadSleep(500 /* milliseconds */);
-			barometer1Runnable.setThreadSleep(200 /* milliseconds */);
-			barometer2Runnable.setThreadSleep(200 /* milliseconds */);
-			imuRunnable.setThreadFrequency(8 /* Hz */);
+			barometerRunnable.setThreadSleep(200 /* milliseconds */);
 		}
 	}
 	

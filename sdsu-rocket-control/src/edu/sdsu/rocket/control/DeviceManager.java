@@ -28,14 +28,14 @@ public class DeviceManager implements IOIOLooper {
 	/**
 	 * Sleep duration between IOIO thread loops (milliseconds).
 	 */
-	private int sleep;
+	private long sleep;
 	
 	/**
 	 * Creates a device manager.
 	 * 
 	 * @param threadSleep Sleep duration between IOIO thread loops (milliseconds).
 	 */
-	public DeviceManager(int threadSleep) {
+	public DeviceManager(long threadSleep) {
 		this.sleep = threadSleep;
 	}
 	
@@ -90,7 +90,7 @@ public class DeviceManager implements IOIOLooper {
 		}
 		for (DeviceRunnable runnable : runnables) {
 			App.log.i(App.TAG, "Setting up threaded device: " + runnable.device.info());
-			runnable.device.setup(ioio);
+			runnable.setup(ioio);
 		}
 		
 		for (DeviceRunnable runnable : runnables) {
@@ -118,12 +118,21 @@ public class DeviceManager implements IOIOLooper {
 			listener.disconnected();
 		}
 		
+		for (Device device : devices) {
+			App.log.i(App.TAG, "Notifying device of disconnect: " + device.info());
+			device.disconnected();
+		}
+		for (DeviceRunnable runnable : runnables) {
+			App.log.i(App.TAG, "Notifying device of disconnect: " + runnable.device.info());
+			runnable.device.disconnected();
+		}
+		
 		for (Thread thread : threads) {
 			thread.interrupt();
 			try {
 				thread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				// ignore
 			}
 		}
 		threads.clear();

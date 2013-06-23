@@ -7,6 +7,7 @@ public interface Device {
 
 	public void setup(IOIO ioio) throws ConnectionLostException;
 	public void loop() throws ConnectionLostException, InterruptedException;
+	public void disconnected();
 	public String info();
 	
 }

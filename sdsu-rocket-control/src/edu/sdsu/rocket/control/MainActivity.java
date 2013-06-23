@@ -4,7 +4,9 @@ import ioio.lib.api.IOIO;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,29 +20,22 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.Menu;
 import android.widget.TextView;
-
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener;
-
 import edu.sdsu.rocket.Network;
+import edu.sdsu.rocket.control.logging.AndroidLog;
+import edu.sdsu.rocket.control.logging.LogMultiplexer;
+import edu.sdsu.rocket.control.logging.StreamLog;
 import edu.sdsu.rocket.control.models.Rocket;
-import edu.sdsu.rocket.control.network.RemoteCommandController;
+import edu.sdsu.rocket.control.network.UdpOutputStream;
 import edu.sdsu.rocket.control.objectives.FillTanksObjective;
 import edu.sdsu.rocket.control.objectives.FlightObjective;
 import edu.sdsu.rocket.control.objectives.LaunchObjective;
+import edu.sdsu.rocket.control.objectives.ObjectiveController;
 
 public class MainActivity extends IOIOActivity {
 
 	private DeviceManager deviceManager;
-	private RemoteCommandController remoteCommand;
-	
-	private TextView serverStatusTextView;
-	private TextView connectionCountTextView;
 	private TextView ioioStatusTextView;
-
-	private Thread objectiveThread;
 	private PowerManager.WakeLock wakelock;
-
 	
 	@Override
 	protected IOIOLooper createIOIOLooper() {
@@ -53,7 +48,9 @@ public class MainActivity extends IOIOActivity {
 		
 		super.onCreate(savedInstanceState);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		
 		setupUI();
+		setupLogging();
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -66,7 +63,7 @@ public class MainActivity extends IOIOActivity {
 		App.rocket = new Rocket();
 		App.data = new DataLogger(App.rocket);
 		
-		deviceManager = new DeviceManager(200 /* IOIO thread sleep */);
+		deviceManager = new DeviceManager(250L /* IOIO thread sleep in milliseconds */);
 		deviceManager.setListener(new DeviceManager.DeviceManagerListener() {
 			@Override
 			public void incompatible() {
@@ -85,9 +82,23 @@ public class MainActivity extends IOIOActivity {
 		SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		App.rocket.setupDevices(deviceManager, sensorManager);
 		setupObjectives(App.rocket);
-		setupRemoteCommand(App.objective);
 	}
 	
+	private void setupLogging() {
+		LogMultiplexer log = new LogMultiplexer(new AndroidLog());
+		
+		InetSocketAddress address = new InetSocketAddress("192.168.1.3", 9999);
+		OutputStream udpStream;
+		try {
+			udpStream = new UdpOutputStream(address);
+			log.addLogger(new StreamLog(udpStream));
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		
+		App.log = log;
+	}
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -96,59 +107,25 @@ public class MainActivity extends IOIOActivity {
 	
 	@Override
 	protected void onDestroy() {
-		objectiveThread.interrupt();
+		App.log.i(App.TAG, "Shutting down.");
+		App.objective.stop();
 		wakelock.release();
 		super.onDestroy();
 	}
 
 	private void setupObjectives(Rocket rocket) {
-		App.objective = new ObjectiveController(rocket, 250 /* thread sleep in milliseconds */);
+		App.objective = new ObjectiveController(rocket, 250L /* thread sleep in milliseconds */);
 		App.objective.add(Network.FILL_TANKS_OBJECTIVE, new FillTanksObjective());
 		App.objective.add(Network.LAUNCH_OBJECTIVE, new LaunchObjective());
 		App.objective.add(Network.FLIGHT_OBJECTIVE, new FlightObjective());
-		objectiveThread = new Thread(App.objective);
 		
-		App.log.i(App.TAG, "Starting objective thread.");
-		objectiveThread.start();
+		App.log.i(App.TAG, "Starting objective controller.");
+		App.objective.start();
 	}
 
 	private void setupUI() {
 		setContentView(R.layout.activity_main);
-		
-		serverStatusTextView = (TextView) findViewById(R.id.server_status);
-		connectionCountTextView = (TextView) findViewById(R.id.server_connections);
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
-	}
-
-	private void setupRemoteCommand(ObjectiveController objectiveController) {
-		int tcpPort = Network.TCP_PORT;
-		int udpPort = Network.UDP_PORT;
-		
-		remoteCommand = new RemoteCommandController(tcpPort, udpPort, objectiveController);
-		try {
-			remoteCommand.start();
-		} catch (IOException e) {
-			updateTextView(serverStatusTextView, "Failed to bind server.");
-			e.printStackTrace();
-			return;
-		}
-		
-		remoteCommand.server.addListener(new Listener() {
-			@Override
-			public void connected(Connection connection) {
-				int count = remoteCommand.server.getConnections().length;
-				updateTextView(connectionCountTextView, String.valueOf(count) + " connections");
-				App.log.i(App.TAG, "Connection count: " + count);
-			}
-			@Override
-			public void disconnected(Connection connection) {
-				int count = remoteCommand.server.getConnections().length;
-				updateTextView(connectionCountTextView, String.valueOf(count) + " connections");
-			}
-		});
-		
-		String ip = getIpAddr();
-		updateTextView(serverStatusTextView, "tcp://" + ip + ":" + tcpPort + "\nudp://" + ip + ":" + udpPort);
 	}
 
 	@Override

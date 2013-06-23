@@ -84,6 +84,12 @@ public class PS050 implements Device {
 	}
 	
 	@Override
+	public void disconnected() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public String info() {
 		return this.getClass().getSimpleName() + ": rx=" + pwmPin + ", frequency=" + pwmFrequency;
 	}

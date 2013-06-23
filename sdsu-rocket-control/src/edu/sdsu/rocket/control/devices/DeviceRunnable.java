@@ -6,6 +6,7 @@ import edu.sdsu.rocket.control.App;
 
 public class DeviceRunnable implements Runnable {
 
+	// TODO support multiple devices, this should become private:
 	public final Device device;
 	
 	/**
@@ -49,11 +50,9 @@ public class DeviceRunnable implements Runnable {
 				Thread.sleep(sleep);
 			}
 		} catch (ConnectionLostException e) {
-//			e.printStackTrace();
 			App.log.e(App.TAG, "Connection lost with " + device.info(), e);
 		} catch (InterruptedException e) {
-//			e.printStackTrace();
-			App.log.e(App.TAG, "Interrupted with " + device.info(), e);
+			// thread interrupted
 		}
 	}
 
