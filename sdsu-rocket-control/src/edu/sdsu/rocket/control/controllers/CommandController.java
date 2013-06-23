@@ -1,4 +1,4 @@
-package edu.sdsu.rocket.control.network;
+package edu.sdsu.rocket.control.controllers;
 
 import java.nio.ByteBuffer;
 
@@ -8,7 +8,7 @@ import edu.sdsu.rocket.control.devices.SB70;
 import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.io.Packet;
 
-public class UartCommandController {
+public class CommandController {
 	
 	private static final int BUFFER_SIZE = 1024;
 	
@@ -18,7 +18,7 @@ public class UartCommandController {
 
 	private long threadSleep; // milliseconds
 
-	public UartCommandController(SB70 sb70, long threadSleep) {
+	public CommandController(SB70 sb70, long threadSleep) {
 		this.sb70 = sb70;
 		this.threadSleep = threadSleep;
 	}

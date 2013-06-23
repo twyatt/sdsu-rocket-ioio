@@ -25,11 +25,11 @@ import edu.sdsu.rocket.control.logging.AndroidLog;
 import edu.sdsu.rocket.control.logging.LogMultiplexer;
 import edu.sdsu.rocket.control.logging.StreamLog;
 import edu.sdsu.rocket.control.models.Rocket;
-import edu.sdsu.rocket.control.network.UdpOutputStream;
 import edu.sdsu.rocket.control.objectives.FillTanksObjective;
 import edu.sdsu.rocket.control.objectives.FlightObjective;
 import edu.sdsu.rocket.control.objectives.LaunchObjective;
 import edu.sdsu.rocket.control.objectives.ObjectiveController;
+import edu.sdsu.rocket.io.DatagramOutputStream;
 
 public class MainActivity extends IOIOActivity {
 
@@ -87,10 +87,10 @@ public class MainActivity extends IOIOActivity {
 	private void setupLogging() {
 		LogMultiplexer log = new LogMultiplexer(new AndroidLog());
 		
-		InetSocketAddress address = new InetSocketAddress("192.168.1.3", 9999);
+		InetSocketAddress address = new InetSocketAddress("192.168.1.149", 9999);
 		OutputStream udpStream;
 		try {
-			udpStream = new UdpOutputStream(address);
+			udpStream = new DatagramOutputStream(address);
 			log.addLogger(new StreamLog(udpStream));
 		} catch (SocketException e) {
 			e.printStackTrace();

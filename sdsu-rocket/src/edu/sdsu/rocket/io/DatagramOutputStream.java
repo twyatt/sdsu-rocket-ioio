@@ -1,4 +1,4 @@
-package edu.sdsu.rocket.control.network;
+package edu.sdsu.rocket.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -7,14 +7,14 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 
-public class UdpOutputStream extends OutputStream {
+public class DatagramOutputStream extends OutputStream {
 	
 	private DatagramSocket socket;
 	private InetSocketAddress address;
 	
 	private byte[] buffer = new byte[1];
 	
-	public UdpOutputStream(InetSocketAddress address) throws SocketException {
+	public DatagramOutputStream(InetSocketAddress address) throws SocketException {
 		this.address = address;
 		socket = new DatagramSocket();
 	}

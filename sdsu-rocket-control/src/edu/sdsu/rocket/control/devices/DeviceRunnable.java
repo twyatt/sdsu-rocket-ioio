@@ -12,7 +12,7 @@ public class DeviceRunnable implements Runnable {
 	/**
 	 * Duration to sleep between thread loops in milliseconds.
 	 */
-	private int sleep = 1000; // default is 1000 ms delay (1 Hz)
+	private long sleep = 1000L; // default is 1000 ms delay (1 Hz)
 	
 	public DeviceRunnable(Device device) {
 		this.device = device;
@@ -33,7 +33,7 @@ public class DeviceRunnable implements Runnable {
 	 * 
 	 * @param sleep Thread loop sleep duration (milliseconds).
 	 */
-	public DeviceRunnable setThreadSleep(int sleep) {
+	public DeviceRunnable setThreadSleep(long sleep) {
 		this.sleep = sleep;
 		return this;
 	}

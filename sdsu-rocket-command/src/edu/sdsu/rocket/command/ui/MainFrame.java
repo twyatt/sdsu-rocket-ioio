@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -24,8 +26,9 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+
+import edu.sdsu.rocket.Serial;
+import edu.sdsu.rocket.io.PacketOutputStream;
 
 public class MainFrame extends JFrame {
 
@@ -38,6 +41,7 @@ public class MainFrame extends JFrame {
 	private static final String CONNECT_TEXT    = "Connect";
 	
 	private Socket client;
+	private PacketOutputStream out;
 	
 	private JTextField hostTextField;
 	private JTextField portTextField;
@@ -63,6 +67,7 @@ public class MainFrame extends JFrame {
 			try {
 				int port = Integer.valueOf(portTextField.getText());
 				client = new Socket(address, port);
+				out = new PacketOutputStream(client.getOutputStream(), Serial.START_BYTES);
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(this, "Failed to create network socket.");
 				return;
@@ -137,6 +142,15 @@ public class MainFrame extends JFrame {
 		fillTanksPanel.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		JButton setFillTanksObjectiveButton = new JButton("Set Objective");
+		setFillTanksObjectiveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					out.writePacket(Serial.SET_OBJECTIVE_REQUEST, new byte[] { Serial.OBJECTIVE_FILL_TANKS });
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		setFillTanksObjectiveButton.setFont(new Font("Lucida Grande", Font.PLAIN, 24));
 		fillTanksPanel.add(setFillTanksObjectiveButton);
 		

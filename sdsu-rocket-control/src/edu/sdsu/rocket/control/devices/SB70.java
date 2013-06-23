@@ -9,6 +9,7 @@ import ioio.lib.api.exception.ConnectionLostException;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import edu.sdsu.rocket.Serial;
 import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketInputStream;
@@ -16,7 +17,6 @@ import edu.sdsu.rocket.io.PacketOutputStream;
 
 public class SB70 implements Device {
 	
-	private static final byte[] START_BYTES = { (byte) 0xF0, (byte) 0x0D };
 	private static final int MAX_DATA_LENGTH = 1024000;
 	
 	private Uart uart;
@@ -64,16 +64,14 @@ public class SB70 implements Device {
 	public void setup(IOIO ioio) throws ConnectionLostException {
 		uart = ioio.openUart(rxPin, txPin, baud, parity, stopbits);
 		
-		in = new PacketInputStream(uart.getInputStream(), START_BYTES, MAX_DATA_LENGTH);
-		out = new PacketOutputStream(uart.getOutputStream(), START_BYTES);
+		in = new PacketInputStream(uart.getInputStream(), Serial.START_BYTES, MAX_DATA_LENGTH);
+		out = new PacketOutputStream(uart.getOutputStream(), Serial.START_BYTES);
 	}
 
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
 		try {
-			Packet packet;
-			while ((packet = in.readPacket()) != null)
-				queue.add(packet);
+			queue.add(in.readPacket());
 		} catch (IOException e) {
 			// TODO flash IOIO status LED to indicate error
 			App.log.e(App.TAG, "Failed to read packet.", e);
@@ -83,12 +81,12 @@ public class SB70 implements Device {
 
 	@Override
 	public void disconnected() {
-		try {
-			in.close();
-			out.close();
-		} catch (IOException e) {
-			App.log.e(App.TAG, "Failed to close streams.", e);
-		}
+//		try {
+//			in.close();
+//			out.close();
+//		} catch (IOException e) {
+//			App.log.e(App.TAG, "Failed to close SB70 streams.", e);
+//		}
 	}
 
 	@Override

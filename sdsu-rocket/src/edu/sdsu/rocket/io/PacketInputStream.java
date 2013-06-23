@@ -5,6 +5,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+
 /**
  * Reads packets from an InputStream of the format:
  * 
@@ -48,8 +49,12 @@ public class PacketInputStream extends DataInputStream {
 			throw new PacketException("Data length of " + length + " exceeds max of " + maxDataLength);
 		
 		byte[] data = null;
-		if (length > 0) {
-			data = new byte[length - 1];
+		if (length < 0) {
+			// TODO drop packet
+		} else if (length > 0) {
+			if (length > maxDataLength) // TODO drop packet instead
+				length = maxDataLength;
+			data = new byte[length];
 			readFully(data);
 		}
 		

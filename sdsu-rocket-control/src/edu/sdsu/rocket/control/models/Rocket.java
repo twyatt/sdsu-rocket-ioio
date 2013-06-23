@@ -95,8 +95,8 @@ public class Rocket {
 		 * DMO063 #1 DC Load - = Screw-down Connector #4 Port #2
 		 */
 		
-		connectionSlow = new SB70( 9, 10,   9600, Parity.NONE, StopBits.ONE);
-		connectionFast = new SB70(45, 46, 115200, Parity.NONE, StopBits.ONE);
+		connectionSlow = new SB70(45, 46,   9600, Parity.NONE, StopBits.ONE);
+		connectionFast = new SB70( 9, 10, 115200, Parity.NONE, StopBits.ONE);
 		
 		ignitor = new DMO063(21 /* pin */, 3.0f /* duration (seconds) */);
 		fuelValve = new DMO063(20 /* pin */, 10.0f /* duration (seconds) */);
@@ -126,27 +126,27 @@ public class Rocket {
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		accelerometer.setDataSource(sensorManager, accelerometerSensor);
 		
-		deviceManager.add(connectionSlow); // FIXME runnable
-		deviceManager.add(connectionFast); // FIXME runnable
-		
-		deviceManager.add(ignitor);
-		deviceManager.add(fuelValve);
-		deviceManager.add(breakWire);
-		
-		tankPressureLOXRunnable = new DeviceRunnable(tankPressureLOX);
-		deviceManager.add(tankPressureLOXRunnable);
-		
-		tankPressureEthanolRunnable = new DeviceRunnable(tankPressureEthanol);
-		deviceManager.add(tankPressureEthanolRunnable);
-		
-		tankPressureEngineRunnable = new DeviceRunnable(tankPressureEngine);
-		deviceManager.add(tankPressureEngineRunnable);
-		
-		deviceManager.add(servoLOX);
-		deviceManager.add(servoEthanol);
-		
-		barometerRunnable = new DeviceRunnable(barometer);
-		deviceManager.add(barometerRunnable);
+		deviceManager.add(new DeviceRunnable(connectionSlow).setThreadSleep(100L));
+		deviceManager.add(new DeviceRunnable(connectionFast).setThreadSleep(100L));
+//		
+//		deviceManager.add(ignitor);
+//		deviceManager.add(fuelValve);
+//		deviceManager.add(breakWire);
+//		
+//		tankPressureLOXRunnable = new DeviceRunnable(tankPressureLOX);
+//		deviceManager.add(tankPressureLOXRunnable);
+//		
+//		tankPressureEthanolRunnable = new DeviceRunnable(tankPressureEthanol);
+//		deviceManager.add(tankPressureEthanolRunnable);
+//		
+//		tankPressureEngineRunnable = new DeviceRunnable(tankPressureEngine);
+//		deviceManager.add(tankPressureEngineRunnable);
+//		
+//		deviceManager.add(servoLOX);
+//		deviceManager.add(servoEthanol);
+//		
+//		barometerRunnable = new DeviceRunnable(barometer);
+//		deviceManager.add(barometerRunnable);
 	}
 
 	public void setSensorPriority(SensorPriority priority) {

@@ -2,6 +2,8 @@ package edu.sdsu.rocket;
 
 public class Serial {
 	
+	public static final byte[] START_BYTES = { (byte) 0xF0, (byte) 0x0D };
+	
 	// | MESSAGE (String) |
 	public static final byte LOG_MESSAGE              = (byte) 0x01;
 	
