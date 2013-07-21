@@ -46,7 +46,8 @@ public class DataLogger {
 		return enabled;
 	}
 	
-	public void setup() {
+	// FIXME return false if there are any failures
+	public boolean setup() {
 		makeStream(STATUS, STATUS_BUFFER_SIZE);
 		
 		makeStream(BAROMETER, BAROMETER_BUFFER_SIZE);
@@ -74,20 +75,20 @@ public class DataLogger {
 				if (LOG) {
 					App.log.i(App.TAG, BAROMETER + " = P: " + pressure + " mbar, T: " + temperature + " C");
 					
-					float temperatureK = temperature + 273.15f; // C -> K
-					double tempF = Units.convertCelsiusToFahrenheit(temperature);
-					
-					/*
-					 * http://en.wikipedia.org/wiki/Density_altitude
-					 */
-					float Psl = 1013.25f; // standard sea level atmospheric pressure (hPa)
-					float Tsl = 288.15f; // ISA standard sea level air temperature (K)
-					float b = 0.234969f;
-					
-//					float altitude = 145442.156f * (1f - (float)Math.pow((pressure / Psl) / (temperature / Tsl), b));
-					float altitude = (((float)Math.pow(Psl / pressure, 1f/5.257f) - 1f) * temperatureK) / 0.0065f;
-					
-					App.log.i(App.TAG, BAROMETER + " = A: " + altitude + " ft, T: " + tempF + " F");
+//					float temperatureK = temperature + 273.15f; // C -> K
+//					double tempF = Units.convertCelsiusToFahrenheit(temperature);
+//					
+//					/*
+//					 * http://en.wikipedia.org/wiki/Density_altitude
+//					 */
+//					float Psl = 1013.25f; // standard sea level atmospheric pressure (hPa)
+//					float Tsl = 288.15f; // ISA standard sea level air temperature (K)
+//					float b = 0.234969f;
+//					
+////					float altitude = 145442.156f * (1f - (float)Math.pow((pressure / Psl) / (temperature / Tsl), b));
+//					float altitude = (((float)Math.pow(Psl / pressure, 1f/5.257f) - 1f) * temperatureK) / 0.0065f;
+//					
+//					App.log.i(App.TAG, BAROMETER + " = A: " + altitude + " ft, T: " + tempF + " F");
 				}
 			}
 		});
@@ -95,7 +96,7 @@ public class DataLogger {
 		makeStream(LOX_PRESSURE, PRESSURE_BUFFER_SIZE);
 		rocket.tankPressureLOX.setListener(new P51500AA1365V.P51500AA1365VListener() {
 			@Override
-			public void onP51500AA1365VValue(float voltage) {
+			public void onVoltage(float voltage) {
 				if (enabled) {
 					DataOutputStream stream = out.get(LOX_PRESSURE);
 					
@@ -122,7 +123,7 @@ public class DataLogger {
 		makeStream(ETHANOL_PRESSURE, PRESSURE_BUFFER_SIZE);
 		rocket.tankPressureEthanol.setListener(new P51500AA1365V.P51500AA1365VListener() {
 			@Override
-			public void onP51500AA1365VValue(float voltage) {
+			public void onVoltage(float voltage) {
 				if (enabled) {
 					DataOutputStream stream = out.get(ETHANOL_PRESSURE);
 					
@@ -149,7 +150,7 @@ public class DataLogger {
 		makeStream(ENGINE_PRESSURE, PRESSURE_BUFFER_SIZE);
 		rocket.tankPressureEngine.setListener(new P51500AA1365V.P51500AA1365VListener() {
 			@Override
-			public void onP51500AA1365VValue(float voltage) {
+			public void onVoltage(float voltage) {
 				if (enabled) {
 					DataOutputStream stream = out.get(ENGINE_PRESSURE);
 					
@@ -201,6 +202,8 @@ public class DataLogger {
 				}
 			}
 		});
+		
+		return true;
 	}
 	
 	public void enable() {
@@ -245,22 +248,27 @@ public class DataLogger {
 		}
 	}
 	
-	public void close() {
+	public boolean close() {
+		boolean success = true;
 		for (Entry<String, DataOutputStream> entry : out.entrySet()) {
 			try {
 				entry.getValue().close();
 			} catch (IOException e) {
+				success = false;
 				App.log.e(App.TAG, "Failed to close output stream for " + entry.getKey() + ".");
 				e.printStackTrace();
 			}
 		}
+		return success;
 	}
 	
-	public void reset() {
+	public boolean reset() {
+		boolean success = true;
 		disable();
-		close();
-		setup();
+		success = close() && success;
+		success = setup() && success;
 		enable();
+		return success;
 	}
 	
 	private DataOutputStream makeStream(String name, int bufferSize) {

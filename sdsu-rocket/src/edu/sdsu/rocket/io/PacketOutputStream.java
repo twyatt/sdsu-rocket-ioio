@@ -9,7 +9,7 @@ import java.io.OutputStream;
  * 
  *   START_BYTES (byte[]) | MESSAGE_ID (byte) | LENGTH (int) | DATA (byte[])
  */
-public class PacketOutputStream extends DataOutputStream {
+public class PacketOutputStream extends DataOutputStream implements PacketWriter {
 
 	private final byte[] startBytes;
 
@@ -22,10 +22,16 @@ public class PacketOutputStream extends DataOutputStream {
 		this.startBytes = startBytes;
 	}
 	
-	public void writePacket(Packet packet) throws IOException {
+	/*
+	 * PacketWriter interface methods.
+	 */
+	
+	@Override
+	public void write(Packet packet) throws IOException {
 		writePacket(packet.messageId, packet.data);
 	}
 	
+	@Override
 	synchronized public void writePacket(byte messageId, byte[] data) throws IOException {
 		write(startBytes);
 		writeByte(messageId);

@@ -1,9 +1,7 @@
-package edu.sdsu.rocket.control.logging;
+package edu.sdsu.rocket.logging;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
-import edu.sdsu.rocket.logging.Logger;
 
 public class StreamLog implements Logger {
 
@@ -30,7 +28,7 @@ public class StreamLog implements Logger {
 	}
 
 	@Override
-	public void e(String tag, String msg, Exception e) {
+	public void e(String tag, String msg, Throwable e) {
 		String text = msg + "\n" + e.getMessage();
 		e(tag, text);
 	}

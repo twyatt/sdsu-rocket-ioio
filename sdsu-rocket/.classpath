@@ -2,12 +2,5 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/kryonet"/>
-	<classpathentry kind="lib" path="/kryonet/lib/asm-4.0.jar"/>
-	<classpathentry kind="lib" path="/kryonet/lib/jsonbeans-0.2.jar"/>
-	<classpathentry kind="lib" path="/kryonet/lib/kryo-debug-2.20.jar"/>
-	<classpathentry kind="lib" path="/kryonet/lib/minlog-1.2.jar"/>
-	<classpathentry kind="lib" path="/kryonet/lib/objenesis-1.2.jar"/>
-	<classpathentry kind="lib" path="/kryonet/lib/reflectasm-1.07.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

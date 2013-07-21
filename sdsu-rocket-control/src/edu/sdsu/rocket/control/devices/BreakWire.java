@@ -4,12 +4,12 @@ import ioio.lib.api.DigitalInput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
 
-public class BreakWire implements Device {
+public class BreakWire extends DeviceAdapter {
 
-	private int pin;
-	private DigitalInput wire;
+	volatile private boolean isBroken;
 	
-	private boolean isBroken;
+	private final int pin;
+	private DigitalInput wire;
 
 	public BreakWire(int pin) {
 		this.pin = pin;
@@ -19,6 +19,10 @@ public class BreakWire implements Device {
 		return isBroken;
 	}
 
+	/*
+	 * IOIOLooper interface methods.
+	 */
+	
 	@Override
 	public void setup(IOIO ioio) throws ConnectionLostException {
 		wire = ioio.openDigitalInput(pin, DigitalInput.Spec.Mode.PULL_UP);
@@ -27,16 +31,16 @@ public class BreakWire implements Device {
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
 		isBroken = wire.read();
+		super.loop();
 	}
-
+	
+	/*
+	 * Device interface methods.
+	 */
+	
 	@Override
 	public String info() {
 		return this.getClass().getSimpleName() + ": pin=" + pin;
-	}
-
-	@Override
-	public void disconnected() {
-		// TODO Auto-generated method stub
 	}
 
 }

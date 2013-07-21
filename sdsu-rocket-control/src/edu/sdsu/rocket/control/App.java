@@ -1,10 +1,9 @@
 package edu.sdsu.rocket.control;
 
+import edu.sdsu.rocket.control.controllers.RocketController;
 import edu.sdsu.rocket.control.logging.AndroidLog;
-import edu.sdsu.rocket.control.models.Rocket;
-import edu.sdsu.rocket.control.models.Statistics;
-import edu.sdsu.rocket.control.objectives.ObjectiveController;
 import edu.sdsu.rocket.logging.Logger;
+import edu.sdsu.rocket.models.Statistics;
 
 public class App {
 
@@ -20,11 +19,9 @@ public class App {
 	 */
 	public static final boolean DEBUG = true;
 	
-	public static Rocket rocket;
-	
 	public static Logger log = new AndroidLog();
 	public static Statistics stats = new Statistics();
-	public static ObjectiveController objective;
+	public static RocketController rocketController;
 	public static DataLogger data;
 
 	private static long startTime;
@@ -39,11 +36,7 @@ public class App {
 	}
 	
 	public static void start() {
-		startTime = getNanoTime();
-	}
-	
-	public static long getNanoTime() {
-		return System.nanoTime();
+		startTime = nanoTime();
 	}
 	
 	/**
@@ -52,8 +45,12 @@ public class App {
 	 * @return Seconds since start.
 	 */
 	public static float elapsedTime() {
-		long time = System.nanoTime();
+		long time = nanoTime();
 		return (time - startTime) / 1000000000.0f;
+	}
+	
+	public static long nanoTime() {
+		return System.nanoTime();
 	}
 	
 }

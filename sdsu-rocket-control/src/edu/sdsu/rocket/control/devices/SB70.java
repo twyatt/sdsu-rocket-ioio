@@ -7,17 +7,18 @@ import ioio.lib.api.Uart.StopBits;
 import ioio.lib.api.exception.ConnectionLostException;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import edu.sdsu.rocket.Serial;
-import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketInputStream;
+import edu.sdsu.rocket.io.PacketListener;
 import edu.sdsu.rocket.io.PacketOutputStream;
+import edu.sdsu.rocket.io.PacketWriter;
 
-public class SB70 implements Device {
+public class SB70 extends DeviceAdapter implements PacketWriter {
 	
 	private static final int MAX_DATA_LENGTH = 1024000;
+	
+	private PacketListener listener;
 	
 	private Uart uart;
 	private int rxPin;
@@ -26,8 +27,7 @@ public class SB70 implements Device {
 	private Parity parity;
 	private StopBits stopbits;
 	
-	ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<Packet>();
-
+	private IOIO ioio;
 	private PacketInputStream in;
 	private PacketOutputStream out;
 	
@@ -39,56 +39,55 @@ public class SB70 implements Device {
 		this.stopbits = stopbits;
 	}
 	
-	public void send(Packet packet) {
-		send(packet.messageId, packet.data);
+	public SB70 setListener(PacketListener listener) {
+		this.listener = listener;
+		return this;
 	}
 	
-	public void send(byte id, byte data) {
-		send(id, new byte[] { data });
+	public void write(Packet packet) throws IOException {
+		writePacket(packet.messageId, packet.data);
 	}
 	
-	public void send(byte id, byte[] data) {
+	public void write(byte id, byte data) throws IOException {
+		writePacket(id, new byte[] { data });
+	}
+	
+	public void writePacket(byte id, byte[] data) throws IOException {
 		try {
+			ioio.beginBatch();
 			out.writePacket(id, data);
-		} catch (IOException e) {
-			// TODO flash IOIO status LED to indicate error
-//			App.log.e(App.TAG, "Failed to write packet.", e);
+			ioio.endBatch();
+		} catch (ConnectionLostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
-	public Packet get() {
-		return queue.poll();
-	}
+	/*
+	 * Device interface methods.
+	 */
 	
 	@Override
 	public void setup(IOIO ioio) throws ConnectionLostException {
+		this.ioio = ioio;
 		uart = ioio.openUart(rxPin, txPin, baud, parity, stopbits);
 		
-		in = new PacketInputStream(uart.getInputStream(), Serial.START_BYTES, MAX_DATA_LENGTH);
-		out = new PacketOutputStream(uart.getOutputStream(), Serial.START_BYTES);
+		in = new PacketInputStream(uart.getInputStream(), Packet.START_BYTES, MAX_DATA_LENGTH);
+		out = new PacketOutputStream(uart.getOutputStream(), Packet.START_BYTES);
 	}
 
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
 		try {
-			queue.add(in.readPacket());
+			Packet packet = in.readPacket();
+			if (listener != null)
+				listener.onPacketReceived(packet);
 		} catch (IOException e) {
-			// TODO flash IOIO status LED to indicate error
-			App.log.e(App.TAG, "Failed to read packet.", e);
-			return;
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public void disconnected() {
-//		try {
-//			in.close();
-//			out.close();
-//		} catch (IOException e) {
-//			App.log.e(App.TAG, "Failed to close SB70 streams.", e);
-//		}
-	}
-
+	
 	@Override
 	public String info() {
 		return this.getClass().getSimpleName() + ": rx=" + rxPin + ", tx=" + txPin + ", baud=" + baud + ", parity=" + parity + ", stopbits=" + stopbits;

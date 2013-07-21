@@ -20,22 +20,23 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.Menu;
 import android.widget.TextView;
-import edu.sdsu.rocket.Network;
+import edu.sdsu.rocket.control.controllers.PacketController;
+import edu.sdsu.rocket.control.controllers.RocketController;
 import edu.sdsu.rocket.control.logging.AndroidLog;
-import edu.sdsu.rocket.control.logging.LogMultiplexer;
-import edu.sdsu.rocket.control.logging.StreamLog;
 import edu.sdsu.rocket.control.models.Rocket;
-import edu.sdsu.rocket.control.objectives.FillTanksObjective;
-import edu.sdsu.rocket.control.objectives.FlightObjective;
-import edu.sdsu.rocket.control.objectives.LaunchObjective;
-import edu.sdsu.rocket.control.objectives.ObjectiveController;
 import edu.sdsu.rocket.io.DatagramOutputStream;
+import edu.sdsu.rocket.io.PacketMultiplexer;
+import edu.sdsu.rocket.logging.LogMultiplexer;
+import edu.sdsu.rocket.logging.StreamLog;
 
 public class MainActivity extends IOIOActivity {
 
 	private DeviceManager deviceManager;
-	private TextView ioioStatusTextView;
+	private PacketController command;
+	
 	private PowerManager.WakeLock wakelock;
+	
+	private TextView ioioStatusTextView;
 	
 	@Override
 	protected IOIOLooper createIOIOLooper() {
@@ -48,21 +49,40 @@ public class MainActivity extends IOIOActivity {
 		
 		super.onCreate(savedInstanceState);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		disableDeviceSleep();
 		
 		setupUI();
-		setupLogging();
+//		setupLogging();
+		setupDeviceManager();
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
 //		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
-		// prevent device from sleeping
+		Rocket rocket = new Rocket();
+		App.rocketController = new RocketController(rocket);
+		App.data = new DataLogger(rocket);
+		
+		SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		App.rocketController.setup(deviceManager, sensorManager);
+//		App.rocketController.start(); // TODO uncomment?
+		
+		setupPacketController(rocket);
+	}
+
+	private void disableDeviceSleep() {
 		PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, App.TAG);
 		wakelock.acquire();
-		
-		App.rocket = new Rocket();
-		App.data = new DataLogger(App.rocket);
-		
+	}
+
+	private void setupPacketController(Rocket rocket) {
+		PacketMultiplexer messenger = new PacketMultiplexer(rocket.connection1, rocket.connection2);
+		command = new PacketController(messenger);
+		rocket.connection1.setListener(command);
+		rocket.connection2.setListener(command);
+	}
+
+	private void setupDeviceManager() {
 		deviceManager = new DeviceManager(250L /* IOIO thread sleep in milliseconds */);
 		deviceManager.setListener(new DeviceManager.DeviceManagerListener() {
 			@Override
@@ -74,14 +94,15 @@ public class MainActivity extends IOIOActivity {
 				updateTextView(ioioStatusTextView, "IOIO disconnected.");
 			}
 			@Override
-			public void connected(IOIO ioio) {
+			public void setup(IOIO ioio) {
 				updateTextView(ioioStatusTextView, "IOIO connected.");
 			}
 		});
-		
-		SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		App.rocket.setupDevices(deviceManager, sensorManager);
-		setupObjectives(App.rocket);
+	}
+	
+	private void setupUI() {
+		setContentView(R.layout.activity_main);
+		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
 	}
 	
 	private void setupLogging() {
@@ -108,24 +129,9 @@ public class MainActivity extends IOIOActivity {
 	@Override
 	protected void onDestroy() {
 		App.log.i(App.TAG, "Shutting down.");
-		App.objective.stop();
-		wakelock.release();
-		super.onDestroy();
-	}
-
-	private void setupObjectives(Rocket rocket) {
-		App.objective = new ObjectiveController(rocket, 250L /* thread sleep in milliseconds */);
-		App.objective.add(Network.FILL_TANKS_OBJECTIVE, new FillTanksObjective());
-		App.objective.add(Network.LAUNCH_OBJECTIVE, new LaunchObjective());
-		App.objective.add(Network.FLIGHT_OBJECTIVE, new FlightObjective());
 		
-		App.log.i(App.TAG, "Starting objective controller.");
-		App.objective.start();
-	}
-
-	private void setupUI() {
-		setContentView(R.layout.activity_main);
-		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
+		wakelock.release(); // TODO should be released onPause
+		super.onDestroy();
 	}
 
 	@Override

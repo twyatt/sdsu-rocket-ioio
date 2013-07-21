@@ -16,7 +16,7 @@ import edu.sdsu.rocket.control.App;
  *   4. D2 conversion
  *   5. Read ADC result (24 bit pressure / temperature)
  */
-public class MS5611 implements Device {
+public class MS5611 extends Device {
 	
 	public interface MS5611Listener {
 		public void onMS5611Values(float pressure /* mbar */, float temperature /* C */);
@@ -198,11 +198,6 @@ public class MS5611 implements Device {
 		return readU24BE(response, 0);
 	}
 	
-	@Override
-	public String info() {
-		return this.getClass().getSimpleName() + ": twi=" + twiNum;
-	}
-	
 	/*
 	 * Device interface methods.
 	 */
@@ -308,6 +303,16 @@ public class MS5611 implements Device {
 	@Override
 	public void disconnected() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void incompatible() {
+		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public String info() {
+		return this.getClass().getSimpleName() + ": twi=" + twiNum;
 	}
 
 }

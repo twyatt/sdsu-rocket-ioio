@@ -1,9 +1,7 @@
-package edu.sdsu.rocket.control.logging;
+package edu.sdsu.rocket.logging;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.sdsu.rocket.logging.Logger;
 
 public class LogMultiplexer implements Logger {
 	
@@ -38,7 +36,7 @@ public class LogMultiplexer implements Logger {
 	}
 
 	@Override
-	public void e(String tag, String msg, Exception e) {
+	public void e(String tag, String msg, Throwable e) {
 		for (Logger logger : loggers) {
 			logger.e(tag, msg, e);
 		}

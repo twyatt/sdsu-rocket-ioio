@@ -1,4 +1,4 @@
-package edu.sdsu.rocket.control.models;
+package edu.sdsu.rocket.models;
 
 public class Statistics {
 

@@ -8,21 +8,21 @@ import ioio.lib.api.exception.ConnectionLostException;
  * Pressure transducer
  * {@link http://www.digikey.com/product-detail/en/P51-500-A-A-I36-5V-000-000/734-1063-ND/1665825}
  */
-public class P51500AA1365V implements Device {
+public class P51500AA1365V extends DeviceAdapter  {
 
 	public interface P51500AA1365VListener {
-		public void onP51500AA1365VValue(float voltage);
+		public void onVoltage(float voltage);
 	}
 	
-	public float voltage;
+	volatile private float voltage;
 	
 	private P51500AA1365VListener listener;
 	
 	private AnalogInput input;
 	public final int pin;
 	
-	private float slope;
-	private float bias;
+	final private float slope;
+	final private float bias;
 
 	public P51500AA1365V(int pin, float slope, float bias) {
 		this.pin = pin;
@@ -32,6 +32,10 @@ public class P51500AA1365V implements Device {
 	
 	public void setListener(P51500AA1365VListener listener) {
 		this.listener = listener;
+	}
+	
+	public float getVoltage() {
+		return voltage;
 	}
 	
 	public float getPressure() {
@@ -51,19 +55,15 @@ public class P51500AA1365V implements Device {
 	public void loop() throws ConnectionLostException, InterruptedException {
 		voltage = input.getVoltage();
 		
-		if (listener != null) {
-			listener.onP51500AA1365VValue(voltage);
-		}
+		if (listener != null)
+			listener.onVoltage(voltage);
+		
+		super.loop();
 	}
 	
 	@Override
 	public String info() {
 		return this.getClass().getSimpleName() + ": pin=" + pin;
-	}
-
-	@Override
-	public void disconnected() {
-		// TODO Auto-generated method stub
 	}
 	
 }

@@ -1,19 +1,21 @@
 package edu.sdsu.rocket.control.devices;
 
-import edu.sdsu.rocket.control.App;
 import ioio.lib.api.DigitalOutput;
+import ioio.lib.api.DigitalOutput.Spec.Mode;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.PwmOutput;
-import ioio.lib.api.DigitalOutput.Spec.Mode;
 import ioio.lib.api.exception.ConnectionLostException;
 
 /**
  * Servo
+ * 
+ * Supports being disabled which closes the IOIO PWM output to help prevent
+ * burning out servos.
+ * 
+ * Servo is disabled by default and must be enabled prior to use.
  */
-public class PS050 implements Device {
+public class PS050 extends DeviceAdapter {
 
-	private static final float ACTION_DURATION = 3.0f; // seconds
-	
 	private IOIO ioio;
 	
 	private PwmOutput pwm;
@@ -21,24 +23,21 @@ public class PS050 implements Device {
 	private int pwmFrequency; // Hz
 	private int pulseWidth;
 	
-	/*
-	 * Timestamp of last action.
-	 */
-	private float lastActionTime;
-
 	public PS050(int pwmPin, int pwmFrequency) {
 		this.pwmPin = pwmPin;
 		this.pwmFrequency = pwmFrequency;
 	}
 	
-	public void open() {
-		setPositionPercent(90);
-		lastActionTime = App.elapsedTime();
+	public void enable() throws ConnectionLostException {
+		if (pwm == null)
+			pwm = ioio.openPwmOutput(new DigitalOutput.Spec(pwmPin, Mode.OPEN_DRAIN), pwmFrequency);
 	}
 	
-	public void close() {
-		setPositionPercent(25);
-		lastActionTime = App.elapsedTime();
+	public void disable() {
+		if (pwm != null) {
+			pwm.close();
+			pwm = null;
+		}
 	}
 	
 	/**
@@ -70,23 +69,10 @@ public class PS050 implements Device {
 	
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
-		if (App.elapsedTime() - lastActionTime > ACTION_DURATION) {
-			if (pwm != null) {
-				pwm.close();
-				pwm = null;
-			}
-		} else {
-			if (pwm == null) {
-				pwm = ioio.openPwmOutput(new DigitalOutput.Spec(pwmPin, Mode.OPEN_DRAIN), pwmFrequency);
-			}
+		if (pwm != null)
 			pwm.setPulseWidth(pulseWidth);
-		}
-	}
-	
-	@Override
-	public void disconnected() {
-		// TODO Auto-generated method stub
 		
+		super.loop();
 	}
 	
 	@Override

@@ -3,40 +3,41 @@ package edu.sdsu.rocket.control;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.IOIOLooper;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.sdsu.rocket.control.devices.Device;
-import edu.sdsu.rocket.control.devices.DeviceRunnable;
+import edu.sdsu.rocket.control.devices.DeviceMultiplexer;
+import edu.sdsu.rocket.control.devices.DeviceThreader;
 
+/**
+ * Provides a way to manage multiple devices connected to the IOIO. A device can
+ * either be added to the IOIO thread or a thread can be spawned for the device.
+ */
 public class DeviceManager implements IOIOLooper {
 	
 	public interface DeviceManagerListener {
-		public void incompatible();
-		public void connected(IOIO ioio);
+		public void setup(IOIO ioio);
 		public void disconnected();
+		public void incompatible();
 	}
 	
 	private DeviceManagerListener listener;
 	
-	private List<Device> devices = new ArrayList<Device>();
-	private List<DeviceRunnable> runnables = new ArrayList<DeviceRunnable>();
-	
-	private List<Thread> threads = new ArrayList<Thread>();
+	/**
+	 * Manages the devices to be run on the IOIO thread.
+	 */
+	private DeviceMultiplexer multiplexer = new DeviceMultiplexer();
 	
 	/**
-	 * Sleep duration between IOIO thread loops (milliseconds).
+	 * Manages devices that will run on their own threads.
 	 */
-	private long sleep;
+	private DeviceThreader threader = new DeviceThreader();
 	
 	/**
 	 * Creates a device manager.
 	 * 
-	 * @param threadSleep Sleep duration between IOIO thread loops (milliseconds).
+	 * @param sleep Sleep duration between IOIO thread loops (milliseconds).
 	 */
-	public DeviceManager(long threadSleep) {
-		this.sleep = threadSleep;
+	public DeviceManager(long sleep) {
+		multiplexer.setSleep(sleep);
 	}
 	
 	public void setListener(DeviceManagerListener listener) {
@@ -44,23 +45,19 @@ public class DeviceManager implements IOIOLooper {
 	}
 	
 	/**
-	 * Adds a device on the IOIO thread to the device manager.
+	 * Adds a device to the device manager.
 	 * 
 	 * @param device
+	 * @param threaded
 	 */
-	public void add(Device device) {
-		App.log.i(App.TAG, "Device manager adding device: " + device.info());
-		this.devices.add(device);
-	}
-	
-	/**
-	 * Adds a device a device thread to the device manager.
-	 * 
-	 * @param device
-	 */
-	public void add(DeviceRunnable runnable) {
-		App.log.i(App.TAG, "Device manager adding runnable for device: " + runnable.device.info());
-		runnables.add(runnable);
+	public void add(Device device, boolean threaded) {
+		if (threaded) {
+			App.log.i(App.TAG, "Device manager adding device to seperate thread: " + device.info());
+			threader.add(device);
+		} else {
+			App.log.i(App.TAG, "Device manager adding device to IOIO thread: " + device.info());
+			multiplexer.add(device);
+		}
 	}
 	
 	/**
@@ -69,73 +66,34 @@ public class DeviceManager implements IOIOLooper {
 
 	@Override
 	public void incompatible() {
-		App.log.i(App.TAG, "IOIO incompatible");
-		
-		if (listener != null) {
+		if (listener != null)
 			listener.incompatible();
-		}
+		
+		multiplexer.incompatible();
+		threader.incompatible();
 	}
 
 	@Override
 	public void setup(IOIO ioio) throws ConnectionLostException, InterruptedException {
-		App.log.i(App.TAG, "IOIO setup");
+		if (listener != null)
+			listener.setup(ioio);
 		
-		if (listener != null) {
-			listener.connected(ioio);
-		}
-		
-		for (Device device : devices) {
-			App.log.i(App.TAG, "Setting up device: " + device.info());
-			device.setup(ioio);
-		}
-		for (DeviceRunnable runnable : runnables) {
-			App.log.i(App.TAG, "Setting up threaded device: " + runnable.device.info());
-			runnable.setup(ioio);
-		}
-		
-		for (DeviceRunnable runnable : runnables) {
-			App.log.i(App.TAG, "Starting thread for device: " + runnable.device.info());
-			Thread thread = new Thread(runnable);
-			threads.add(thread);
-			thread.start();
-		}
+		multiplexer.setup(ioio);
+		threader.setup(ioio);
 	}
 	
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
-		for (Device device : devices) {
-			device.loop();
-		}
-		
-		Thread.sleep(sleep);
+		multiplexer.loop();		
 	}
 	
 	@Override
 	public void disconnected() {
-		App.log.i(App.TAG, "IOIO disconnected");
-		
-		if (listener != null) {
+		if (listener != null)
 			listener.disconnected();
-		}
 		
-		for (Device device : devices) {
-			App.log.i(App.TAG, "Notifying device of disconnect: " + device.info());
-			device.disconnected();
-		}
-		for (DeviceRunnable runnable : runnables) {
-			App.log.i(App.TAG, "Notifying device of disconnect: " + runnable.device.info());
-			runnable.device.disconnected();
-		}
-		
-		for (Thread thread : threads) {
-			thread.interrupt();
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				// ignore
-			}
-		}
-		threads.clear();
+		multiplexer.disconnected();
+		threader.disconnected();
 	}
 
 }

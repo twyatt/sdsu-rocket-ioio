@@ -1,13 +1,16 @@
 package edu.sdsu.rocket.control.devices;
 
-import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
+import ioio.lib.util.IOIOLooper;
+import edu.sdsu.rocket.helpers.ThreadTimer;
 
-public interface Device {
+abstract public class Device extends ThreadTimer implements IOIOLooper {
 
-	public void setup(IOIO ioio) throws ConnectionLostException;
-	public void loop() throws ConnectionLostException, InterruptedException;
-	public void disconnected();
-	public String info();
+	@Override
+	public void loop() throws ConnectionLostException, InterruptedException {
+		sleep();
+	}
+	
+	abstract public String info();
 	
 }

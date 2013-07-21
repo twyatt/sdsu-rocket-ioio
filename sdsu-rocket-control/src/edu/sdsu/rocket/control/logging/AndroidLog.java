@@ -17,7 +17,7 @@ public class AndroidLog implements Logger {
 	}
 	
 	@Override
-	public void e(String tag, String msg, Exception e) {
+	public void e(String tag, String msg, Throwable e) {
 		if (App.DEBUG) {
 			Log.e(tag, msg, e);
 		} else {

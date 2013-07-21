@@ -18,6 +18,6 @@ public interface Logger {
 
 	public void i(String tag, String msg);
 	public void e(String tag, String msg);
-	public void e(String tag, String msg, Exception e);
+	public void e(String tag, String msg, Throwable e);
 	
 }

@@ -1,4 +1,4 @@
-package edu.sdsu.rocket.control;
+package edu.sdsu.rocket.command;
 
 public class Units {
 
