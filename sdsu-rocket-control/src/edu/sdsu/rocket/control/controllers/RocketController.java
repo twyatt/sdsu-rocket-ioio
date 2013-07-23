@@ -35,7 +35,7 @@ public class RocketController extends Threaded {
 	
 	public void setup(DeviceManager deviceManager, SensorManager sensorManager) {
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		rocket.accelerometer.setDataSource(sensorManager, accelerometerSensor);
+		rocket.internalAccelerometer.setDataSource(sensorManager, accelerometerSensor);
 		
 		deviceManager.add(rocket.connection1, true /* threaded */);
 		deviceManager.add(rocket.connection2, true /* threaded */);
@@ -52,7 +52,10 @@ public class RocketController extends Threaded {
 //		
 //		deviceManager.add(rocket.barometer, true /* threaded */);
 		
-		setSensorPriority(SensorPriority.SENSOR_PRIORITY_LOW);
+		deviceManager.add(rocket.accelerometer, true /* threaded */);
+		
+//		setSensorPriority(SensorPriority.SENSOR_PRIORITY_LOW);
+		setSensorPriority(SensorPriority.SENSOR_PRIORITY_HIGH);
 	}
 	
 	public void setSensorPriority(SensorPriority priority) {
@@ -61,16 +64,19 @@ public class RocketController extends Threaded {
 			rocket.tankPressureEthanol.setSleep(5 /* milliseconds */);
 			rocket.tankPressureEngine.setSleep(1 /* milliseconds */);
 			rocket.barometer.setSleep(1 /* milliseconds */);
+			rocket.accelerometer.setFrequency(100f /* Hz */);
 		} else if (SensorPriority.SENSOR_PRIORITY_MEDIUM.equals(priority)) {
 			rocket.tankPressureLOX.setSleep(50 /* milliseconds */);
 			rocket.tankPressureEthanol.setSleep(50 /* milliseconds */);
 			rocket.tankPressureEngine.setSleep(10 /* milliseconds */);
 			rocket.barometer.setSleep(10 /* milliseconds */);
+			rocket.accelerometer.setFrequency(10f /* Hz */);
 		} else { // SENSOR_PRIORITY_LOW
 			rocket.tankPressureLOX.setSleep(500 /* milliseconds */);
 			rocket.tankPressureEthanol.setSleep(500 /* milliseconds */);
 			rocket.tankPressureEngine.setSleep(500 /* milliseconds */);
 			rocket.barometer.setSleep(200 /* milliseconds */); // FIXME set frequency
+			rocket.accelerometer.setFrequency(1f /* Hz */);
 		}
 	}
 	

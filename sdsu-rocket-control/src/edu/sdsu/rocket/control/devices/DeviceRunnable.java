@@ -16,9 +16,8 @@ public class DeviceRunnable implements Runnable {
 	@Override
 	public void run() {
 		try {
-			while (!Thread.currentThread().isInterrupted()) {
+			while (!Thread.currentThread().isInterrupted())
 				device.loop();
-			}
 		} catch (ConnectionLostException e) {
 			App.log.e(App.TAG, "Connection lost with " + device.info(), e);
 		} catch (InterruptedException e) {

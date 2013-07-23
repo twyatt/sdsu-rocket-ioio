@@ -32,7 +32,6 @@ import edu.sdsu.rocket.logging.StreamLog;
 public class MainActivity extends IOIOActivity {
 
 	private DeviceManager deviceManager;
-	private PacketController command;
 	
 	private PowerManager.WakeLock wakelock;
 	
@@ -77,9 +76,8 @@ public class MainActivity extends IOIOActivity {
 
 	private void setupPacketController(Rocket rocket) {
 		PacketMultiplexer messenger = new PacketMultiplexer(rocket.connection1, rocket.connection2);
-		command = new PacketController(messenger);
-		rocket.connection1.setListener(command);
-		rocket.connection2.setListener(command);
+		rocket.connection1.setListener(new PacketController(messenger));
+		rocket.connection2.setListener(new PacketController(messenger));
 	}
 
 	private void setupDeviceManager() {

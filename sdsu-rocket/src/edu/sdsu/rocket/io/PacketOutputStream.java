@@ -32,7 +32,7 @@ public class PacketOutputStream extends DataOutputStream implements PacketWriter
 	}
 	
 	@Override
-	synchronized public void writePacket(byte messageId, byte[] data) throws IOException {
+	public void writePacket(byte messageId, byte[] data) throws IOException {
 		write(startBytes);
 		writeByte(messageId);
 		if (data == null || data.length == 0) {

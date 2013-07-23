@@ -5,7 +5,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 /**
  * Reads packets from an InputStream of the format:
  * 
@@ -15,6 +14,7 @@ public class PacketInputStream extends DataInputStream {
 	
 	private final byte[] startBytes;
 	private final int maxDataLength;
+	private int position;
 	
 	public PacketInputStream(InputStream in, byte[] startBytes, int maxDataLength) {
 		super(in);
@@ -27,9 +27,12 @@ public class PacketInputStream extends DataInputStream {
 	}
 
 	public Packet readPacket() throws IOException {
-		int position = 0;
+		System.out.println("avail = " + in.available());
+		
+		position = 0;
 		while (position < startBytes.length) {
 			int sb = in.read();
+			System.out.println("sb=" + sb);
 			if (sb < 0)
 				throw new EOFException();
 			
@@ -40,20 +43,23 @@ public class PacketInputStream extends DataInputStream {
 			}
 		}
 		
+		System.out.println("ID");
 		int id = in.read();
 		if (id < 0)
 			throw new EOFException();
 		
 		int length = readInt();
+		if (length < 0)
+			throw new PacketException("Invalid data length: " + length);
 		if (length > maxDataLength)
 			throw new PacketException("Data length of " + length + " exceeds max of " + maxDataLength);
 		
-		byte[] data = null;
-		if (length < 0) {
-			// TODO drop packet
-		} else if (length > 0) {
-			if (length > maxDataLength) // TODO drop packet instead
-				length = maxDataLength;
+//		System.out.println("length = " + length);
+		
+		byte[] data;
+		if (length == 0) {
+			data = null;
+		} else {
 			data = new byte[length];
 			readFully(data);
 		}

@@ -16,15 +16,20 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
-import edu.sdsu.rocket.command.controllers.PacketController;
-import edu.sdsu.rocket.command.controllers.PacketController.PacketControllerListener;
+import edu.sdsu.rocket.command.controllers.RocketController;
+import edu.sdsu.rocket.command.controllers.RocketController.RocketControllerListener;
 import edu.sdsu.rocket.command.io.TcpClient;
 import edu.sdsu.rocket.command.io.TcpClient.TcpClientListener;
 import edu.sdsu.rocket.command.models.Rocket;
-import edu.sdsu.rocket.io.Packet;
 
-public class MainFrame extends JFrame implements PacketControllerListener, TcpClientListener {
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.factories.FormFactory;
+
+public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
 
 	/**
 	 * 
@@ -34,21 +39,22 @@ public class MainFrame extends JFrame implements PacketControllerListener, TcpCl
 	private static final String DISCONNECT_TEXT = "Disconnect";
 	private static final String CONNECT_TEXT    = "Connect";
 	
-	private final Rocket rocket = new Rocket();
+	final private Rocket rocket = new Rocket();
 	
-	private TcpClient client = new TcpClient();
-	private PacketController controller;
+	final private TcpClient client = new TcpClient();
+	final private RocketController controller;
 	
 	private JTextField hostTextField;
 	private JTextField portTextField;
 	private JButton connectButton;
 	private JLabel lblInfo;
+	private JLabel lblX;
+	private JLabel lblY;
+	private JLabel lblZ;
 
 	public MainFrame() {
-		client.setListener(this);
-		controller = new PacketController(rocket, client);
-		controller.setListener(this);
-		client.setPacketListener(controller);
+		controller = new RocketController(rocket).setListener(this);
+		client.setPacketListener(controller).setListener(this);
 		
 		setSize(new Dimension(741, 506));
 		setResizable(false);
@@ -84,19 +90,33 @@ public class MainFrame extends JFrame implements PacketControllerListener, TcpCl
 	
 	@Override
 	public void onConnected() {
-		System.out.println("onConnected");
-		client.writePacket(Packet.IDENT_REQUEST, null);
+		controller.setWriter(client.getOutputStream());
+		try {
+			controller.sendIdentRequest();
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(this, "Failed to send ident request.\n" + e.getMessage());
+			e.printStackTrace();
+		}
+		controller.start();
 	}
 	
 	@Override
 	public void onDisconnected() {
-		System.out.println("onDisconnected");
+		controller.stop();
 		lblInfo.setText("");
 	}
 	
 	@Override
 	public void onChange() {
-		lblInfo.setText(rocket.ident);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				lblInfo.setText(rocket.ident);
+				lblX.setText(String.valueOf(rocket.accelerometer.getX()));
+				lblY.setText(String.valueOf(rocket.accelerometer.getY()));
+				lblZ.setText(String.valueOf(rocket.accelerometer.getZ()));
+			}
+		});
 	}
 
 	private void setupUI() {
@@ -115,8 +135,33 @@ public class MainFrame extends JFrame implements PacketControllerListener, TcpCl
 		JPanel mainPanel = new JPanel();
 		contentPane.add(mainPanel, BorderLayout.CENTER);
 		
-		lblInfo = new JLabel("Info: ?");
+		lblInfo = new JLabel("");
 		mainPanel.add(lblInfo);
+		
+		JPanel panel = new JPanel();
+		mainPanel.add(panel);
+		panel.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+				ColumnSpec.decode("184px"),
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("16px"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("max(10dlu;default)"),
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
+		
+		lblX = new JLabel("X");
+		panel.add(lblX, "2, 2, center, top");
+		
+		lblY = new JLabel("Y");
+		panel.add(lblY, "2, 4, center, default");
+		
+		lblZ = new JLabel("Z");
+		panel.add(lblZ, "2, 6, center, default");
 		
 		return contentPane;
 	}

@@ -9,9 +9,8 @@ import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketInputStream;
 import edu.sdsu.rocket.io.PacketListener;
 import edu.sdsu.rocket.io.PacketOutputStream;
-import edu.sdsu.rocket.io.PacketWriter;
 
-public class TcpClient extends Threaded implements PacketWriter {
+public class TcpClient extends Threaded {
 	
 	final private static int MAX_DATA_LENGTH = 1024000; // bytes
 	
@@ -38,11 +37,12 @@ public class TcpClient extends Threaded implements PacketWriter {
 	}
 	
 	public TcpClient setPacketListener(PacketListener listener) {
-		if (listener == null)
-			throw new NullPointerException();
 		this.packetListener = listener;
-		
 		return this;
+	}
+	
+	public PacketOutputStream getOutputStream() {
+		return out;
 	}
 	
 	public void connect(InetAddress address, int port) throws IOException {
@@ -71,21 +71,6 @@ public class TcpClient extends Threaded implements PacketWriter {
 		if (listener != null)
 			listener.onDisconnected();
 	}
-
-	@Override
-	public void write(Packet packet) {
-		writePacket(packet.messageId, packet.data);
-	}
-
-	@Override
-	public void writePacket(byte id, byte[] data) {
-		try {
-			out.writePacket(id, data);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	/*
 	 * Threaded interface methods.
@@ -93,10 +78,12 @@ public class TcpClient extends Threaded implements PacketWriter {
 
 	@Override
 	public void loop() {
-		try {
-			packetListener.onPacketReceived(in.readPacket());
-		} catch (IOException e) {
-			packetListener.onPacketError(e);
+		if (packetListener != null) {
+			try {
+				packetListener.onPacketReceived(in.readPacket());
+			} catch (IOException e) {
+				packetListener.onPacketError(e);
+			}
 		}
 	}
 

@@ -26,29 +26,43 @@ public class PacketController implements PacketListener, PacketWriter {
 	}
 	
 	public void sendIdent(String ident) {
-		writePacket(Packet.IDENT_RESPONSE, ident.getBytes());
+		try {
+			writePacket(Packet.IDENT_RESPONSE, ident.getBytes());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void onSensorRequest(Packet request) {
-		App.log.i(App.TAG, "onSensorRequest");
+		sendSensorData();
 	}
 	
 	public void sendSensorData() {
 		Rocket rocket = App.rocketController.getRocket();
 		buffer.clear();
 		
-		buffer.putFloat(rocket.tankPressureLOX.getVoltage());
-		buffer.putFloat(rocket.tankPressureEngine.getVoltage());
-		buffer.putFloat(rocket.tankPressureEthanol.getVoltage());
-		buffer.putFloat(rocket.barometer.pressure);
-		buffer.putFloat(rocket.barometer.temperature);
-		buffer.put((byte) (rocket.breakWire.isBroken() ? 1 : 0));
+//		buffer.putFloat(rocket.tankPressureLOX.getVoltage());
+//		buffer.putFloat(rocket.tankPressureEngine.getVoltage());
+//		buffer.putFloat(rocket.tankPressureEthanol.getVoltage());
+//		buffer.putFloat(rocket.barometer.pressure);
+//		buffer.putFloat(rocket.barometer.temperature);
+//		buffer.put((byte) (rocket.breakWire.isBroken() ? 1 : 0));
+		buffer.putFloat(rocket.accelerometer.getMultiplier());
+		buffer.putInt(rocket.accelerometer.getX());
+		buffer.putInt(rocket.accelerometer.getY());
+		buffer.putInt(rocket.accelerometer.getZ());
 		
 		buffer.flip();
 		byte[] data = new byte[buffer.limit()];
 		buffer.get(data);
 		
-		writePacket(Packet.SENSOR_RESPONSE, data);
+		try {
+			writePacket(Packet.SENSOR_RESPONSE, data);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void onDataCollectionRequest(Packet request) {
@@ -108,23 +122,13 @@ public class PacketController implements PacketListener, PacketWriter {
 	 */
 	
 	@Override
-	public void write(Packet packet) {
-		try {
-			writer.write(packet);
-		} catch (IOException e) {
-			App.log.e(App.TAG, "Packet controller failed to write packet.", e);
-			e.printStackTrace();
-		}
+	public void write(Packet packet) throws IOException {
+		writer.write(packet);
 	}
 
 	@Override
-	public void writePacket(byte id, byte[] data) {
-		try {
-			writer.writePacket(id, data);
-		} catch (IOException e) {
-			App.log.e(App.TAG, "Packet controller failed to write packet.", e);
-			e.printStackTrace();
-		}
+	public void writePacket(byte id, byte[] data) throws IOException {
+		writer.writePacket(id, data);
 	}
 	
 	/*

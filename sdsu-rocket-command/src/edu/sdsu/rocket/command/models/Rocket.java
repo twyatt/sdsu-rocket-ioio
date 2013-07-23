@@ -4,4 +4,6 @@ public class Rocket {
 
 	public String ident;
 	
+	public ADXL345 accelerometer = new ADXL345();
+	
 }

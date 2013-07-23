@@ -175,7 +175,7 @@ public class DataLogger {
 		});
 		
 		makeStream(ACCELEROMETER, ACCELEROMETER_BUFFER_SIZE);
-		rocket.accelerometer.setListener(new PhoneAccelerometer.PhoneAccelerometerListener() {
+		rocket.internalAccelerometer.setListener(new PhoneAccelerometer.PhoneAccelerometerListener() {
 			@Override
 			public void onPhoneAccelerometer(float x, float y, float z) {
 				if (enabled) {
@@ -198,7 +198,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, ACCELEROMETER + " = [" + rocket.accelerometer.x + ", " + rocket.accelerometer.y + ", " + rocket.accelerometer.z + "]");
+					App.log.i(App.TAG, ACCELEROMETER + " = [" + rocket.internalAccelerometer.x + ", " + rocket.internalAccelerometer.y + ", " + rocket.internalAccelerometer.z + "]");
 				}
 			}
 		});
@@ -210,7 +210,7 @@ public class DataLogger {
 		logTime();
 		
 		enabled = true;
-		rocket.accelerometer.start();
+		rocket.internalAccelerometer.start();
 		App.log.i(App.TAG, "Enabled data logging.");
 	}
 	
@@ -233,7 +233,7 @@ public class DataLogger {
 
 	public void disable() {
 		enabled = false;
-		rocket.accelerometer.stop();
+		rocket.internalAccelerometer.stop();
 		App.log.i(App.TAG, "Disabled data logging.");
 	}
 	

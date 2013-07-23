@@ -6,6 +6,7 @@ import ioio.lib.api.Uart.Parity;
 import ioio.lib.api.Uart.StopBits;
 import ioio.lib.api.exception.ConnectionLostException;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import edu.sdsu.rocket.io.Packet;
@@ -13,6 +14,7 @@ import edu.sdsu.rocket.io.PacketInputStream;
 import edu.sdsu.rocket.io.PacketListener;
 import edu.sdsu.rocket.io.PacketOutputStream;
 import edu.sdsu.rocket.io.PacketWriter;
+import edu.sdsu.rocket.io.PacketInputStream.PacketException;
 
 public class SB70 extends DeviceAdapter implements PacketWriter {
 	
@@ -37,6 +39,7 @@ public class SB70 extends DeviceAdapter implements PacketWriter {
 		this.baud = baud;
 		this.parity = parity;
 		this.stopbits = stopbits;
+		setSleep(0L);
 	}
 	
 	public SB70 setListener(PacketListener listener) {
@@ -79,13 +82,19 @@ public class SB70 extends DeviceAdapter implements PacketWriter {
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
 		try {
+//			System.out.println("avail = " + in.available());
 			Packet packet = in.readPacket();
 			if (listener != null)
 				listener.onPacketReceived(packet);
+		} catch (PacketException pe) {
+			System.out.println("dropped packet");
+			// TODO increment dropped packet counter
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			Thread.sleep(500L);
 			e.printStackTrace();
 		}
+		super.loop();
 	}
 	
 	@Override

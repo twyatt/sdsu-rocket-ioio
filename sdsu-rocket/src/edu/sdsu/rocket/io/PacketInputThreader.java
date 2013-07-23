@@ -32,8 +32,14 @@ public class PacketInputThreader extends Threaded {
 	public void loop() {
 		try {
 			listener.onPacketReceived(in.readPacket());
-		} catch (IOException e) {
-			listener.onPacketError(e);
+		} catch (IOException ioe) {
+			listener.onPacketError(ioe);
+			try {
+				Thread.sleep(500L);
+			} catch (InterruptedException ie) {
+				// TODO Auto-generated catch block
+				ie.printStackTrace();
+			}
 		}
 	}
 

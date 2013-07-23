@@ -1,8 +1,10 @@
 package edu.sdsu.rocket.control.models;
 
+import ioio.lib.api.SpiMaster;
 import ioio.lib.api.Uart.Parity;
 import ioio.lib.api.Uart.StopBits;
 import android.hardware.SensorManager;
+import edu.sdsu.rocket.control.devices.ADXL345;
 import edu.sdsu.rocket.control.devices.BreakWire;
 import edu.sdsu.rocket.control.devices.DeviceRunnable;
 import edu.sdsu.rocket.control.devices.MS5611;
@@ -43,9 +45,10 @@ public class Rocket {
 	public RelayValve loxValve;
 	public ServoValve ethanolValve;
 	
+	public ADXL345 accelerometer;
 	public MS5611 barometer;
 	
-	public PhoneAccelerometer accelerometer;
+	public PhoneAccelerometer internalAccelerometer;
 	
 	DeviceRunnable tankPressureLOXRunnable;
 	DeviceRunnable tankPressureEthanolRunnable;
@@ -69,15 +72,18 @@ public class Rocket {
 		loxValve     = new RelayValve(new Relay(13 /* pin */));
 		ethanolValve = new ServoValve(new PS050(14 /* pin */, 100 /* frequency */), ACTION_DURATION);
 		
-		// twiNum 1 = pin 1 (SDA) and 2 (SCL)
+		accelerometer = new ADXL345(29 /* miso */, 28 /* mosi */, 27 /* scl */, 30 /* cs */, SpiMaster.Rate.RATE_2M);
+		
+		// twiNum 1 = pin 1 (SDA) and pin 2 (SCL)
 		// VCC = 3.3V
 		barometer = new MS5611(1 /* twiNum */, MS5611.ADD_CSB_LOW /* address */, 30 /* sample rate */);
+		
 		
 		/*
 		 * Devices internal to the Android phone (not connected via the IOIO).
 		 */
 		
-		accelerometer = new PhoneAccelerometer(SensorManager.SENSOR_DELAY_FASTEST);
+		internalAccelerometer = new PhoneAccelerometer(SensorManager.SENSOR_DELAY_FASTEST);
 	}
 	
 }
