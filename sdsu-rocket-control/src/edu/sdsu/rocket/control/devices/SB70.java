@@ -6,15 +6,14 @@ import ioio.lib.api.Uart.Parity;
 import ioio.lib.api.Uart.StopBits;
 import ioio.lib.api.exception.ConnectionLostException;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketInputStream;
+import edu.sdsu.rocket.io.PacketInputStream.PacketException;
 import edu.sdsu.rocket.io.PacketListener;
 import edu.sdsu.rocket.io.PacketOutputStream;
 import edu.sdsu.rocket.io.PacketWriter;
-import edu.sdsu.rocket.io.PacketInputStream.PacketException;
 
 public class SB70 extends DeviceAdapter implements PacketWriter {
 	

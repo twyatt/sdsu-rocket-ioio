@@ -48,6 +48,11 @@ public class Packet {
 	public byte messageId;
 	public byte[] data;
 	
+	public Packet(byte messageId, byte[] data) {
+		this.messageId = messageId;
+		this.data = data;
+	}
+	
 	@Override
 	public String toString() {
 		return super.toString() + ": id=" + messageId + ", data.length=" + data.length;

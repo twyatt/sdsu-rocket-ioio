@@ -27,12 +27,9 @@ public class PacketInputStream extends DataInputStream {
 	}
 
 	public Packet readPacket() throws IOException {
-		System.out.println("avail = " + in.available());
-		
 		position = 0;
 		while (position < startBytes.length) {
 			int sb = in.read();
-			System.out.println("sb=" + sb);
 			if (sb < 0)
 				throw new EOFException();
 			
@@ -43,7 +40,6 @@ public class PacketInputStream extends DataInputStream {
 			}
 		}
 		
-		System.out.println("ID");
 		int id = in.read();
 		if (id < 0)
 			throw new EOFException();
@@ -54,8 +50,6 @@ public class PacketInputStream extends DataInputStream {
 		if (length > maxDataLength)
 			throw new PacketException("Data length of " + length + " exceeds max of " + maxDataLength);
 		
-//		System.out.println("length = " + length);
-		
 		byte[] data;
 		if (length == 0) {
 			data = null;
@@ -64,11 +58,7 @@ public class PacketInputStream extends DataInputStream {
 			readFully(data);
 		}
 		
-		Packet packet = new Packet();
-		packet.messageId = (byte) id;
-		packet.data = data;
-		
-		return packet;
+		return new Packet((byte) id, data);
 	}
 	
 	public class PacketException extends IOException {
