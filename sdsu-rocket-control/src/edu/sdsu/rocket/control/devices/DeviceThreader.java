@@ -12,7 +12,7 @@ public class DeviceThreader extends DeviceMultiplexer {
 	
 	private List<Thread> threads = new ArrayList<Thread>();
 	
-	private void start() {
+	synchronized private void start() {
 		for (Device device : devices) {
 			App.log.i(App.TAG, "Starting thread for device: " + device.info());
 			
@@ -22,7 +22,7 @@ public class DeviceThreader extends DeviceMultiplexer {
 		}
 	}
 	
-	private void stop() {
+	synchronized private void stop() {
 		for (Thread thread : threads) {
 			thread.interrupt();
 			try {
