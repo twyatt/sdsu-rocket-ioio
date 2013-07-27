@@ -3,7 +3,6 @@ package edu.sdsu.rocket.command.controllers;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.sdsu.rocket.command.models.Rocket;
 import edu.sdsu.rocket.helpers.Threaded;
@@ -13,9 +12,6 @@ import edu.sdsu.rocket.io.PacketWriter;
 
 public class RocketController extends Threaded implements PacketListener {
 	
-	AtomicInteger sensorRequests = new AtomicInteger();
-	AtomicInteger sensorResponses = new AtomicInteger();
-
 	public interface RocketControllerListener {
 		public void onChange();
 	}
@@ -27,7 +23,7 @@ public class RocketController extends Threaded implements PacketListener {
 
 	public RocketController(Rocket rocket) {
 		this.rocket = rocket;
-		setFrequency(1f /* Hz */);
+		setFrequency(50f /* Hz */);
 	}
 	
 	public RocketController setListener(RocketControllerListener listener) {
@@ -52,14 +48,10 @@ public class RocketController extends Threaded implements PacketListener {
 	}
 	
 	public void sendSensorRequest() throws IOException {
-		int n = sensorRequests.incrementAndGet();
-//		System.out.println("req = " + n);
 		writer.writePacket(Packet.SENSOR_REQUEST, null);
 	}
 	
 	private void onSensorResponse(Packet packet) {
-		int n = sensorResponses.incrementAndGet();
-//		System.out.println("resp = " + n);
 //		rocket.waitingForSensorData.set(false);
 		
 		ByteBuffer buffer = ByteBuffer.wrap(packet.data);

@@ -21,7 +21,7 @@ public class DeviceRunnable implements Runnable {
 		} catch (ConnectionLostException e) {
 			App.log.e(App.TAG, "Connection lost with " + device.info(), e);
 		} catch (InterruptedException e) {
-			// silently ignore
+			App.log.e(App.TAG, "Thread interrupted for " + device.info(), e);
 		}
 	}
 

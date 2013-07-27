@@ -31,6 +31,7 @@ public class PacketController implements PacketListener, PacketWriter {
 	
 	public void start() {
 		flushThread = new Thread(new FlushThread());
+		flushThread.setName("Packet Controller Flush Thread");
 		flushThread.start();
 	}
 	
@@ -90,7 +91,7 @@ public class PacketController implements PacketListener, PacketWriter {
 
 	private void onDataCollectionRequest(Packet request) {
 		if (request.data == null || request.data.length == 0) {
-			App.stats.network.packetsDropped++;
+			App.stats.network.packetsDropped.incrementAndGet();
 			App.log.e(App.TAG, "Invalid data collection request.");
 			return;
 		}
@@ -148,9 +149,8 @@ public class PacketController implements PacketListener, PacketWriter {
 	public void write(Packet packet) throws IOException {
 		if (!packetQueue.offer(packet)) {
 			// FIXME log queue overflow error
-			// FIXME increment packet dropped counter
+			App.stats.network.packetsDropped.incrementAndGet();
 		}
-//		writer.write(packet);
 	}
 
 	@Override

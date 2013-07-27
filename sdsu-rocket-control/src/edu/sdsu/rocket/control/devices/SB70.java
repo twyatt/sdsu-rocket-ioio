@@ -8,6 +8,7 @@ import ioio.lib.api.exception.ConnectionLostException;
 
 import java.io.IOException;
 
+import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketInputStream;
 import edu.sdsu.rocket.io.PacketInputStream.PacketException;
@@ -50,18 +51,16 @@ public class SB70 extends DeviceAdapter implements PacketWriter {
 		writePacket(packet.messageId, packet.data);
 	}
 	
-	public void write(byte id, byte data) throws IOException {
-		writePacket(id, new byte[] { data });
-	}
-	
 	public void writePacket(byte id, byte[] data) throws IOException {
 		try {
 			ioio.beginBatch();
 			out.writePacket(id, data);
 			ioio.endBatch();
+			App.stats.network.packetsSent.incrementAndGet();
 		} catch (ConnectionLostException e) {
-			// TODO Auto-generated catch block
+			App.stats.ioio.errors.incrementAndGet();
 			e.printStackTrace();
+			Thread.yield();
 		}
 	}
 	
@@ -81,19 +80,27 @@ public class SB70 extends DeviceAdapter implements PacketWriter {
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
 		try {
-//			System.out.println("avail = " + in.available());
 			Packet packet = in.readPacket();
+			App.stats.network.packetsReceived.incrementAndGet();
 			if (listener != null)
 				listener.onPacketReceived(packet);
 		} catch (PacketException pe) {
-			System.out.println("dropped packet");
-			// TODO increment dropped packet counter
+			App.stats.network.packetsDropped.incrementAndGet();
+			App.log.e(App.TAG, pe.getMessage(), pe);
+			Thread.yield();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Thread.sleep(500L);
+			App.stats.ioio.errors.incrementAndGet();
 			e.printStackTrace();
+			Thread.yield();
 		}
 		super.loop();
+	}
+	
+	@Override
+	public void disconnected() {
+		in = null;
+		out = null;
+		super.disconnected();
 	}
 	
 	@Override

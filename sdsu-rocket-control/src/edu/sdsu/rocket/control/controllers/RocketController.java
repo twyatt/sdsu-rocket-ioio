@@ -22,6 +22,8 @@ public class RocketController extends Threaded {
 	private float lastEthanolCycle;
 	
 	public RocketController(Rocket rocket) {
+		super("Rocket Controller");
+		
 		if (rocket == null)
 			throw new NullPointerException();
 		this.rocket = rocket;

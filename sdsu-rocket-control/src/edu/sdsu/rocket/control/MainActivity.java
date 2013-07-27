@@ -7,15 +7,14 @@ import ioio.lib.util.android.IOIOActivity;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.Menu;
@@ -32,10 +31,18 @@ import edu.sdsu.rocket.logging.StreamLog;
 public class MainActivity extends IOIOActivity {
 
 	private DeviceManager deviceManager;
+	private final Timer timer = new Timer();
 	
 	private PowerManager.WakeLock wakelock;
 	
 	private TextView ioioStatusTextView;
+	private TextView ioioConnectsTextView;
+	private TextView ioioDisconnectsTextView;
+	private TextView ioioErrorsTextView;
+	private TextView packetsSentTextView;
+	private TextView packetsReceivedTextView;
+	private TextView packetsDroppedTextView;
+	private TextView upTimeTextView;
 	
 	@Override
 	protected IOIOLooper createIOIOLooper() {
@@ -66,6 +73,24 @@ public class MainActivity extends IOIOActivity {
 //		App.rocketController.start(); // TODO uncomment?
 		
 		setupPacketController(rocket);
+		
+		long delay = 1000L; // ms
+		long period = 1000L; // ms
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						ioioErrorsTextView.setText(String.valueOf(App.stats.ioio.errors.get()));
+						packetsSentTextView.setText(String.valueOf(App.stats.network.packetsSent.get()));
+						packetsReceivedTextView.setText(String.valueOf(App.stats.network.packetsReceived.get()));
+						packetsDroppedTextView.setText(String.valueOf(App.stats.network.packetsDropped.get()));
+						upTimeTextView.setText(String.valueOf(App.elapsedTime()) + " s");
+					}
+				});
+			}
+		}, delay, period);
 	}
 
 	private void disableDeviceSleep() {
@@ -85,15 +110,33 @@ public class MainActivity extends IOIOActivity {
 		deviceManager.setListener(new DeviceManager.DeviceManagerListener() {
 			@Override
 			public void incompatible() {
-				updateTextView(ioioStatusTextView, "IOIO incompatible.");
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						ioioStatusTextView.setText("Incompatible");
+						App.stats.ioio.errors.incrementAndGet();
+					}
+				});
 			}
 			@Override
 			public void disconnected() {
-				updateTextView(ioioStatusTextView, "IOIO disconnected.");
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						ioioStatusTextView.setText("Disconnected");
+						ioioDisconnectsTextView.setText(String.valueOf(App.stats.ioio.disconnects.incrementAndGet()));
+					}
+				});
 			}
 			@Override
 			public void setup(IOIO ioio) {
-				updateTextView(ioioStatusTextView, "IOIO connected.");
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						ioioStatusTextView.setText("Connected");
+						ioioConnectsTextView.setText(String.valueOf(App.stats.ioio.connects.incrementAndGet()));
+					}
+				});
 			}
 		});
 	}
@@ -101,6 +144,13 @@ public class MainActivity extends IOIOActivity {
 	private void setupUI() {
 		setContentView(R.layout.activity_main);
 		ioioStatusTextView = (TextView) findViewById(R.id.ioio_status);
+		ioioConnectsTextView = (TextView) findViewById(R.id.ioio_connects);
+		ioioDisconnectsTextView = (TextView) findViewById(R.id.ioio_disconnects);
+		ioioErrorsTextView = (TextView) findViewById(R.id.ioio_errors);
+		packetsSentTextView = (TextView) findViewById(R.id.packets_sent);
+		packetsReceivedTextView = (TextView) findViewById(R.id.packets_received);
+		packetsDroppedTextView = (TextView) findViewById(R.id.packets_dropped);
+		upTimeTextView = (TextView) findViewById(R.id.up_time);
 	}
 	
 	private void setupLogging() {
@@ -158,27 +208,6 @@ public class MainActivity extends IOIOActivity {
 //		Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 //		startActivity(settingsIntent);
 //	}
-
-	/**
-	 * http://stackoverflow.com/questions/7975473/detect-wifi-ip-address-on-android
-	 * @return
-	 */
-	@SuppressLint("DefaultLocale")
-	public String getIpAddr() {
-		WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-		int ip = wifiInfo.getIpAddress();
-		
-		String ipString = String.format(
-			"%d.%d.%d.%d",
-			(ip & 0xff),
-			(ip >> 8 & 0xff),
-			(ip >> 16 & 0xff),
-			(ip >> 24 & 0xff)
-		);
-		
-		return ipString;
-	}
 	
 	private void updateTextView(final TextView textView, final String text) {
 		runOnUiThread(new Runnable() {

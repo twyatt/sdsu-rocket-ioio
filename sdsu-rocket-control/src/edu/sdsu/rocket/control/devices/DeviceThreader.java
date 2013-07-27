@@ -17,6 +17,7 @@ public class DeviceThreader extends DeviceMultiplexer {
 			App.log.i(App.TAG, "Starting thread for device: " + device.info());
 			
 			Thread thread = new Thread(new DeviceRunnable(device));
+			thread.setName(device.getClass().getSimpleName());
 			threads.add(thread);
 			thread.start();
 		}

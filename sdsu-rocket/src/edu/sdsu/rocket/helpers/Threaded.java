@@ -6,6 +6,15 @@ public abstract class Threaded implements LooperRunnableListener {
 	
 	LooperRunnable runnable = new LooperRunnable(this);
 	private Thread thread;
+	private String name;
+	
+	public Threaded() {
+		this(null);
+	}
+	
+	public Threaded(String name) {
+		this.name = name;
+	}
 	
 	/**
 	 * Sets the duration to sleep between thread loops (in milliseconds).
@@ -27,6 +36,8 @@ public abstract class Threaded implements LooperRunnableListener {
 	
 	public void start() {
 		thread = new Thread(runnable);
+		if (name != null)
+			thread.setName(name);
 		thread.start();
 	}
 	
