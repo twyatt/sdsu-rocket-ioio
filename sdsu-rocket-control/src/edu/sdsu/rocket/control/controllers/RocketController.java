@@ -37,7 +37,9 @@ public class RocketController extends Threaded {
 	
 	public void setup(DeviceManager deviceManager, SensorManager sensorManager) {
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		rocket.internalAccelerometer.setDataSource(sensorManager, accelerometerSensor);
+		rocket.internalAccelerometer
+			.setDataSource(accelerometerSensor)
+			.setSensorManager(sensorManager);
 		
 		deviceManager.add(rocket.connection1, true /* threaded */);
 		deviceManager.add(rocket.connection2, true /* threaded */);
@@ -54,7 +56,7 @@ public class RocketController extends Threaded {
 //		
 //		deviceManager.add(rocket.barometer, true /* threaded */);
 		
-		deviceManager.add(rocket.accelerometer, true /* threaded */);
+//		deviceManager.add(rocket.accelerometer, true /* threaded */);
 		
 //		setSensorPriority(SensorPriority.SENSOR_PRIORITY_LOW);
 		setSensorPriority(SensorPriority.SENSOR_PRIORITY_HIGH);

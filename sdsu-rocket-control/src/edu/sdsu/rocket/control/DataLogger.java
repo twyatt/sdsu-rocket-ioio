@@ -198,7 +198,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, ACCELEROMETER + " = [" + rocket.internalAccelerometer.x + ", " + rocket.internalAccelerometer.y + ", " + rocket.internalAccelerometer.z + "]");
+					App.log.i(App.TAG, ACCELEROMETER + " = [" + rocket.internalAccelerometer.getX() + ", " + rocket.internalAccelerometer.getY() + ", " + rocket.internalAccelerometer.getZ() + "]");
 				}
 			}
 		});

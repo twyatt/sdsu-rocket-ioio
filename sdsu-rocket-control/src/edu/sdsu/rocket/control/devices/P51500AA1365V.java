@@ -14,7 +14,7 @@ public class P51500AA1365V extends DeviceAdapter  {
 		public void onVoltage(float voltage);
 	}
 	
-	volatile private float voltage;
+	private volatile float voltage;
 	
 	private P51500AA1365VListener listener;
 	
@@ -55,8 +55,9 @@ public class P51500AA1365V extends DeviceAdapter  {
 	public void loop() throws ConnectionLostException, InterruptedException {
 		voltage = input.getVoltage();
 		
-		if (listener != null)
+		if (listener != null) {
 			listener.onVoltage(voltage);
+		}
 		
 		super.loop();
 	}

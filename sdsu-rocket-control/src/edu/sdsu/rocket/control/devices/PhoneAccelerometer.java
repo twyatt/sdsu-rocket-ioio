@@ -12,8 +12,8 @@ public class PhoneAccelerometer implements SensorEventListener {
 	}
 
 	private static final int X_INDEX = 0;
-	private static final int Y_INDEX = 0;
-	private static final int Z_INDEX = 0;
+	private static final int Y_INDEX = 1;
+	private static final int Z_INDEX = 2;
 	
 	private PhoneAccelerometerListener listener;
 	
@@ -21,31 +21,54 @@ public class PhoneAccelerometer implements SensorEventListener {
 	private Sensor dataSource;
 	private int rate;
 	
-	public float x;
-	public float y;
-	public float z;
+	private volatile float x;
+	private volatile float y;
+	private volatile float z;
 	
 	public PhoneAccelerometer(int rate) {
 		this.rate = rate;
 	}
 	
-	public void setListener(PhoneAccelerometerListener listener) {
+	public PhoneAccelerometer setListener(PhoneAccelerometerListener listener) {
 		this.listener = listener;
+		return this;
+	}
+	
+	public PhoneAccelerometer setSensorManager(SensorManager sensorManager) {
+		this.sensorManager = sensorManager;
+		return this;
 	}
 
-	public void setDataSource(SensorManager sensorManager, Sensor dataSource) {
-		this.sensorManager = sensorManager;
+	public PhoneAccelerometer setDataSource(Sensor dataSource) {
 		this.dataSource = dataSource;
+		return this;
 	}
 	
 	public void start() {
-		if (sensorManager != null && dataSource != null) {
-			sensorManager.registerListener(this, dataSource, rate);
+		if (sensorManager == null) {
+			throw new NullPointerException();
 		}
+		if (dataSource == null) {
+			throw new NullPointerException();
+		}
+		
+		sensorManager.registerListener(this, dataSource, rate);
 	}
 	
 	public void stop() {
 		sensorManager.unregisterListener(this);
+	}
+	
+	public float getX() {
+		return x;
+	}
+	
+	public float getY() {
+		return y;
+	}
+	
+	public float getZ() {
+		return z;
 	}
 	
 	@Override
@@ -56,11 +79,11 @@ public class PhoneAccelerometer implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
+		x = event.values[X_INDEX];
+		y = event.values[Y_INDEX];
+		z = event.values[Z_INDEX];
+		
 		if (listener != null) {
-			x = event.values[X_INDEX];
-			y = event.values[Y_INDEX];
-			z = event.values[Z_INDEX];
-			
 			listener.onPhoneAccelerometer(x, y, z);
 		}
 	}

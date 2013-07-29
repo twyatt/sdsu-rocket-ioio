@@ -112,9 +112,14 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			@Override
 			public void run() {
 				lblInfo.setText(rocket.ident);
+				
 				lblX.setText(String.valueOf(rocket.accelerometer.getX()));
 				lblY.setText(String.valueOf(rocket.accelerometer.getY()));
 				lblZ.setText(String.valueOf(rocket.accelerometer.getZ()));
+				
+//				lblX.setText(String.valueOf(rocket.internalAccelerometer.getX()));
+//				lblY.setText(String.valueOf(rocket.internalAccelerometer.getY()));
+//				lblZ.setText(String.valueOf(rocket.internalAccelerometer.getZ()));
 			}
 		});
 	}
@@ -178,7 +183,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		connectionPanel.add(lblHost);
 		
 		hostTextField = new JTextField();
-		hostTextField.setText("192.168.5.5");
+		hostTextField.setText("10.0.1.1");
 		lblHost.setLabelFor(hostTextField);
 		connectionPanel.add(hostTextField);
 		hostTextField.setColumns(10);

@@ -125,6 +125,7 @@ public class MainActivity extends IOIOActivity {
 					public void run() {
 						ioioStatusTextView.setText("Disconnected");
 						ioioDisconnectsTextView.setText(String.valueOf(App.stats.ioio.disconnects.incrementAndGet()));
+						App.rocketController.getRocket().internalAccelerometer.stop();
 					}
 				});
 			}
@@ -135,6 +136,7 @@ public class MainActivity extends IOIOActivity {
 					public void run() {
 						ioioStatusTextView.setText("Connected");
 						ioioConnectsTextView.setText(String.valueOf(App.stats.ioio.connects.incrementAndGet()));
+						App.rocketController.getRocket().internalAccelerometer.start();
 					}
 				});
 			}

@@ -23,7 +23,7 @@ public class RocketController extends Threaded implements PacketListener {
 
 	public RocketController(Rocket rocket) {
 		this.rocket = rocket;
-		setFrequency(50f /* Hz */);
+		setFrequency(100f /* Hz */);
 	}
 	
 	public RocketController setListener(RocketControllerListener listener) {
@@ -56,10 +56,16 @@ public class RocketController extends Threaded implements PacketListener {
 		
 		ByteBuffer buffer = ByteBuffer.wrap(packet.data);
 		try {
+			// for ADXL345
 			rocket.accelerometer.multiplier = buffer.getFloat();
 			rocket.accelerometer.x = buffer.getInt();
 			rocket.accelerometer.y = buffer.getInt();
 			rocket.accelerometer.z = buffer.getInt();
+			
+			// for internal accelerometer
+//			rocket.internalAccelerometer.x = buffer.getFloat();
+//			rocket.internalAccelerometer.y = buffer.getFloat();
+//			rocket.internalAccelerometer.z = buffer.getFloat();
 		} catch (BufferUnderflowException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

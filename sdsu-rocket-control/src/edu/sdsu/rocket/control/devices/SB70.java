@@ -51,7 +51,7 @@ public class SB70 extends DeviceAdapter implements PacketWriter {
 		writePacket(packet.messageId, packet.data);
 	}
 	
-	public void writePacket(byte id, byte[] data) throws IOException {
+	synchronized public void writePacket(byte id, byte[] data) throws IOException {
 		try {
 			ioio.beginBatch();
 			out.writePacket(id, data);
@@ -82,16 +82,17 @@ public class SB70 extends DeviceAdapter implements PacketWriter {
 		try {
 			Packet packet = in.readPacket();
 			App.stats.network.packetsReceived.incrementAndGet();
-			if (listener != null)
+			if (listener != null) {
 				listener.onPacketReceived(packet);
+			}
 		} catch (PacketException pe) {
 			App.stats.network.packetsDropped.incrementAndGet();
 			App.log.e(App.TAG, pe.getMessage(), pe);
 			Thread.yield();
 		} catch (IOException e) {
 			App.stats.ioio.errors.incrementAndGet();
-			e.printStackTrace();
-			Thread.yield();
+			App.log.e(App.TAG, e.getMessage(), e);
+			throw new ConnectionLostException(e);
 		}
 		super.loop();
 	}

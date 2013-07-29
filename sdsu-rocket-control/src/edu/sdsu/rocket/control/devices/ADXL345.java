@@ -1,5 +1,6 @@
 package edu.sdsu.rocket.control.devices;
 
+import edu.sdsu.rocket.control.App;
 import ioio.lib.api.DigitalInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -118,7 +119,7 @@ public class ADXL345 extends DeviceAdapter {
 		clk  = new DigitalOutput.Spec(sclPin);
 		slaveSelect = new DigitalOutput.Spec[] { new DigitalOutput.Spec(csPin) };
 		this.rate = rate;
-		setSleep(10L);
+		setFrequency(10L); // default to 10 Hz
 	}
 	
 	public ADXL345 setListener(ADXL345Listener listener) {

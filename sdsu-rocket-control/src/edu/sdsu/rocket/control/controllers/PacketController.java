@@ -11,7 +11,7 @@ import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketListener;
 import edu.sdsu.rocket.io.PacketWriter;
 
-public class PacketController implements PacketListener, PacketWriter {
+public class PacketController implements PacketListener {
 	
 	private static final int BUFFER_SIZE = 1024;
 	
@@ -51,7 +51,7 @@ public class PacketController implements PacketListener, PacketWriter {
 	
 	public void sendIdent(String ident) {
 		try {
-			writePacket(Packet.IDENT_RESPONSE, ident.getBytes());
+			send(Packet.IDENT_RESPONSE, ident.getBytes());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -72,17 +72,22 @@ public class PacketController implements PacketListener, PacketWriter {
 //		buffer.putFloat(rocket.barometer.pressure);
 //		buffer.putFloat(rocket.barometer.temperature);
 //		buffer.put((byte) (rocket.breakWire.isBroken() ? 1 : 0));
-		buffer.putFloat(rocket.accelerometer.getMultiplier());
-		buffer.putInt(rocket.accelerometer.getX());
-		buffer.putInt(rocket.accelerometer.getY());
-		buffer.putInt(rocket.accelerometer.getZ());
+		
+		buffer.putFloat(rocket.internalAccelerometer.getX());
+		buffer.putFloat(rocket.internalAccelerometer.getY());
+		buffer.putFloat(rocket.internalAccelerometer.getZ());
+		
+//		buffer.putFloat(rocket.accelerometer.getMultiplier());
+//		buffer.putInt(rocket.accelerometer.getX());
+//		buffer.putInt(rocket.accelerometer.getY());
+//		buffer.putInt(rocket.accelerometer.getZ());
 		
 		buffer.flip();
 		byte[] data = new byte[buffer.limit()];
 		buffer.get(data);
 		
 		try {
-			writePacket(Packet.SENSOR_RESPONSE, data);
+			send(Packet.SENSOR_RESPONSE, data);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -141,21 +146,15 @@ public class PacketController implements PacketListener, PacketWriter {
 //		}
 	}
 	
-	/*
-	 * PacketWriter interface methods.
-	 */
+	public void send(byte id, byte[] data) throws IOException {
+		send(new Packet(id, data));
+	}
 	
-	@Override
-	public void write(Packet packet) throws IOException {
+	public void send(Packet packet) {
 		if (!packetQueue.offer(packet)) {
-			// FIXME log queue overflow error
+			App.log.e(App.TAG, "Packet controller queue overflow.");
 			App.stats.network.packetsDropped.incrementAndGet();
 		}
-	}
-
-	@Override
-	public void writePacket(byte id, byte[] data) throws IOException {
-		write(new Packet(id, data));
 	}
 	
 	/*
@@ -185,20 +184,20 @@ public class PacketController implements PacketListener, PacketWriter {
 		public void run() {
 			try {
 				while (!Thread.currentThread().isInterrupted()) {
-					try {
-						writer.write(packetQueue.take());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						// FIXME increment packets dropped counter
-						e.printStackTrace();
-						Thread.sleep(500L);
-					}
+					Packet packet = packetQueue.take();
+					writer.write(packet);
 				}
+			} catch (IOException e) {
+				App.log.e(App.TAG, "Flush thread failed to write packet.", e);
+				App.stats.network.packetsDropped.incrementAndGet();
+				e.printStackTrace();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				App.log.e(App.TAG, "Flush thread interrupted.", e);
+				App.stats.ioio.errors.incrementAndGet();
 				e.printStackTrace();
 			}
 		}
+		
 		
 	}
 
