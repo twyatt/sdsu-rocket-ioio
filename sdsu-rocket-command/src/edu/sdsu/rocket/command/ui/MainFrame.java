@@ -53,7 +53,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JLabel lblY;
 	private JLabel lblZ;
 	private GraphPanel accelerometerPanel;
-	private JButton btnNewButton;
+	private GaugePanel loxPanel;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -186,20 +186,9 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		accelerometerPanel.setPreferredSize(new Dimension(200, 100));
 		mainPanel.add(accelerometerPanel);
 		
-		btnNewButton = new JButton("New button");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				accelerometerPanel.point(-5f, Color.CYAN);
-				accelerometerPanel.step(1);
-				accelerometerPanel.point(-5f, Color.CYAN);
-				accelerometerPanel.step(1);
-				accelerometerPanel.point(-5f, Color.CYAN);
-				accelerometerPanel.step(1);
-				accelerometerPanel.point(-5f, Color.CYAN);
-				accelerometerPanel.step(1);
-			}
-		});
-		mainPanel.add(btnNewButton);
+		loxPanel = new GaugePanel(0 /* min */, 500 /* max */);
+		loxPanel.setPreferredSize(new Dimension(100, 100));
+		mainPanel.add(loxPanel);
 		
 		return contentPane;
 	}

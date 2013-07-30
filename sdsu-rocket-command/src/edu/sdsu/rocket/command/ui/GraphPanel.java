@@ -9,6 +9,9 @@ import javax.swing.JPanel;
 
 public class GraphPanel extends JPanel {
 
+	private static final int IMAGE_TYPE = BufferedImage.TYPE_INT_RGB;
+	private static final Color COORDINATES_COLOR = new Color(255, 255, 255, 128);
+
 	/**
 	 * 
 	 */
@@ -57,7 +60,7 @@ public class GraphPanel extends JPanel {
 	}
 	
 	private void setup() {
-		bufferedImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+		bufferedImage = new BufferedImage(getWidth(), getHeight(), IMAGE_TYPE);
 	}
 	
 	private void drawCoordinates(Graphics g, Color color) {
@@ -98,7 +101,7 @@ public class GraphPanel extends JPanel {
 			g.drawImage(bufferedImage, 0, 0, getBackground(), null /* observer */);
 		}
 		
-		drawCoordinates(g, Color.WHITE);
+		drawCoordinates(g, COORDINATES_COLOR);
 	}
 
 }
