@@ -1,6 +1,7 @@
 package edu.sdsu.rocket.command.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -18,16 +19,16 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
+import com.jgoodies.forms.factories.FormFactory;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
+
 import edu.sdsu.rocket.command.controllers.RocketController;
 import edu.sdsu.rocket.command.controllers.RocketController.RocketControllerListener;
 import edu.sdsu.rocket.command.io.TcpClient;
 import edu.sdsu.rocket.command.io.TcpClient.TcpClientListener;
 import edu.sdsu.rocket.command.models.Rocket;
-
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.factories.FormFactory;
 
 public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
 
@@ -51,6 +52,8 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JLabel lblX;
 	private JLabel lblY;
 	private JLabel lblZ;
+	private GraphPanel accelerometerPanel;
+	private JButton btnNewButton;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -113,9 +116,18 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			public void run() {
 				lblInfo.setText(rocket.ident);
 				
-				lblX.setText(String.valueOf(rocket.accelerometer.getX()));
-				lblY.setText(String.valueOf(rocket.accelerometer.getY()));
-				lblZ.setText(String.valueOf(rocket.accelerometer.getZ()));
+				float x = rocket.accelerometer.getX();
+				float y = rocket.accelerometer.getY();
+				float z = rocket.accelerometer.getZ();
+				
+				lblX.setText(String.valueOf(x));
+				lblY.setText(String.valueOf(y));
+				lblZ.setText(String.valueOf(z));
+				
+				accelerometerPanel.point(x, Color.RED);
+				accelerometerPanel.point(y, Color.GREEN);
+				accelerometerPanel.point(z, Color.BLUE);
+				accelerometerPanel.step();
 				
 //				lblX.setText(String.valueOf(rocket.internalAccelerometer.getX()));
 //				lblY.setText(String.valueOf(rocket.internalAccelerometer.getY()));
@@ -168,6 +180,27 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		lblZ = new JLabel("Z");
 		panel.add(lblZ, "2, 6, center, default");
 		
+		accelerometerPanel = new GraphPanel(-10 /* min */, 10 /* max */);
+		accelerometerPanel.setBorder(null);
+		accelerometerPanel.setBackground(Color.WHITE);
+		accelerometerPanel.setPreferredSize(new Dimension(200, 100));
+		mainPanel.add(accelerometerPanel);
+		
+		btnNewButton = new JButton("New button");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				accelerometerPanel.point(-5f, Color.CYAN);
+				accelerometerPanel.step(1);
+				accelerometerPanel.point(-5f, Color.CYAN);
+				accelerometerPanel.step(1);
+				accelerometerPanel.point(-5f, Color.CYAN);
+				accelerometerPanel.step(1);
+				accelerometerPanel.point(-5f, Color.CYAN);
+				accelerometerPanel.step(1);
+			}
+		});
+		mainPanel.add(btnNewButton);
+		
 		return contentPane;
 	}
 
@@ -177,7 +210,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		JPanel connectionPanel = new JPanel();
 		connectionPanel.setBorder(null);
 		toolBar.add(connectionPanel);
-		connectionPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+		connectionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
 		JLabel lblHost = new JLabel("Host");
 		connectionPanel.add(lblHost);

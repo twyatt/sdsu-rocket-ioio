@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import edu.sdsu.rocket.helpers.Threaded;
 import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketInputStream;
 import edu.sdsu.rocket.io.PacketListener;
 import edu.sdsu.rocket.io.PacketOutputStream;
 
-public class TcpClient extends Threaded {
+public class TcpClient {
 	
 	final private static int MAX_DATA_LENGTH = 1024000; // bytes
 	
@@ -27,9 +26,8 @@ public class TcpClient extends Threaded {
 	private PacketOutputStream out;
 	private PacketInputStream in;
 	
-	public TcpClient() {
-		setSleep(0L);
-	}
+	private Thread readThread;
+	private boolean isRunning;
 	
 	public TcpClient setListener(TcpClientListener listener) {
 		this.listener = listener;
@@ -53,43 +51,60 @@ public class TcpClient extends Threaded {
 		
 		start();
 		
-		if (listener != null)
+		if (listener != null) {
 			listener.onConnected();
+		}
 	}
 	
 	public void disconnect() {
+		stop();
 		
 		try {
-			socket.close();
+			if (!socket.isClosed()) {
+				socket.close();
+			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		stop();
-		
-		if (listener != null)
+		if (listener != null) {
 			listener.onDisconnected();
+		}
 	}
 	
-	/*
-	 * Threaded interface methods.
-	 */
-
-	@Override
-	public void loop() {
-		if (packetListener != null) {
-			try {
-				packetListener.onPacketReceived(in.readPacket());
-			} catch (IOException e) {
-				packetListener.onPacketError(e);
-			}
+	private void start() {
+		if (isRunning)
+			throw new IllegalStateException("TCP read thread already running.");
+		
+		readThread = new Thread(new TcpReader());
+		readThread.setName("TCP Read");
+		readThread.start();
+		isRunning = true;
+	}
+	
+	private void stop() {
+		if (isRunning) {
+			readThread.interrupt();
 		}
 	}
 
-	@Override
-	public void interrupted() {
-		// silently ignore
+	public class TcpReader implements Runnable {
+		
+		@Override
+		public void run() {
+			// http://stackoverflow.com/questions/141560/should-try-catch-go-inside-or-outside-a-loop
+			try {
+				while (!Thread.currentThread().isInterrupted()) {
+					Packet packet = in.readPacket();
+					packetListener.onPacketReceived(packet);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				isRunning = false;
+				disconnect();
+			}
+		}
+		
 	}
 
 }

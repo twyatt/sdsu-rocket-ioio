@@ -1,6 +1,6 @@
 package edu.sdsu.rocket.command.models;
 
-public class PhoneAccelerometer {
+public class PhoneAccelerometer implements Accelerometer {
 	
 	volatile public float x;
 	volatile public float y;

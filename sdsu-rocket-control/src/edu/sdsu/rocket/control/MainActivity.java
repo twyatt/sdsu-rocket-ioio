@@ -24,7 +24,6 @@ import edu.sdsu.rocket.control.controllers.RocketController;
 import edu.sdsu.rocket.control.logging.AndroidLog;
 import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.io.DatagramOutputStream;
-import edu.sdsu.rocket.io.PacketMultiplexer;
 import edu.sdsu.rocket.logging.LogMultiplexer;
 import edu.sdsu.rocket.logging.StreamLog;
 
@@ -100,9 +99,8 @@ public class MainActivity extends IOIOActivity {
 	}
 
 	private void setupPacketController(Rocket rocket) {
-		PacketMultiplexer messenger = new PacketMultiplexer(rocket.connection1, rocket.connection2);
-		rocket.connection1.setListener(new PacketController(messenger));
-		rocket.connection2.setListener(new PacketController(messenger));
+		rocket.connection1.setListener(new PacketController(rocket.connection1));
+		rocket.connection2.setListener(new PacketController(rocket.connection2));
 	}
 
 	private void setupDeviceManager() {
@@ -210,14 +208,5 @@ public class MainActivity extends IOIOActivity {
 //		Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 //		startActivity(settingsIntent);
 //	}
-	
-	private void updateTextView(final TextView textView, final String text) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				textView.setText(text);
-			}
-		});
-	}
 
 }

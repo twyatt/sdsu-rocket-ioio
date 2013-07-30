@@ -36,11 +36,6 @@ public class RocketController extends Threaded {
 	}
 	
 	public void setup(DeviceManager deviceManager, SensorManager sensorManager) {
-		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		rocket.internalAccelerometer
-			.setDataSource(accelerometerSensor)
-			.setSensorManager(sensorManager);
-		
 		deviceManager.add(rocket.connection1, true /* threaded */);
 		deviceManager.add(rocket.connection2, true /* threaded */);
 		
@@ -56,13 +51,20 @@ public class RocketController extends Threaded {
 //		
 //		deviceManager.add(rocket.barometer, true /* threaded */);
 		
-//		deviceManager.add(rocket.accelerometer, true /* threaded */);
+		deviceManager.add(rocket.accelerometer, true /* threaded */);
+		
+		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		rocket.internalAccelerometer
+			.setDataSource(accelerometerSensor)
+			.setSensorManager(sensorManager);
 		
 //		setSensorPriority(SensorPriority.SENSOR_PRIORITY_LOW);
 		setSensorPriority(SensorPriority.SENSOR_PRIORITY_HIGH);
 	}
 	
 	public void setSensorPriority(SensorPriority priority) {
+		// TODO update phone's accelerometer rate
+		
 		if (SensorPriority.SENSOR_PRIORITY_HIGH.equals(priority)) {
 			rocket.tankPressureLOX.setSleep(5 /* milliseconds */);
 			rocket.tankPressureEthanol.setSleep(5 /* milliseconds */);

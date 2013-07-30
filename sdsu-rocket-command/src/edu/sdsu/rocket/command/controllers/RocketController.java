@@ -23,7 +23,7 @@ public class RocketController extends Threaded implements PacketListener {
 
 	public RocketController(Rocket rocket) {
 		this.rocket = rocket;
-		setFrequency(100f /* Hz */);
+		setFrequency(10f /* Hz */);
 	}
 	
 	public RocketController setListener(RocketControllerListener listener) {
@@ -56,16 +56,16 @@ public class RocketController extends Threaded implements PacketListener {
 		
 		ByteBuffer buffer = ByteBuffer.wrap(packet.data);
 		try {
-			// for ADXL345
+			// for ADXL345 accelerometer
 			rocket.accelerometer.multiplier = buffer.getFloat();
 			rocket.accelerometer.x = buffer.getInt();
 			rocket.accelerometer.y = buffer.getInt();
 			rocket.accelerometer.z = buffer.getInt();
 			
-			// for internal accelerometer
-//			rocket.internalAccelerometer.x = buffer.getFloat();
-//			rocket.internalAccelerometer.y = buffer.getFloat();
-//			rocket.internalAccelerometer.z = buffer.getFloat();
+			// for phone's internal accelerometer
+			rocket.internalAccelerometer.x = buffer.getFloat();
+			rocket.internalAccelerometer.y = buffer.getFloat();
+			rocket.internalAccelerometer.z = buffer.getFloat();
 		} catch (BufferUnderflowException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -75,8 +75,9 @@ public class RocketController extends Threaded implements PacketListener {
 	}
 	
 	private void onChange() {
-		if (listener != null)
+		if (listener != null) {
 			listener.onChange();
+		}
 	}
 
 	/*
@@ -93,12 +94,6 @@ public class RocketController extends Threaded implements PacketListener {
 			onSensorResponse(packet);
 			break;
 		}
-	}
-
-	@Override
-	public void onPacketError(Throwable e) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	/*

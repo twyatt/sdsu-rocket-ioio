@@ -1,6 +1,6 @@
 package edu.sdsu.rocket.command.models;
 
-public class ADXL345 {
+public class ADXL345 implements Accelerometer {
 	
 	volatile public float multiplier;
 	volatile public int x;

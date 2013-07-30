@@ -8,8 +8,6 @@ public class PacketMultiplexer implements PacketWriter {
 	
 	final List<PacketWriter> handlers = new ArrayList<PacketWriter>();
 	
-	int i = 0;
-	
 	public PacketMultiplexer(PacketWriter ... handlers) {
 		for (PacketWriter handler : handlers) {
 			add(handler);
