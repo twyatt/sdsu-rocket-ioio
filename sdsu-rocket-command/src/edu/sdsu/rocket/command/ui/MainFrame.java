@@ -59,8 +59,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		controller = new RocketController(rocket).setListener(this);
 		client.setPacketListener(controller).setListener(this);
 		
-		setSize(new Dimension(741, 506));
-		setResizable(false);
+		setSize(new Dimension(820, 559));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		setupUI();
@@ -183,11 +182,11 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		accelerometerPanel = new GraphPanel(-10 /* min */, 10 /* max */);
 		accelerometerPanel.setBorder(null);
 		accelerometerPanel.setBackground(Color.WHITE);
-		accelerometerPanel.setPreferredSize(new Dimension(200, 100));
+		accelerometerPanel.setPreferredSize(new Dimension(300, 150));
 		mainPanel.add(accelerometerPanel);
 		
-		loxPanel = new GaugePanel(0 /* min */, 500 /* max */);
-		loxPanel.setPreferredSize(new Dimension(100, 100));
+		loxPanel = new GaugePanel(0 /* min */, 500 /* max */, 10);
+		loxPanel.setPreferredSize(new Dimension(200, 200));
 		mainPanel.add(loxPanel);
 		
 		return contentPane;

@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import edu.sdsu.rocket.command.helpers.MathHelper;
+
 public class GraphPanel extends JPanel {
 
 	private static final int IMAGE_TYPE = BufferedImage.TYPE_INT_RGB;
@@ -21,13 +23,6 @@ public class GraphPanel extends JPanel {
 
 	private final float min;
 	private final float max;
-	
-	/**
-	 * http://stackoverflow.com/questions/929103/convert-a-number-range-to-another-range-maintaining-ratio
-	 */
-	public static float linearConversion(float oldMin, float oldMax, float newMin, float newMax, float value) {
-		return ((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin;
-	}
 	
 	public GraphPanel(float min, float max) {
 		this.min = min;
@@ -55,7 +50,7 @@ public class GraphPanel extends JPanel {
 	}
 	
 	private int toImageY(float y) {
-		float pos = linearConversion(min, max, 0, bufferedImage.getHeight(), y);
+		float pos = MathHelper.linearConversion(min, max, 0, bufferedImage.getHeight(), y);
 		return Math.round(bufferedImage.getHeight() - pos);
 	}
 	
