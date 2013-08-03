@@ -5,6 +5,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -17,9 +20,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -35,7 +40,6 @@ import edu.sdsu.rocket.command.controllers.RocketController.RocketControllerList
 import edu.sdsu.rocket.command.io.TcpClient;
 import edu.sdsu.rocket.command.io.TcpClient.TcpClientListener;
 import edu.sdsu.rocket.command.models.Rocket;
-import javax.swing.border.BevelBorder;
 
 public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
 
@@ -56,10 +60,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JTextField portTextField;
 	private JButton connectButton;
 	private JLabel lblInfo;
-	private JLabel lblX;
-	private JLabel lblY;
-	private JLabel lblZ;
-	private GraphPanel accelerometerPanel;
+	private AccelerometerPanel accelerometerPanel;
 	private GaugePanel loxPanel;
 	private JSlider frequencySlider;
 	private JLabel frequencyLabel;
@@ -69,21 +70,24 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private BreakWirePanel breakWirePanel;
 	private JPanel statusPanel;
 	private JLabel lblBreakWire;
-	private JPanel controlPanel;
-	private JButton button;
-	private JButton btnOpenLoxVent;
-	private JButton btnAbort;
-	private JButton btnCloseLoxVent;
 	private JPanel bottomPanel;
-	private JPanel lastMessagePanel;
+	private JPanel latencyPanel;
 	private JLabel lblLatency;
 	private JLabel latencyLabel;
+	private JSplitPane splitPane;
+	private JPanel leftPanel;
+	private JPanel rightPanel;
+	private JPanel controlPanel;
+	private JButton openLOXButton;
+	private JButton closeLOXVentButton;
+	private JButton igniteButton;
+	private JButton abortButton;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
 		client.setPacketListener(controller).setListener(this);
 		
-		setSize(new Dimension(889, 628));
+		setSize(new Dimension(1024, 650));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		setupUI();
@@ -129,7 +133,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	@Override
 	public void onDisconnected() {
 		controller.stop();
-		lblInfo.setText("");
+//		lblInfo.setText("");
 	}
 	
 	@Override
@@ -137,26 +141,18 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				lblInfo.setText(rocket.ident);
+//				lblInfo.setText(rocket.ident);
 				
 				breakWirePanel.setState(rocket.breakWire.state);
 				
 				float x = rocket.accelerometer.getX();
 				float y = rocket.accelerometer.getY();
 				float z = rocket.accelerometer.getZ();
+				accelerometerPanel.updateWithValues(x, y, z);
 				
 //				float x = rocket.internalAccelerometer.getX();
 //				float y = rocket.internalAccelerometer.getY();
 //				float z = rocket.internalAccelerometer.getZ();
-				
-				lblX.setText(String.valueOf(x));
-				lblY.setText(String.valueOf(y));
-				lblZ.setText(String.valueOf(z));
-				
-				accelerometerPanel.point(x, Color.RED);
-				accelerometerPanel.point(y, Color.GREEN);
-				accelerometerPanel.point(z, Color.BLUE);
-				accelerometerPanel.step();
 				
 //				lblX.setText(String.valueOf(rocket.internalAccelerometer.getX()));
 //				lblY.setText(String.valueOf(rocket.internalAccelerometer.getY()));
@@ -174,54 +170,37 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		contentPane.setBorder(null);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
+		/*
+		 * Toolbar
+		 */
+		
 		JToolBar toolBar = createToolBar();
 		toolBar.setFloatable(false);
 		contentPane.add(toolBar, BorderLayout.NORTH);
 		
-		JPanel mainPanel = new JPanel();
-		contentPane.add(mainPanel, BorderLayout.CENTER);
+		/*
+		 * Main Panel
+		 */
 		
-		lblInfo = new JLabel("");
-		mainPanel.add(lblInfo);
+		splitPane = new JSplitPane();
+		contentPane.add(splitPane, BorderLayout.CENTER);
 		
-		JPanel panel = new JPanel();
-		mainPanel.add(panel);
-		panel.setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				ColumnSpec.decode("184px"),
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("16px"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("max(10dlu;default)"),
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+		/*
+		 * Left Split Pane Panel
+		 */
 		
-		lblX = new JLabel("X");
-		panel.add(lblX, "2, 2, center, top");
-		
-		lblY = new JLabel("Y");
-		panel.add(lblY, "2, 4, center, default");
-		
-		lblZ = new JLabel("Z");
-		panel.add(lblZ, "2, 6, center, default");
-		
-		accelerometerPanel = new GraphPanel(-10 /* min */, 10 /* max */);
-		accelerometerPanel.setBorder(null);
-		accelerometerPanel.setBackground(Color.WHITE);
-		accelerometerPanel.setPreferredSize(new Dimension(300, 150));
-		mainPanel.add(accelerometerPanel);
-		
-		loxPanel = new GaugePanel(0 /* min */, 500 /* max */, 10);
-		loxPanel.setPreferredSize(new Dimension(200, 200));
-		mainPanel.add(loxPanel);
+		leftPanel = new JPanel();
+		leftPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		splitPane.setLeftComponent(leftPanel);
+		GridBagLayout gbl_leftPanel = new GridBagLayout();
+		gbl_leftPanel.columnWidths = new int[]{265, 0};
+		gbl_leftPanel.rowHeights = new int[]{20, 10, 0};
+		gbl_leftPanel.columnWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_leftPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		leftPanel.setLayout(gbl_leftPanel);
 		
 		statusPanel = new JPanel();
 		statusPanel.setBorder(new TitledBorder(null, "Status", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		mainPanel.add(statusPanel);
 		statusPanel.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
 				FormFactory.DEFAULT_COLSPEC,
@@ -234,6 +213,11 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				RowSpec.decode("29px"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
+		GridBagConstraints gbc_statusPanel = new GridBagConstraints();
+		gbc_statusPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_statusPanel.gridx = 0;
+		gbc_statusPanel.gridy = 0;
+		leftPanel.add(statusPanel, gbc_statusPanel);
 		
 		lblBreakWire = new JLabel("Break Wire");
 		lblBreakWire.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
@@ -247,44 +231,61 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		
 		controlPanel = new JPanel();
 		controlPanel.setBorder(new TitledBorder(null, "Control", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		mainPanel.add(controlPanel);
-		
-		button = new JButton("Ignite");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				try {
-					controller.sendIgniteRequest();
-				} catch (IOException e) {
-					e.printStackTrace();
-					JOptionPane.showMessageDialog(MainFrame.this, "Failed to send ignition request.\n" + e.getMessage());
-				}
-			}
-		});
+		GridBagConstraints gbc_controlPanel = new GridBagConstraints();
+		gbc_controlPanel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_controlPanel.gridx = 0;
+		gbc_controlPanel.gridy = 1;
+		leftPanel.add(controlPanel, gbc_controlPanel);
 		controlPanel.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				ColumnSpec.decode("202px:grow"),
-				FormFactory.RELATED_GAP_COLSPEC,},
+				ColumnSpec.decode("117px:grow"),},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("fill:max(30dlu;default)"),
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("fill:max(35dlu;default)"),
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("fill:45px"),
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("fill:max(40dlu;default)"),
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.DEFAULT_ROWSPEC,}));
 		
-		btnOpenLoxVent = new JButton("Open LOX Vent Valve");
-		btnOpenLoxVent.setPreferredSize(new Dimension(175, 50));
-		controlPanel.add(btnOpenLoxVent, "2, 2, fill, fill");
+		openLOXButton = new JButton("Open LOX Vent");
+		openLOXButton.setFont(new Font("Dialog", Font.PLAIN, 20));
+		controlPanel.add(openLOXButton, "2, 2, fill, fill");
 		
-		btnCloseLoxVent = new JButton("Close LOX Vent Valve");
-		controlPanel.add(btnCloseLoxVent, "2, 4, fill, fill");
-		controlPanel.add(button, "2, 6, fill, fill");
+		closeLOXVentButton = new JButton("Close LOX Vent");
+		closeLOXVentButton.setFont(new Font("Dialog", Font.PLAIN, 20));
+		controlPanel.add(closeLOXVentButton, "2, 4, fill, fill");
 		
-		btnAbort = new JButton("Abort");
-		controlPanel.add(btnAbort, "2, 8, fill, fill");
+		igniteButton = new JButton("Ignite");
+		igniteButton.setFont(new Font("Dialog", Font.BOLD, 20));
+		igniteButton.setForeground(Color.RED);
+		igniteButton.setOpaque(true);
+		controlPanel.add(igniteButton, "2, 6, fill, fill");
+		
+		abortButton = new JButton("Abort");
+		abortButton.setFont(new Font("Dialog", Font.PLAIN, 20));
+		controlPanel.add(abortButton, "2, 8, fill, fill");
+		
+		/*
+		 * Right Split Pane Panel
+		 */
+		
+		rightPanel = new JPanel();
+		splitPane.setRightComponent(rightPanel);
+		
+		accelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
+		accelerometerPanel.setBorder(new TitledBorder(null, "Accelerometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		accelerometerPanel.setPreferredSize(new Dimension(300, 200));
+		rightPanel.add(accelerometerPanel);
+		
+		loxPanel = new GaugePanel(0 /* min */, 500 /* max */, 10);
+		loxPanel.setPreferredSize(new Dimension(200, 200));
+		rightPanel.add(loxPanel);
+		
+		/*
+		 * Bottom Panel
+		 */
 		
 		bottomPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) bottomPanel.getLayout();
@@ -293,15 +294,15 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		contentPane.add(bottomPanel, BorderLayout.SOUTH);
 		
-		lastMessagePanel = new JPanel();
-		lastMessagePanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		bottomPanel.add(lastMessagePanel);
+		latencyPanel = new JPanel();
+		latencyPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		bottomPanel.add(latencyPanel);
 		
 		lblLatency = new JLabel("Latency");
-		lastMessagePanel.add(lblLatency);
+		latencyPanel.add(lblLatency);
 		
 		latencyLabel = new JLabel("0 ms");
-		lastMessagePanel.add(latencyLabel);
+		latencyPanel.add(latencyLabel);
 		
 		return contentPane;
 	}
