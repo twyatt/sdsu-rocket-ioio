@@ -41,7 +41,7 @@ public class RocketController extends Threaded {
 		
 //		deviceManager.add(rocket.ignitor, false);
 //		deviceManager.add(rocket.fuelValve, false);
-//		deviceManager.add(rocket.breakWire, false);
+		deviceManager.add(rocket.breakWire, false);
 //		
 //		deviceManager.add(rocket.tankPressureLOX,     true /* threaded */);
 //		deviceManager.add(rocket.tankPressureEthanol, true /* threaded */);

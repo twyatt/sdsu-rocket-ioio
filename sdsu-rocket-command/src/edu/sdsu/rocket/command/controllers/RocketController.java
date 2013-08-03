@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import edu.sdsu.rocket.command.models.BreakWire.State;
 import edu.sdsu.rocket.command.models.Rocket;
 import edu.sdsu.rocket.helpers.Threaded;
 import edu.sdsu.rocket.io.Packet;
@@ -21,6 +22,8 @@ public class RocketController extends Threaded implements PacketListener {
 	final private Rocket rocket;
 	private PacketWriter writer;
 
+	private boolean isSensorRequestsEnabled = true;
+
 	public RocketController(Rocket rocket) {
 		this.rocket = rocket;
 		setFrequency(1f /* Hz */);
@@ -36,6 +39,17 @@ public class RocketController extends Threaded implements PacketListener {
 		return this;
 	}
 	
+	@Override
+	public void setFrequency(float frequency) {
+		if (frequency == 0) {
+			isSensorRequestsEnabled = false;
+			super.setFrequency(1 /* Hz */);
+		} else {
+			isSensorRequestsEnabled = true;
+			super.setFrequency(frequency);
+		}
+	}
+	
 	public void sendIdentRequest() throws IOException {
 		writer.writePacket(Packet.IDENT_REQUEST, null);
 	}
@@ -48,7 +62,9 @@ public class RocketController extends Threaded implements PacketListener {
 	}
 	
 	public void sendSensorRequest() throws IOException {
-		writer.writePacket(Packet.SENSOR_REQUEST, null);
+		if (isSensorRequestsEnabled) {
+			writer.writePacket(Packet.SENSOR_REQUEST, null);
+		}
 	}
 	
 	public void sendIgniteRequest() throws IOException {
@@ -60,6 +76,15 @@ public class RocketController extends Threaded implements PacketListener {
 		
 		ByteBuffer buffer = ByteBuffer.wrap(packet.data);
 		try {
+			byte breakWireState = buffer.get();
+			if (breakWireState == 1) {
+				rocket.breakWire.state = State.BROKEN;
+			} else if (breakWireState == 0) {
+				rocket.breakWire.state = State.NOT_BROKEN;
+			} else {
+				rocket.breakWire.state = State.UNKNOWN;
+			}
+			
 			// for ADXL345 accelerometer
 			rocket.accelerometer.multiplier = buffer.getFloat();
 			rocket.accelerometer.x = buffer.getInt();

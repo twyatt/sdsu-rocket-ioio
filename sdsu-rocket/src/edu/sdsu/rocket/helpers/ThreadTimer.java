@@ -10,7 +10,7 @@ public class ThreadTimer {
 	/**
 	 * Duration to sleep thread (in milliseconds).
 	 */
-	private long sleep; 
+	private volatile long sleep;
 	
 	public ThreadTimer() {
 		setSleep(DEFAULT_SLEEP);

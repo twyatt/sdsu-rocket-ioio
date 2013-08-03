@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.Menu;
 import android.widget.TextView;
+import edu.sdsu.rocket.control.controllers.ArduinoController;
 import edu.sdsu.rocket.control.controllers.PacketController;
 import edu.sdsu.rocket.control.controllers.RocketController;
 import edu.sdsu.rocket.control.logging.AndroidLog;
@@ -72,7 +73,10 @@ public class MainActivity extends IOIOActivity {
 //		App.rocketController.start(); // TODO uncomment?
 		
 		setupPacketController(rocket);
-		
+		setupStatusTimer();
+	}
+
+	private void setupStatusTimer() {
 		long delay = 1000L; // ms
 		long period = 1000L; // ms
 		timer.schedule(new TimerTask() {
@@ -101,10 +105,11 @@ public class MainActivity extends IOIOActivity {
 	private void setupPacketController(Rocket rocket) {
 		rocket.connection1.setListener(new PacketController(rocket.connection1));
 		rocket.connection2.setListener(new PacketController(rocket.connection2));
+		rocket.arduino.setListener(new ArduinoController(rocket.arduino, rocket));
 	}
 
 	private void setupDeviceManager() {
-		deviceManager = new DeviceManager(250L /* IOIO thread sleep in milliseconds */);
+		deviceManager = new DeviceManager(1000L /* IOIO thread sleep in milliseconds */);
 		deviceManager.setListener(new DeviceManager.DeviceManagerListener() {
 			@Override
 			public void incompatible() {

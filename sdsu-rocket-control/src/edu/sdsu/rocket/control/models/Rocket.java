@@ -5,6 +5,7 @@ import ioio.lib.api.Uart.Parity;
 import ioio.lib.api.Uart.StopBits;
 import android.hardware.SensorManager;
 import edu.sdsu.rocket.control.devices.ADXL345;
+import edu.sdsu.rocket.control.devices.Arduino;
 import edu.sdsu.rocket.control.devices.BreakWire;
 import edu.sdsu.rocket.control.devices.DeviceRunnable;
 import edu.sdsu.rocket.control.devices.MS5611;
@@ -19,7 +20,8 @@ import edu.sdsu.rocket.control.devices.ServoValve;
 
 public class Rocket {
 	
-	private static final float ACTION_DURATION = 3.0f; // seconds
+	private static final float SERVO_SIGNAL_DURATION = 3.0f; // seconds
+	private static final float IGNITOR_SIGNAL_DURATION = 3.0f; // seconds
 
 	public enum Mode {
 		
@@ -33,6 +35,7 @@ public class Rocket {
 	
 	public SB70 connection1;
 	public SB70 connection2;
+	public Arduino arduino;
 	
 	public RelayIgnitor ignitor;
 	public BreakWire breakWire;
@@ -56,12 +59,13 @@ public class Rocket {
 	DeviceRunnable barometerRunnable;
 	
 	public Rocket() {
-		connection1 = new SB70(45, 46, 57600, Parity.NONE, StopBits.ONE);
-		connection2 = new SB70( 9, 10, 57600, Parity.NONE, StopBits.ONE);
+		connection1 = new SB70(45 /* RX */, 46 /* TX */, 57600, Parity.NONE, StopBits.ONE);
+		connection2 = new SB70( 9 /* RX */, 10 /* TX */, 57600, Parity.NONE, StopBits.ONE);
+		arduino = new Arduino(35 /* RX */, 34 /* TX */, 9600, Parity.NONE, StopBits.ONE);
 		
-		ignitor = new RelayIgnitor(new Relay(21 /* pin */), 3.0f /* duration (seconds) */);
-		fuelValve = new RelayValve(new Relay(20 /* pin */));
-		breakWire = new BreakWire(9 /* pin */);
+		ignitor = new RelayIgnitor(new Relay(12 /* pin */), IGNITOR_SIGNAL_DURATION);
+		fuelValve = new RelayValve(new Relay(13 /* pin */));
+		breakWire = new BreakWire(3 /* pin */);
 		
 		// max voltage for analog input = 3.3V
 		// calibrated May 12, 2013
@@ -69,8 +73,8 @@ public class Rocket {
 		tankPressureEthanol = new P51500AA1365V(42 /* pin */, 181.8296f /* slope */, -144.22f /* bias */);
 		tankPressureEngine  = new P51500AA1365V(43 /* pin */, 179.7781f /* slope */, -140.324f /* bias */);
 		
-		loxValve     = new RelayValve(new Relay(13 /* pin */));
-		ethanolValve = new ServoValve(new PS050(14 /* pin */, 100 /* frequency */), ACTION_DURATION);
+		ethanolValve = new ServoValve(new PS050(11 /* pin */, 100 /* frequency */), SERVO_SIGNAL_DURATION);
+		loxValve     = new RelayValve(new Relay(14 /* pin */));
 		
 		accelerometer = new ADXL345(29 /* miso */, 28 /* mosi */, 27 /* scl */, 30 /* cs */, SpiMaster.Rate.RATE_2M);
 		
