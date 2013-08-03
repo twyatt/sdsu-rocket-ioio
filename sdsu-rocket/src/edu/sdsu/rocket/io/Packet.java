@@ -11,6 +11,8 @@ public class Packet {
 	public static final byte IDENT_RESPONSE = (byte) 0x03;
 	public static final byte SENSOR_RESPONSE = (byte) 0x04;
 	
+	public static final byte IGNITE_REQUEST = (byte) 0x05;
+	
 	// | MESSAGE (String) |
 	public static final byte LOG_MESSAGE              = (byte) 0x01;
 	

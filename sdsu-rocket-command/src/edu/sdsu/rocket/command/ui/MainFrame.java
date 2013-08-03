@@ -29,6 +29,9 @@ import edu.sdsu.rocket.command.controllers.RocketController.RocketControllerList
 import edu.sdsu.rocket.command.io.TcpClient;
 import edu.sdsu.rocket.command.io.TcpClient.TcpClientListener;
 import edu.sdsu.rocket.command.models.Rocket;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
 
@@ -54,6 +57,9 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JLabel lblZ;
 	private GraphPanel accelerometerPanel;
 	private GaugePanel loxPanel;
+	private JSlider frequencySlider;
+	private JLabel frequencyLabel;
+	private JButton btnIgnite;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -188,6 +194,40 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		loxPanel = new GaugePanel(0 /* min */, 500 /* max */, 10);
 		loxPanel.setPreferredSize(new Dimension(200, 200));
 		mainPanel.add(loxPanel);
+		
+		frequencySlider = new JSlider();
+		frequencySlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent event) {
+				final float frequency = ((JSlider) event.getSource()).getValue();
+				controller.setFrequency(frequency);
+				
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						frequencyLabel.setText(String.valueOf(frequency) + " Hz");
+					}
+				});
+			}
+		});
+		frequencySlider.setValue(1);
+		frequencySlider.setMinimum(1);
+		mainPanel.add(frequencySlider);
+		
+		frequencyLabel = new JLabel("0 Hz");
+		mainPanel.add(frequencyLabel);
+		
+		btnIgnite = new JButton("Ignite");
+		btnIgnite.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					controller.sendIgniteRequest();
+				} catch (IOException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(MainFrame.this, "Failed to send ignition request.");
+				}
+			}
+		});
+		mainPanel.add(btnIgnite);
 		
 		return contentPane;
 	}

@@ -23,7 +23,7 @@ public class RocketController extends Threaded implements PacketListener {
 
 	public RocketController(Rocket rocket) {
 		this.rocket = rocket;
-		setFrequency(10f /* Hz */);
+		setFrequency(1f /* Hz */);
 	}
 	
 	public RocketController setListener(RocketControllerListener listener) {
@@ -49,6 +49,10 @@ public class RocketController extends Threaded implements PacketListener {
 	
 	public void sendSensorRequest() throws IOException {
 		writer.writePacket(Packet.SENSOR_REQUEST, null);
+	}
+	
+	public void sendIgniteRequest() throws IOException {
+		writer.writePacket(Packet.IGNITE_REQUEST, null);
 	}
 	
 	private void onSensorResponse(Packet packet) {

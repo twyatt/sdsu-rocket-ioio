@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
@@ -56,9 +58,17 @@ public class GaugePanel extends JPanel {
 		return new Point(getWidth() / 2, getHeight() / 2);
 	}
 	
-	private void drawGaugeBorder(Graphics g) {
+	private void drawGaugeBackground(Graphics g) {
+		Point position = new Point(PADDING, PADDING);
 		Dimension size = getGaugeSize();
-		g.drawOval(PADDING, PADDING, size.width, size.height);
+		Ellipse2D.Float ellipse = new Ellipse2D.Float(position.x, position.y, size.width, size.height);
+		((Graphics2D) g).fill(ellipse);
+	}
+	
+	private void drawGaugeBorder(Graphics g) {
+		Point position = new Point(PADDING, PADDING);
+		Dimension size = getGaugeSize();
+		g.drawOval(position.x, position.y, size.width, size.height);
 	}
 	
 	private void drawNeedle(Graphics g) {
@@ -137,10 +147,14 @@ public class GaugePanel extends JPanel {
 		super.paintComponent(g);
 		
 		g.setColor(Color.BLACK);
+		drawGaugeBackground(g);
+		
+		g.setColor(Color.DARK_GRAY);
 		drawGaugeBorder(g);
 		
 		g.setFont(new Font("Arial", Font.PLAIN, 10));
-		g.setColor(Color.BLACK);
+//		g.setColor(Color.LIGHT_GRAY);
+		g.setColor(Color.RED);
 		drawTicks(g);
 		
 		g.setColor(Color.BLUE);
