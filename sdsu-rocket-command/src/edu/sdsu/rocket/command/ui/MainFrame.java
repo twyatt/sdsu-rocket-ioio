@@ -39,6 +39,8 @@ import edu.sdsu.rocket.command.controllers.RocketController;
 import edu.sdsu.rocket.command.controllers.RocketController.RocketControllerListener;
 import edu.sdsu.rocket.command.io.TcpClient;
 import edu.sdsu.rocket.command.io.TcpClient.TcpClientListener;
+import edu.sdsu.rocket.command.models.BreakWire;
+import edu.sdsu.rocket.command.models.Ignitor;
 import edu.sdsu.rocket.command.models.Rocket;
 
 public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
@@ -67,7 +69,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JPanel sensorRequestRatePanel;
 	private JLabel lblSensorFrequency;
 
-	private BreakWirePanel breakWirePanel;
+	private BreakWireLabel breakWireLabel;
 	private JPanel statusPanel;
 	private JLabel lblBreakWire;
 	private JPanel bottomPanel;
@@ -82,6 +84,9 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JButton closeLOXVentButton;
 	private JButton igniteButton;
 	private JButton abortButton;
+	private JButton btnLaunch;
+	private JLabel lblIgnitor;
+	private IgnitorLabel ignitorLabel;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -133,6 +138,8 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	@Override
 	public void onDisconnected() {
 		controller.stop();
+		ignitorLabel.setState(Ignitor.State.UNKNOWN);
+		breakWireLabel.setState(BreakWire.State.UNKNOWN);
 //		lblInfo.setText("");
 	}
 	
@@ -143,7 +150,8 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			public void run() {
 //				lblInfo.setText(rocket.ident);
 				
-				breakWirePanel.setState(rocket.breakWire.state);
+				ignitorLabel.setState(rocket.ignitor.state);
+				breakWireLabel.setState(rocket.breakWire.state);
 				
 				float x = rocket.accelerometer.getX();
 				float y = rocket.accelerometer.getY();
@@ -210,6 +218,8 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				FormFactory.DEFAULT_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
 				RowSpec.decode("29px"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
@@ -219,15 +229,23 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		gbc_statusPanel.gridy = 0;
 		leftPanel.add(statusPanel, gbc_statusPanel);
 		
+		lblIgnitor = new JLabel("Ignitor");
+		lblIgnitor.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
+		statusPanel.add(lblIgnitor, "2, 2, right, default");
+		
+		ignitorLabel = new IgnitorLabel();
+		ignitorLabel.setFont(new Font("Courier New", Font.BOLD, 18));
+		ignitorLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		statusPanel.add(ignitorLabel, "4, 2, fill, fill");
+		
 		lblBreakWire = new JLabel("Break Wire");
 		lblBreakWire.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
-		statusPanel.add(lblBreakWire, "2, 2, right, default");
+		statusPanel.add(lblBreakWire, "2, 4, right, default");
 		
-		breakWirePanel = new BreakWirePanel();
-		breakWirePanel.setFont(new Font("Courier New", Font.BOLD, 18));
-		breakWirePanel.setPreferredSize(new Dimension(140, 19));
-		breakWirePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		statusPanel.add(breakWirePanel, "4, 2, left, fill");
+		breakWireLabel = new BreakWireLabel();
+		breakWireLabel.setFont(new Font("Courier New", Font.BOLD, 18));
+		breakWireLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		statusPanel.add(breakWireLabel, "4, 4, fill, fill");
 		
 		controlPanel = new JPanel();
 		controlPanel.setBorder(new TitledBorder(null, "Control", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -247,6 +265,8 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
 		
 		openLOXButton = new JButton("Open LOX Vent");
@@ -258,14 +278,28 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		controlPanel.add(closeLOXVentButton, "2, 4, fill, fill");
 		
 		igniteButton = new JButton("Ignite");
-		igniteButton.setFont(new Font("Dialog", Font.BOLD, 20));
-		igniteButton.setForeground(Color.RED);
+		igniteButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					controller.sendIgniteRequest();
+				} catch (IOException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(MainFrame.this, "Failed to send ignite request.\n" + e.getMessage());
+				}
+			}
+		});
+		igniteButton.setFont(new Font("Dialog", Font.PLAIN, 20));
 		igniteButton.setOpaque(true);
 		controlPanel.add(igniteButton, "2, 6, fill, fill");
 		
+		btnLaunch = new JButton("Launch");
+		btnLaunch.setForeground(Color.RED);
+		btnLaunch.setFont(new Font("Dialog", Font.BOLD, 20));
+		controlPanel.add(btnLaunch, "2, 8, fill, fill");
+		
 		abortButton = new JButton("Abort");
 		abortButton.setFont(new Font("Dialog", Font.PLAIN, 20));
-		controlPanel.add(abortButton, "2, 8, fill, fill");
+		controlPanel.add(abortButton, "2, 10, fill, fill");
 		
 		/*
 		 * Right Split Pane Panel

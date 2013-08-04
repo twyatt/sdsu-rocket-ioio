@@ -56,8 +56,9 @@ public class ThreadTimer {
 	 * @throws InterruptedException
 	 */
 	public void sleep() throws InterruptedException {
-		if (sleep != 0L)
+		if (sleep != 0L) {
 			Thread.sleep(sleep);
+		}
 	}
 	
 }

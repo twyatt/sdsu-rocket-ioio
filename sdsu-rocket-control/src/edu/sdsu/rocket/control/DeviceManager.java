@@ -56,6 +56,7 @@ public class DeviceManager implements IOIOLooper {
 			threader.add(device);
 		} else {
 			App.log.i(App.TAG, "Device manager adding device to IOIO thread: " + device.info());
+			device.setSleep(0L); // disable device sleep as device will run on IOIO thread with it's own sleep
 			multiplexer.add(device);
 		}
 	}

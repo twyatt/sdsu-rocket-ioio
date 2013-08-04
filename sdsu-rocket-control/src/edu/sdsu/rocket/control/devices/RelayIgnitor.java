@@ -28,6 +28,10 @@ public class RelayIgnitor extends DeviceAdapter {
 		relay.high();
 	}
 	
+	public boolean isActive() {
+		return relay.isHigh();
+	}
+	
 	public void cancel() {
 		relay.low();
 	}
@@ -45,8 +49,9 @@ public class RelayIgnitor extends DeviceAdapter {
 	public void loop() throws ConnectionLostException, InterruptedException {
 		float elapsed = App.elapsedTime() - startTime;
 		
-		if (elapsed > duration)
+		if (elapsed > duration) {
 			relay.low();
+		}
 		
 		relay.loop();
 	}
@@ -57,7 +62,7 @@ public class RelayIgnitor extends DeviceAdapter {
 	
 	@Override
 	public String info() {
-		return relay.info() + ", duration=" + duration;
+		return relay.info() + ", duration=" + duration + "s";
 	}
 
 }

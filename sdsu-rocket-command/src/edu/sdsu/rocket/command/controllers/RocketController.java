@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import edu.sdsu.rocket.command.models.BreakWire.State;
 import edu.sdsu.rocket.command.models.Rocket;
 import edu.sdsu.rocket.helpers.Threaded;
 import edu.sdsu.rocket.io.Packet;
@@ -76,14 +75,8 @@ public class RocketController extends Threaded implements PacketListener {
 		
 		ByteBuffer buffer = ByteBuffer.wrap(packet.data);
 		try {
-			byte breakWireState = buffer.get();
-			if (breakWireState == 1) {
-				rocket.breakWire.state = State.BROKEN;
-			} else if (breakWireState == 0) {
-				rocket.breakWire.state = State.NOT_BROKEN;
-			} else {
-				rocket.breakWire.state = State.UNKNOWN;
-			}
+			rocket.ignitor.setState(buffer.get());
+			rocket.breakWire.setState(buffer.get());
 			
 			// for ADXL345 accelerometer
 			rocket.accelerometer.multiplier = buffer.getFloat();

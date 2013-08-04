@@ -38,26 +38,27 @@ public class PacketController implements PacketListener {
 			App.log.e(App.TAG, "Invalid data collection request.");
 			return;
 		}
-		App.log.i(App.TAG, "onDataCollectionRequest");
 		
-		boolean status = false;
 		byte state = request.data[0];
 		
 		switch (state) {
-		case Packet.STATE_OFF:
+		case Packet.DATA_COLLECTION_REQUEST_OFF:
 			App.data.disable();
-			status = true;
 			break;
-		case Packet.STATE_ON:
+		case Packet.DATA_COLLECTION_REQUEST_ON:
 			App.data.enable();
-			status = true;
 			break;
-		case Packet.STATE_RESET:
-			status = App.data.reset();
+		case Packet.DATA_COLLECTION_REQUEST_RESET:
+			App.data.reset();
 			break;
 		}
 		
-		sendDataCollectionResponse(status);
+		sendDataCollectionResponse(App.data.isEnabled());
+	}
+	
+	private void onIgniteRequest(Packet packet) {
+		Rocket rocket = App.rocketController.getRocket();
+		rocket.ignitor.ignite();
 	}
 	
 	/*
@@ -78,6 +79,7 @@ public class PacketController implements PacketListener {
 //		buffer.putFloat(rocket.barometer.pressure);
 //		buffer.putFloat(rocket.barometer.temperature);
 		
+		buffer.put((byte) (rocket.ignitor.isActive() ? 1 : 0));
 		buffer.put((byte) (rocket.breakWire.isBroken() ? 1 : 0));
 		
 		buffer.putFloat(rocket.accelerometer.getMultiplier());
@@ -96,9 +98,9 @@ public class PacketController implements PacketListener {
 		send(Packet.SENSOR_RESPONSE, data);
 	}
 
-	private void sendDataCollectionResponse(boolean status) {
-		 byte data = status ? Packet.STATUS_SUCCESS : Packet.STATUS_FAILURE;
-//		 messenger.write(Packet.DATA_COLLECTION_RESPONSE, data);
+	private void sendDataCollectionResponse(boolean on) {
+		 byte data = on ? Packet.DATA_COLLECTION_RESPONSE_ON : Packet.DATA_COLLECTION_RESPONSE_OFF;
+		 send(Packet.DATA_COLLECTION_RESPONSE, new byte[] { data });
 	}
 
 	protected void onCommandRequest(Packet packet) {
@@ -145,6 +147,14 @@ public class PacketController implements PacketListener {
 		case Packet.SENSOR_REQUEST:
 			onSensorRequest(packet);
 			break;
+		case Packet.IGNITE_REQUEST:
+			onIgniteRequest(packet);
+			break;
+		case Packet.DATA_COLLECTION_REQUEST:
+			onDataCollectionRequest(packet);
+			break;
+		default:
+			App.log.e(App.TAG, "Unknown packet ID: " + packet.messageId);
 		}
 	}
 
