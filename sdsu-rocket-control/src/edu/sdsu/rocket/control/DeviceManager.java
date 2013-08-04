@@ -67,8 +67,9 @@ public class DeviceManager implements IOIOLooper {
 
 	@Override
 	public void incompatible() {
-		if (listener != null)
+		if (listener != null) {
 			listener.incompatible();
+		}
 		
 		multiplexer.incompatible();
 		threader.incompatible();
@@ -76,8 +77,9 @@ public class DeviceManager implements IOIOLooper {
 
 	@Override
 	public void setup(IOIO ioio) throws ConnectionLostException, InterruptedException {
-		if (listener != null)
+		if (listener != null) {
 			listener.setup(ioio);
+		}
 		
 		multiplexer.setup(ioio);
 		threader.setup(ioio);
@@ -90,8 +92,9 @@ public class DeviceManager implements IOIOLooper {
 	
 	@Override
 	public void disconnected() {
-		if (listener != null)
+		if (listener != null) {
 			listener.disconnected();
+		}
 		
 		multiplexer.disconnected();
 		threader.disconnected();

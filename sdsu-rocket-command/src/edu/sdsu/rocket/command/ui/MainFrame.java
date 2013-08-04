@@ -87,6 +87,11 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JButton btnLaunch;
 	private JLabel lblIgnitor;
 	private IgnitorLabel ignitorLabel;
+	private JLabel lblLoxPressure;
+	private JLabel lblEthanolPressure;
+	private JButton btnOpenEthanolVent;
+	private JButton btnCloseEthanolVent;
+	private JButton resetIOIOButton;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -125,6 +130,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	
 	@Override
 	public void onConnected() {
+		resetIOIOButton.setEnabled(true);
 		controller.setWriter(client.getOutputStream());
 		try {
 			controller.sendIdentRequest();
@@ -137,6 +143,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	
 	@Override
 	public void onDisconnected() {
+		resetIOIOButton.setEnabled(false);
 		controller.stop();
 		ignitorLabel.setState(Ignitor.State.UNKNOWN);
 		breakWireLabel.setState(BreakWire.State.UNKNOWN);
@@ -214,9 +221,12 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.GROWING_BUTTON_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,},
+				FormFactory.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
@@ -224,28 +234,37 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
 		GridBagConstraints gbc_statusPanel = new GridBagConstraints();
+		gbc_statusPanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_statusPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_statusPanel.gridx = 0;
 		gbc_statusPanel.gridy = 0;
 		leftPanel.add(statusPanel, gbc_statusPanel);
 		
+		lblEthanolPressure = new JLabel("Ethanol Pressure");
+		lblEthanolPressure.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
+		statusPanel.add(lblEthanolPressure, "2, 2, right, default");
+		
+		lblLoxPressure = new JLabel("LOX Pressure");
+		lblLoxPressure.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
+		statusPanel.add(lblLoxPressure, "2, 4, right, default");
+		
 		lblIgnitor = new JLabel("Ignitor");
 		lblIgnitor.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
-		statusPanel.add(lblIgnitor, "2, 2, right, default");
+		statusPanel.add(lblIgnitor, "2, 6, right, default");
 		
 		ignitorLabel = new IgnitorLabel();
 		ignitorLabel.setFont(new Font("Courier New", Font.BOLD, 18));
 		ignitorLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		statusPanel.add(ignitorLabel, "4, 2, fill, fill");
+		statusPanel.add(ignitorLabel, "4, 6, fill, fill");
 		
 		lblBreakWire = new JLabel("Break Wire");
 		lblBreakWire.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
-		statusPanel.add(lblBreakWire, "2, 4, right, default");
+		statusPanel.add(lblBreakWire, "2, 8, right, default");
 		
 		breakWireLabel = new BreakWireLabel();
 		breakWireLabel.setFont(new Font("Courier New", Font.BOLD, 18));
 		breakWireLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		statusPanel.add(breakWireLabel, "4, 4, fill, fill");
+		statusPanel.add(breakWireLabel, "4, 8, fill, fill");
 		
 		controlPanel = new JPanel();
 		controlPanel.setBorder(new TitledBorder(null, "Control", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -267,15 +286,27 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.DEFAULT_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
+		
+		btnOpenEthanolVent = new JButton("Open Ethanol Vent");
+		btnOpenEthanolVent.setFont(new Font("Dialog", Font.PLAIN, 20));
+		controlPanel.add(btnOpenEthanolVent, "2, 2, fill, fill");
+		
+		btnCloseEthanolVent = new JButton("Close Ethanol Vent");
+		btnCloseEthanolVent.setFont(new Font("Dialog", Font.PLAIN, 20));
+		controlPanel.add(btnCloseEthanolVent, "2, 4, fill, fill");
 		
 		openLOXButton = new JButton("Open LOX Vent");
 		openLOXButton.setFont(new Font("Dialog", Font.PLAIN, 20));
-		controlPanel.add(openLOXButton, "2, 2, fill, fill");
+		controlPanel.add(openLOXButton, "2, 6, fill, fill");
 		
 		closeLOXVentButton = new JButton("Close LOX Vent");
 		closeLOXVentButton.setFont(new Font("Dialog", Font.PLAIN, 20));
-		controlPanel.add(closeLOXVentButton, "2, 4, fill, fill");
+		controlPanel.add(closeLOXVentButton, "2, 8, fill, fill");
 		
 		igniteButton = new JButton("Ignite");
 		igniteButton.addActionListener(new ActionListener() {
@@ -290,16 +321,16 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		});
 		igniteButton.setFont(new Font("Dialog", Font.PLAIN, 20));
 		igniteButton.setOpaque(true);
-		controlPanel.add(igniteButton, "2, 6, fill, fill");
+		controlPanel.add(igniteButton, "2, 10, fill, fill");
 		
 		btnLaunch = new JButton("Launch");
 		btnLaunch.setForeground(Color.RED);
 		btnLaunch.setFont(new Font("Dialog", Font.BOLD, 20));
-		controlPanel.add(btnLaunch, "2, 8, fill, fill");
+		controlPanel.add(btnLaunch, "2, 12, fill, fill");
 		
 		abortButton = new JButton("Abort");
 		abortButton.setFont(new Font("Dialog", Font.PLAIN, 20));
-		controlPanel.add(abortButton, "2, 10, fill, fill");
+		controlPanel.add(abortButton, "2, 14, fill, fill");
 		
 		/*
 		 * Right Split Pane Panel
@@ -373,6 +404,20 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			}
 		});
 		connectionPanel.add(connectButton);
+		
+		resetIOIOButton = new JButton("Reset IOIO");
+		resetIOIOButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					controller.sendIOIOResetRequest();
+				} catch (IOException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(MainFrame.this, "Failed to send IOIO reset request.\n" + e.getMessage());
+				}
+			}
+		});
+		resetIOIOButton.setEnabled(false);
+		connectionPanel.add(resetIOIOButton);
 		
 		sensorRequestRatePanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) sensorRequestRatePanel.getLayout();

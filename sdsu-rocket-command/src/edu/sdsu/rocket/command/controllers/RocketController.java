@@ -49,6 +49,10 @@ public class RocketController extends Threaded implements PacketListener {
 		}
 	}
 	
+	/*
+	 * Requests
+	 */
+	
 	public void sendIdentRequest() throws IOException {
 		writer.writePacket(Packet.IDENT_REQUEST, null);
 	}
@@ -69,6 +73,14 @@ public class RocketController extends Threaded implements PacketListener {
 	public void sendIgniteRequest() throws IOException {
 		writer.writePacket(Packet.IGNITE_REQUEST, null);
 	}
+	
+	public void sendIOIOResetRequest() throws IOException {
+		writer.writePacket(Packet.IOIO_REQUEST_RESET, new byte[] { Packet.IOIO_REQUEST_DISCONNECT });
+	}
+	
+	/*
+	 * Responses
+	 */
 	
 	private void onSensorResponse(Packet packet) {
 //		rocket.waitingForSensorData.set(false);

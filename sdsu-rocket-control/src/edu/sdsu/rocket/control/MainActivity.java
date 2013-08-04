@@ -4,9 +4,6 @@ import ioio.lib.api.IOIO;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,16 +19,15 @@ import android.widget.TextView;
 import edu.sdsu.rocket.control.controllers.ArduinoController;
 import edu.sdsu.rocket.control.controllers.PacketController;
 import edu.sdsu.rocket.control.controllers.RocketController;
-import edu.sdsu.rocket.control.logging.AndroidLog;
 import edu.sdsu.rocket.control.models.Rocket;
-import edu.sdsu.rocket.io.DatagramOutputStream;
-import edu.sdsu.rocket.logging.LogMultiplexer;
-import edu.sdsu.rocket.logging.StreamLog;
 
 public class MainActivity extends IOIOActivity {
 
 	private DeviceManager deviceManager;
 	private final Timer timer = new Timer();
+	
+	private PacketController packetController1;
+	private PacketController packetController2;
 	
 	private PowerManager.WakeLock wakelock;
 	
@@ -58,7 +54,6 @@ public class MainActivity extends IOIOActivity {
 		disableDeviceSleep();
 		
 		setupUI();
-//		setupLogging();
 		setupDeviceManager();
 		
 		// http://developer.android.com/training/basics/location/locationmanager.html#TaskGetLocationManagerRef
@@ -103,13 +98,15 @@ public class MainActivity extends IOIOActivity {
 	}
 
 	private void setupPacketController(Rocket rocket) {
-		rocket.connection1.setListener(new PacketController(rocket.connection1));
-		rocket.connection2.setListener(new PacketController(rocket.connection2));
+		packetController1 = new PacketController(rocket.connection1);
+		packetController2 = new PacketController(rocket.connection2);
+		rocket.connection1.setListener(packetController1);
+		rocket.connection2.setListener(packetController2);
 		rocket.arduino.setListener(new ArduinoController(rocket.arduino, rocket));
 	}
 
 	private void setupDeviceManager() {
-		deviceManager = new DeviceManager(1000L /* IOIO thread sleep in milliseconds */);
+		deviceManager = new DeviceManager(250L /* IOIO thread sleep in milliseconds */);
 		deviceManager.setListener(new DeviceManager.DeviceManagerListener() {
 			@Override
 			public void incompatible() {
@@ -123,14 +120,17 @@ public class MainActivity extends IOIOActivity {
 			}
 			@Override
 			public void disconnected() {
+				App.ioio = null;
+				packetController1.stop();
+				packetController2.stop();
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						ioioStatusTextView.setText("Disconnected");
 						ioioDisconnectsTextView.setText(String.valueOf(App.stats.ioio.disconnects.incrementAndGet()));
-						App.rocketController.getRocket().internalAccelerometer.stop();
 					}
 				});
+				App.rocketController.getRocket().internalAccelerometer.stop();
 			}
 			@Override
 			public void setup(IOIO ioio) {
@@ -139,9 +139,12 @@ public class MainActivity extends IOIOActivity {
 					public void run() {
 						ioioStatusTextView.setText("Connected");
 						ioioConnectsTextView.setText(String.valueOf(App.stats.ioio.connects.incrementAndGet()));
-						App.rocketController.getRocket().internalAccelerometer.start();
 					}
 				});
+				App.ioio = ioio;
+				packetController1.start();
+				packetController2.start();
+				App.rocketController.getRocket().internalAccelerometer.start();
 			}
 		});
 	}
@@ -158,21 +161,6 @@ public class MainActivity extends IOIOActivity {
 		upTimeTextView = (TextView) findViewById(R.id.up_time);
 	}
 	
-	private void setupLogging() {
-		LogMultiplexer log = new LogMultiplexer(new AndroidLog());
-		
-		InetSocketAddress address = new InetSocketAddress("192.168.1.149", 9999);
-		OutputStream udpStream;
-		try {
-			udpStream = new DatagramOutputStream(address);
-			log.addLogger(new StreamLog(udpStream));
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-		
-		App.log = log;
-	}
-
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);

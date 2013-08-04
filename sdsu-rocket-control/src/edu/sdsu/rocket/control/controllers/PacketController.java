@@ -1,7 +1,10 @@
 package edu.sdsu.rocket.control.controllers;
 
+import ioio.lib.api.exception.ConnectionLostException;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import edu.sdsu.rocket.control.App;
 import edu.sdsu.rocket.control.models.Rocket;
@@ -11,13 +14,35 @@ import edu.sdsu.rocket.io.PacketWriter;
 
 public class PacketController implements PacketListener {
 	
-	private static final int BUFFER_SIZE = 1024;
+	private static final int     QUEUE_CAPACITY = 15;
+	private static final boolean QUEUE_FIFO     = true;
+	
+	private static final int BUFFER_SIZE = 1024; // bytes
+	
+	private ArrayBlockingQueue<Packet> queue = new ArrayBlockingQueue<Packet>(QUEUE_CAPACITY, QUEUE_FIFO);
+	private Thread flushThread;
 	
 	private ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 	private PacketWriter writer;
 	
 	public PacketController(PacketWriter writer) {
 		this.writer = writer;
+	}
+	
+	public void start() {
+		queue.clear();
+		flushThread = new Thread(new FlushRunnable());
+		flushThread.setName("Packet Flush");
+		flushThread.start();
+	}
+	
+	public void stop() {
+		flushThread.interrupt();
+		try {
+			flushThread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/*
@@ -57,8 +82,51 @@ public class PacketController implements PacketListener {
 	}
 	
 	private void onIgniteRequest(Packet packet) {
-		Rocket rocket = App.rocketController.getRocket();
-		rocket.ignitor.ignite();
+		App.rocketController.ignite();
+	}
+	
+	private void onIOIOResetRequest(Packet request) {
+		if (request.data == null || request.data.length == 0) {
+			App.stats.network.packetsDropped.incrementAndGet();
+			App.log.e(App.TAG, "Invalid IOIO reset request.");
+			return;
+		}
+		
+		if (request.data[0] == Packet.IOIO_REQUEST_DISCONNECT) {
+			if (App.ioio == null) {
+				App.log.e(App.TAG, "Failed to disconnect IOIO.\nIOIO not connected.");
+			} else {
+				App.log.i(App.TAG, "Performing IOIO disconnect.");
+				stop();
+				App.ioio.disconnect();
+				start();
+			}
+		} else if (request.data[0] == Packet.IOIO_REQUEST_SOFT_RESET) {
+			if (App.ioio == null) {
+				App.log.e(App.TAG, "Failed to soft reset IOIO.\nIOIO not connected.");
+			} else {
+				try {
+					App.log.i(App.TAG, "Performing IOIO soft reset.");
+					App.ioio.softReset();
+				} catch (ConnectionLostException e) {
+					App.log.e(App.TAG, "Connection lost during IOIO soft reset.", e);
+				}
+			}
+		} else if (request.data[0] == Packet.IOIO_REQUEST_HARD_RESET) {
+			if (App.ioio == null) {
+				App.log.e(App.TAG, "Failed to hard reset IOIO.\nIOIO not connected.");
+			} else {
+				try {
+					App.log.i(App.TAG, "Performing IOIO hard reset.");
+					App.ioio.hardReset();
+				} catch (ConnectionLostException e) {
+					App.log.e(App.TAG, "Connection lost during IOIO hard reset.", e);
+				}
+			}
+		} else {
+			App.stats.network.packetsDropped.incrementAndGet();
+			App.log.e(App.TAG, "Unknown IOIO reset request: " + request.data[0]);
+		}
 	}
 	
 	/*
@@ -123,16 +191,13 @@ public class PacketController implements PacketListener {
 	}
 	
 	public void send(Packet packet) {
-		send(packet.messageId, packet.data);
+		if (!queue.offer(packet)) {
+			App.log.e(App.TAG, "Send packet queue overflow.");
+		}
 	}
 	
 	public void send(byte id, byte[] data) {
-		try {
-			writer.writePacket(id, data);
-		} catch (IOException e) {
-			App.stats.network.packetsDropped.incrementAndGet();
-			App.log.e(App.TAG, "Packet controller failed to send packet.", e);
-		}
+		send(new Packet(id, data));
 	}
 	
 	/*
@@ -153,9 +218,31 @@ public class PacketController implements PacketListener {
 		case Packet.DATA_COLLECTION_REQUEST:
 			onDataCollectionRequest(packet);
 			break;
+		case Packet.IOIO_REQUEST_RESET:
+			onIOIOResetRequest(packet);
+			break;
 		default:
 			App.log.e(App.TAG, "Unknown packet ID: " + packet.messageId);
 		}
+	}
+	
+	public class FlushRunnable implements Runnable {
+
+		@Override
+		public void run() {
+			try {
+				while (!Thread.currentThread().isInterrupted()) {
+					Packet packet = queue.take();
+					writer.write(packet);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				App.stats.network.packetsDropped.incrementAndGet();
+				App.log.e(App.TAG, "Packet controller failed to send packet.", e);
+			}
+		}
+		
 	}
 
 }

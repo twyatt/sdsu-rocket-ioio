@@ -1,5 +1,6 @@
 package edu.sdsu.rocket.control;
 
+import ioio.lib.api.IOIO;
 import edu.sdsu.rocket.control.controllers.RocketController;
 import edu.sdsu.rocket.control.logging.AndroidLog;
 import edu.sdsu.rocket.logging.Logger;
@@ -19,6 +20,7 @@ public class App {
 	 */
 	public static final boolean DEBUG = true;
 	
+	public static IOIO ioio;
 	public static Logger log = new AndroidLog();
 	public static Statistics stats = new Statistics();
 	public static RocketController rocketController;
