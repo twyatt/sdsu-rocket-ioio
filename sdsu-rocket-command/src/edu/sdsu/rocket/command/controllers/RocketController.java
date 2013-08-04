@@ -13,6 +13,7 @@ import edu.sdsu.rocket.io.PacketWriter;
 public class RocketController extends Threaded implements PacketListener {
 	
 	public interface RocketControllerListener {
+		public void onIdent();
 		public void onChange();
 	}
 	
@@ -60,7 +61,9 @@ public class RocketController extends Threaded implements PacketListener {
 	private void onIdentResponse(Packet packet) {
 		if (packet.data.length > 0) {
 			rocket.ident = new String(packet.data);
-			onChange();
+			if (listener != null) {
+				listener.onIdent();
+			}
 		}
 	}
 	
@@ -72,6 +75,14 @@ public class RocketController extends Threaded implements PacketListener {
 	
 	public void sendIgniteRequest() throws IOException {
 		writer.writePacket(Packet.IGNITE_REQUEST, null);
+	}
+	
+	public void sendLaunchRequest() throws IOException {
+		writer.writePacket(Packet.LAUNCH_REQUEST, null);
+	}
+	
+	public void sendAbortRequest() throws IOException {
+		writer.writePacket(Packet.ABORT_REQUEST, null);
 	}
 	
 	public void sendIOIOResetRequest() throws IOException {

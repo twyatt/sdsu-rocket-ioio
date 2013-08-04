@@ -85,6 +85,14 @@ public class PacketController implements PacketListener {
 		App.rocketController.ignite();
 	}
 	
+	private void onLaunchRequest(Packet packet) {
+		App.rocketController.launch();
+	}
+	
+	private void onAbortRequest(Packet packet) {
+		App.rocketController.abortLaunch();
+	}
+	
 	private void onIOIOResetRequest(Packet request) {
 		if (request.data == null || request.data.length == 0) {
 			App.stats.network.packetsDropped.incrementAndGet();
@@ -214,6 +222,12 @@ public class PacketController implements PacketListener {
 			break;
 		case Packet.IGNITE_REQUEST:
 			onIgniteRequest(packet);
+			break;
+		case Packet.LAUNCH_REQUEST:
+			onLaunchRequest(packet);
+			break;
+		case Packet.ABORT_REQUEST:
+			onAbortRequest(packet);
 			break;
 		case Packet.DATA_COLLECTION_REQUEST:
 			onDataCollectionRequest(packet);

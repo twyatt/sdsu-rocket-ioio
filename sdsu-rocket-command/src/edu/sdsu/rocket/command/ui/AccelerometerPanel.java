@@ -3,6 +3,7 @@ package edu.sdsu.rocket.command.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.text.DecimalFormat;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -10,10 +11,13 @@ import javax.swing.border.EmptyBorder;
 
 public class AccelerometerPanel extends JPanel {
 
+	private static final DecimalFormat DISPLAY = new DecimalFormat("#.#####");
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8090649155449467756L;
+	
 	private GraphPanel graphPanel;
 	private JLabel xLabel;
 	private JLabel yLabel;
@@ -24,9 +28,9 @@ public class AccelerometerPanel extends JPanel {
 	}
 	
 	public void updateWithValues(float x, float y, float z) {
-		xLabel.setText("X: " + x);
-		yLabel.setText("Y: " + y);
-		zLabel.setText("Z: " + z);
+		xLabel.setText("X: " + DISPLAY.format(x));
+		yLabel.setText("Y: " + DISPLAY.format(y));
+		zLabel.setText("Z: " + DISPLAY.format(z));
 		
 		graphPanel.point(x, Color.RED);
 		graphPanel.point(y, Color.GREEN);

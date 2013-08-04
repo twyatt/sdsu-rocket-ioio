@@ -127,8 +127,8 @@ public class RocketController extends Threaded {
 		rocket.ignitor.ignite();
 	}
 	
-	public void launch(boolean force) {
-		if (rocket.breakWire.isBroken() || force) {
+	public void launch() {
+		if (rocket.breakWire.isBroken()) {
 			isLOXCycling = false;
 			isEthanolCycling = false;
 			
@@ -142,9 +142,10 @@ public class RocketController extends Threaded {
 	
 	public void abortLaunch() {
 		rocket.fuelValve.close();
+		rocket.ignitor.cancel();
 		rocket.loxValve.open();
 		rocket.ethanolValve.open();
-		App.log.i(App.TAG, "Closing fuel valves and opening tank vents!");
+		App.log.i(App.TAG, "Closing fuel valves, cancelling ignitor and opening tank vents!");
 		
 		App.data.disable();
 		App.log.i(App.TAG, "Launch aborted!");
@@ -183,8 +184,6 @@ public class RocketController extends Threaded {
 				}
 			}
 		}
-		
-		// TODO send rocket status? i.e. break wire, ready for launch status
 	}
 
 	@Override

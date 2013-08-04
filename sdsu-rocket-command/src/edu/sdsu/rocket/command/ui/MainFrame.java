@@ -42,6 +42,8 @@ import edu.sdsu.rocket.command.io.TcpClient.TcpClientListener;
 import edu.sdsu.rocket.command.models.BreakWire;
 import edu.sdsu.rocket.command.models.Ignitor;
 import edu.sdsu.rocket.command.models.Rocket;
+import java.awt.Component;
+import javax.swing.Box;
 
 public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
 
@@ -61,14 +63,12 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JTextField hostTextField;
 	private JTextField portTextField;
 	private JButton connectButton;
-	private JLabel lblInfo;
 	private AccelerometerPanel accelerometerPanel;
 	private GaugePanel loxPanel;
 	private JSlider frequencySlider;
 	private JLabel frequencyLabel;
 	private JPanel sensorRequestRatePanel;
 	private JLabel lblSensorFrequency;
-
 	private BreakWireLabel breakWireLabel;
 	private JPanel statusPanel;
 	private JLabel lblBreakWire;
@@ -92,6 +92,10 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JButton btnOpenEthanolVent;
 	private JButton btnCloseEthanolVent;
 	private JButton resetIOIOButton;
+	private Component horizontalStrut;
+	private JPanel identPanel;
+	private JLabel identLabel;
+	private PressureLabel loxPressureLabel;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -145,9 +149,24 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	public void onDisconnected() {
 		resetIOIOButton.setEnabled(false);
 		controller.stop();
+		loxPressureLabel.setPressure(Float.NaN);
 		ignitorLabel.setState(Ignitor.State.UNKNOWN);
 		breakWireLabel.setState(BreakWire.State.UNKNOWN);
-//		lblInfo.setText("");
+		identLabel.setText(" ");
+	}
+	
+	/*
+	 * RocketControllerListener interface methods
+	 */
+	
+	@Override
+	public void onIdent() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				identLabel.setText(rocket.ident);
+			}
+		});
 	}
 	
 	@Override
@@ -155,15 +174,14 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-//				lblInfo.setText(rocket.ident);
-				
 				ignitorLabel.setState(rocket.ignitor.state);
 				breakWireLabel.setState(rocket.breakWire.state);
 				
-				float x = rocket.accelerometer.getX();
-				float y = rocket.accelerometer.getY();
-				float z = rocket.accelerometer.getZ();
-				accelerometerPanel.updateWithValues(x, y, z);
+				accelerometerPanel.updateWithValues(
+					rocket.accelerometer.getX(),
+					rocket.accelerometer.getY(),
+					rocket.accelerometer.getZ()
+				);
 				
 //				float x = rocket.internalAccelerometer.getX();
 //				float y = rocket.internalAccelerometer.getY();
@@ -175,6 +193,10 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			}
 		});
 	}
+	
+	/*
+	 * UI
+	 */
 
 	private void setupUI() {
 		setContentPane(createContentPane());
@@ -247,6 +269,11 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		lblLoxPressure = new JLabel("LOX Pressure");
 		lblLoxPressure.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
 		statusPanel.add(lblLoxPressure, "2, 4, right, default");
+		
+		loxPressureLabel = new PressureLabel(300, 400);
+		loxPressureLabel.setFont(new Font("Courier New", Font.BOLD, 18));
+		loxPressureLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		statusPanel.add(loxPressureLabel, "4, 4, fill, fill");
 		
 		lblIgnitor = new JLabel("Ignitor");
 		lblIgnitor.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
@@ -324,11 +351,31 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		controlPanel.add(igniteButton, "2, 10, fill, fill");
 		
 		btnLaunch = new JButton("Launch");
+		btnLaunch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					controller.sendLaunchRequest();
+				} catch (IOException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(MainFrame.this, "Failed to send launch request.\n" + e.getMessage());
+				}
+			}
+		});
 		btnLaunch.setForeground(Color.RED);
 		btnLaunch.setFont(new Font("Dialog", Font.BOLD, 20));
 		controlPanel.add(btnLaunch, "2, 12, fill, fill");
 		
 		abortButton = new JButton("Abort");
+		abortButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				try {
+					controller.sendAbortRequest();
+				} catch (IOException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(MainFrame.this, "Failed to send abort request.\n" + e.getMessage());
+				}
+			}
+		});
 		abortButton.setFont(new Font("Dialog", Font.PLAIN, 20));
 		controlPanel.add(abortButton, "2, 14, fill, fill");
 		
@@ -358,6 +405,13 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		flowLayout.setHgap(0);
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		contentPane.add(bottomPanel, BorderLayout.SOUTH);
+		
+		identPanel = new JPanel();
+		identPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		bottomPanel.add(identPanel);
+		
+		identLabel = new JLabel(" ");
+		identPanel.add(identLabel);
 		
 		latencyPanel = new JPanel();
 		latencyPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -416,6 +470,9 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				}
 			}
 		});
+		
+		horizontalStrut = Box.createHorizontalStrut(20);
+		connectionPanel.add(horizontalStrut);
 		resetIOIOButton.setEnabled(false);
 		connectionPanel.add(resetIOIOButton);
 		
