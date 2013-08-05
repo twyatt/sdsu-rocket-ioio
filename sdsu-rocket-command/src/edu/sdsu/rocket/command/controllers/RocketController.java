@@ -101,6 +101,10 @@ public class RocketController extends Threaded implements PacketListener {
 			rocket.ignitor.setState(buffer.get());
 			rocket.breakWire.setState(buffer.get());
 			
+			rocket.pressureLOX.pressure = buffer.getFloat();
+			rocket.pressureEthanol.pressure = buffer.getFloat();
+			rocket.pressureEngine.pressure = buffer.getFloat();
+			
 			// for ADXL345 accelerometer
 			rocket.accelerometer.multiplier = buffer.getFloat();
 			rocket.accelerometer.x = buffer.getInt();

@@ -49,7 +49,6 @@ public class PressureLabel extends StatusLabel {
 	}
 	
 	public void setPressure(float pressure) {
-		System.out.println(pressure);
 		if (Float.isNaN(pressure)) {
 			setBackground(UNKNOWN_COLOR);
 			setText(UNKNOWN_TEXT);

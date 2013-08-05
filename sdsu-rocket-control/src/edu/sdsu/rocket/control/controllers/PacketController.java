@@ -149,14 +149,15 @@ public class PacketController implements PacketListener {
 		Rocket rocket = App.rocketController.getRocket();
 		buffer.clear();
 		
-//		buffer.putFloat(rocket.tankPressureLOX.getVoltage());
-//		buffer.putFloat(rocket.tankPressureEngine.getVoltage());
-//		buffer.putFloat(rocket.tankPressureEthanol.getVoltage());
-//		buffer.putFloat(rocket.barometer.pressure);
-//		buffer.putFloat(rocket.barometer.temperature);
-		
 		buffer.put((byte) (rocket.ignitor.isActive() ? 1 : 0));
 		buffer.put((byte) (rocket.breakWire.isBroken() ? 1 : 0));
+		
+		buffer.putFloat(rocket.tankPressureLOX.getPressure());
+		buffer.putFloat(rocket.tankPressureEthanol.getPressure());
+		buffer.putFloat(rocket.tankPressureEngine.getPressure());
+		
+//		buffer.putFloat(rocket.barometer.pressure);
+//		buffer.putFloat(rocket.barometer.temperature);
 		
 		buffer.putFloat(rocket.accelerometer.getMultiplier());
 		buffer.putInt(rocket.accelerometer.getX());

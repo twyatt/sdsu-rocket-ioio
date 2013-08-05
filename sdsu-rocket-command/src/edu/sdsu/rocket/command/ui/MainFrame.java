@@ -64,7 +64,9 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JTextField portTextField;
 	private JButton connectButton;
 	private AccelerometerPanel accelerometerPanel;
-	private GaugePanel loxPanel;
+	private PressurePanel loxPanel;
+	private PressurePanel ethanolPanel;
+	private PressurePanel enginePanel;
 	private JSlider frequencySlider;
 	private JLabel frequencyLabel;
 	private JPanel sensorRequestRatePanel;
@@ -96,6 +98,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JPanel identPanel;
 	private JLabel identLabel;
 	private PressureLabel loxPressureLabel;
+	private PressureLabel ethanolPressureLabel;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -176,6 +179,10 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			public void run() {
 				ignitorLabel.setState(rocket.ignitor.state);
 				breakWireLabel.setState(rocket.breakWire.state);
+				
+				loxPanel.setPressure(rocket.pressureLOX.getPressure());
+				ethanolPanel.setPressure(rocket.pressureEthanol.getPressure());
+				enginePanel.setPressure(rocket.pressureEngine.getPressure());
 				
 				accelerometerPanel.updateWithValues(
 					rocket.accelerometer.getX(),
@@ -263,11 +270,16 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		leftPanel.add(statusPanel, gbc_statusPanel);
 		
 		lblEthanolPressure = new JLabel("Ethanol Pressure");
-		lblEthanolPressure.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
+		lblEthanolPressure.setFont(new Font("Lucida Grande", Font.PLAIN, 16));
 		statusPanel.add(lblEthanolPressure, "2, 2, right, default");
 		
+		ethanolPressureLabel = new PressureLabel(300, 400);
+		ethanolPressureLabel.setFont(new Font("Courier New", Font.BOLD, 18));
+		ethanolPressureLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		statusPanel.add(ethanolPressureLabel, "4, 2, fill, fill");
+		
 		lblLoxPressure = new JLabel("LOX Pressure");
-		lblLoxPressure.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
+		lblLoxPressure.setFont(new Font("Lucida Grande", Font.PLAIN, 16));
 		statusPanel.add(lblLoxPressure, "2, 4, right, default");
 		
 		loxPressureLabel = new PressureLabel(300, 400);
@@ -276,7 +288,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		statusPanel.add(loxPressureLabel, "4, 4, fill, fill");
 		
 		lblIgnitor = new JLabel("Ignitor");
-		lblIgnitor.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
+		lblIgnitor.setFont(new Font("Lucida Grande", Font.PLAIN, 16));
 		statusPanel.add(lblIgnitor, "2, 6, right, default");
 		
 		ignitorLabel = new IgnitorLabel();
@@ -285,7 +297,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		statusPanel.add(ignitorLabel, "4, 6, fill, fill");
 		
 		lblBreakWire = new JLabel("Break Wire");
-		lblBreakWire.setFont(new Font("Lucida Grande", Font.PLAIN, 18));
+		lblBreakWire.setFont(new Font("Lucida Grande", Font.PLAIN, 16));
 		statusPanel.add(lblBreakWire, "2, 8, right, default");
 		
 		breakWireLabel = new BreakWireLabel();
@@ -347,7 +359,6 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			}
 		});
 		igniteButton.setFont(new Font("Dialog", Font.PLAIN, 20));
-		igniteButton.setOpaque(true);
 		controlPanel.add(igniteButton, "2, 10, fill, fill");
 		
 		btnLaunch = new JButton("Launch");
@@ -386,14 +397,25 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		rightPanel = new JPanel();
 		splitPane.setRightComponent(rightPanel);
 		
+		loxPanel = new PressurePanel(0 /* min */, 500 /* max */, 10);
+		loxPanel.setBorder(new TitledBorder(null, "LOX Pressure", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		loxPanel.setPreferredSize(new Dimension(210, 255));
+		rightPanel.add(loxPanel);
+		
+		ethanolPanel = new PressurePanel(0 /* min */, 500 /* max */, 10);
+		ethanolPanel.setBorder(new TitledBorder(null, "Ethanol Pressure", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		ethanolPanel.setPreferredSize(new Dimension(210, 255));
+		rightPanel.add(ethanolPanel);
+		
+		enginePanel = new PressurePanel(0 /* min */, 500 /* max */, 10);
+		enginePanel.setBorder(new TitledBorder(null, "Engine Pressure", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		enginePanel.setPreferredSize(new Dimension(210, 255));
+		rightPanel.add(enginePanel);
+		
 		accelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
 		accelerometerPanel.setBorder(new TitledBorder(null, "Accelerometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		accelerometerPanel.setPreferredSize(new Dimension(300, 200));
 		rightPanel.add(accelerometerPanel);
-		
-		loxPanel = new GaugePanel(0 /* min */, 500 /* max */, 10);
-		loxPanel.setPreferredSize(new Dimension(200, 200));
-		rightPanel.add(loxPanel);
 		
 		/*
 		 * Bottom Panel
