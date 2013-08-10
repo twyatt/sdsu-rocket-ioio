@@ -15,7 +15,7 @@ import edu.sdsu.rocket.control.App;
 public class Arduino extends DeviceAdapter {
 	
 	public interface ArduinoListener {
-		public void onRequest(char request);
+		public void onRequest(byte request);
 	}
 	
 	private ArduinoListener listener;
@@ -65,9 +65,10 @@ public class Arduino extends DeviceAdapter {
 	@Override
 	public void loop() throws ConnectionLostException, InterruptedException {
 		try {
-			char character = in.readChar();
+			byte b = (byte) in.read();
+			System.out.println("Arduino: " + b);
 			if (listener != null) {
-				listener.onRequest(character);
+				listener.onRequest(b);
 			}
 		} catch (IOException e) {
 			App.stats.ioio.errors.incrementAndGet();

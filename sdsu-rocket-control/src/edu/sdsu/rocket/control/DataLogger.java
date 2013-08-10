@@ -53,7 +53,7 @@ public class DataLogger {
 		makeStream(BAROMETER, BAROMETER_BUFFER_SIZE);
 		rocket.barometer.setListener(new MS5611.MS5611Listener() {
 			@Override
-			public void onMS5611Values(float pressure /* mbar */, float temperature /* C */) {
+			public void onData(int P /* mbar */, int TEMP /* C */) {
 				if (enabled) {
 					DataOutputStream stream = out.get(BAROMETER);
 					
@@ -62,8 +62,8 @@ public class DataLogger {
 					} else {
 						try {
 							stream.writeFloat(App.elapsedTime());
-							stream.writeFloat(pressure);
-							stream.writeFloat(temperature);
+							stream.writeInt(P);
+							stream.writeInt(TEMP);
 						} catch (IOException e) {
 							App.log.e(App.TAG, "Failed to write " + BAROMETER + " values to output stream.");
 							e.printStackTrace();
@@ -73,7 +73,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, BAROMETER + " = P: " + pressure + " mbar, T: " + temperature + " C");
+					App.log.i(App.TAG, BAROMETER + " = P: " + (P / 100f) + " mbar, T: " + (TEMP / 100f) + " C");
 					
 //					float temperatureK = temperature + 273.15f; // C -> K
 //					double tempF = Units.convertCelsiusToFahrenheit(temperature);
@@ -90,6 +90,11 @@ public class DataLogger {
 //					
 //					App.log.i(App.TAG, BAROMETER + " = A: " + altitude + " ft, T: " + tempF + " F");
 				}
+			}
+
+			@Override
+			public void onError(String message) {
+				
 			}
 		});
 		

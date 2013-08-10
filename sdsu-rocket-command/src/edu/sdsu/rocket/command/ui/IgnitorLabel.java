@@ -13,7 +13,7 @@ public class IgnitorLabel extends StatusLabel {
 	
 	public static final String INACTIVE_TEXT  = "Inactive";
 	public static final String ACTIVE_TEXT    = "Active";
-	public static final String ACTIVATED_TEXT = "Actived";
+	public static final String ACTIVATED_TEXT = "Activated";
 	public static final String UNKNOWN_TEXT   = "Unknown";
 	
 	/**

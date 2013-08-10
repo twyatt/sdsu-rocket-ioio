@@ -1,6 +1,5 @@
 package edu.sdsu.rocket.control.devices;
 
-import edu.sdsu.rocket.control.App;
 import ioio.lib.api.DigitalInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;

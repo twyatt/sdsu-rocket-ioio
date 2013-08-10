@@ -9,7 +9,7 @@ import edu.sdsu.rocket.control.models.Rocket;
 
 public class ArduinoController implements ArduinoListener {
 	
-	public static final char LOX_VOLTAGE_REQUEST = 'L';
+	public static final char LOX_VOLTAGE_REQUEST = (byte) 0x00;
 
 	private Arduino arduino;
 	private Rocket rocket;
@@ -20,7 +20,7 @@ public class ArduinoController implements ArduinoListener {
 	}
 
 	@Override
-	public void onRequest(char request) {
+	public void onRequest(byte request) {
 		switch (request) {
 		case LOX_VOLTAGE_REQUEST:
 			onLOXVoltageRequest();
@@ -36,7 +36,8 @@ public class ArduinoController implements ArduinoListener {
 	
 	public void writeLOXVoltage() {
 		try {
-			arduino.getOutputStream().writeFloat(rocket.tankPressureLOX.getVoltage());
+			String string = String.valueOf(rocket.tankPressureLOX.getVoltage());
+			arduino.getOutputStream().writeUTF(string + " ");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

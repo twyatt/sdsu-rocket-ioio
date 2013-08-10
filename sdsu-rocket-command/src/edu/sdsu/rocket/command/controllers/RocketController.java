@@ -105,13 +105,16 @@ public class RocketController extends Threaded implements PacketListener {
 			rocket.pressureEthanol.pressure = buffer.getFloat();
 			rocket.pressureEngine.pressure = buffer.getFloat();
 			
-			// for ADXL345 accelerometer
+			rocket.barometer.temperature = buffer.getInt();
+			rocket.barometer.pressure = buffer.getInt();
+			
+			// ADXL345 accelerometer
 			rocket.accelerometer.multiplier = buffer.getFloat();
 			rocket.accelerometer.x = buffer.getInt();
 			rocket.accelerometer.y = buffer.getInt();
 			rocket.accelerometer.z = buffer.getInt();
 			
-			// for phone's internal accelerometer
+			// phone's internal accelerometer
 			rocket.internalAccelerometer.x = buffer.getFloat();
 			rocket.internalAccelerometer.y = buffer.getFloat();
 			rocket.internalAccelerometer.z = buffer.getFloat();

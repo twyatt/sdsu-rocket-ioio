@@ -156,8 +156,8 @@ public class PacketController implements PacketListener {
 		buffer.putFloat(rocket.tankPressureEthanol.getPressure());
 		buffer.putFloat(rocket.tankPressureEngine.getPressure());
 		
-//		buffer.putFloat(rocket.barometer.pressure);
-//		buffer.putFloat(rocket.barometer.temperature);
+		buffer.putInt(rocket.barometer.getTemperature());
+		buffer.putInt(rocket.barometer.getPressure());
 		
 		buffer.putFloat(rocket.accelerometer.getMultiplier());
 		buffer.putInt(rocket.accelerometer.getX());

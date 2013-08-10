@@ -1,6 +1,7 @@
 package edu.sdsu.rocket.control.models;
 
 import ioio.lib.api.SpiMaster;
+import ioio.lib.api.TwiMaster;
 import ioio.lib.api.Uart.Parity;
 import ioio.lib.api.Uart.StopBits;
 import android.hardware.SensorManager;
@@ -17,6 +18,7 @@ import edu.sdsu.rocket.control.devices.RelayIgnitor;
 import edu.sdsu.rocket.control.devices.RelayValve;
 import edu.sdsu.rocket.control.devices.SB70;
 import edu.sdsu.rocket.control.devices.ServoValve;
+import edu.sdsu.rocket.control.devices.MS5611.OversamplingRatio;
 
 public class Rocket {
 	
@@ -76,11 +78,10 @@ public class Rocket {
 		ethanolValve = new ServoValve(new PS050(11 /* pin */, 100 /* frequency */), SERVO_SIGNAL_DURATION);
 		loxValve     = new RelayValve(new Relay(14 /* pin */));
 		
-		accelerometer = new ADXL345(29 /* miso */, 28 /* mosi */, 27 /* scl */, 30 /* cs */, SpiMaster.Rate.RATE_2M);
+		accelerometer = new ADXL345(29 /* miso */, 28 /* mosi */, 27 /* scl */, 30 /* cs */, SpiMaster.Rate.RATE_31K);
 		
-		// twiNum 1 = pin 1 (SDA) and pin 2 (SCL)
-		// VCC = 3.3V
-		barometer = new MS5611(1 /* twiNum */, MS5611.ADD_CSB_LOW /* address */, 30 /* sample rate */);
+		// DA0 = pin 4, CL0 = pin 5
+		barometer = new MS5611(0 /* twiNum */, TwiMaster.Rate.RATE_100KHz, OversamplingRatio.OSR_4096);
 		
 		
 		/*

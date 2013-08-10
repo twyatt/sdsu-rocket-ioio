@@ -152,9 +152,12 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	public void onDisconnected() {
 		resetIOIOButton.setEnabled(false);
 		controller.stop();
+		
+		rocket.breakWire.state = BreakWire.State.UNKNOWN;
+		rocket.ignitor.state = Ignitor.State.UNKNOWN;
+		onChange();
+		
 		loxPressureLabel.setPressure(Float.NaN);
-		ignitorLabel.setState(Ignitor.State.UNKNOWN);
-		breakWireLabel.setState(BreakWire.State.UNKNOWN);
 		identLabel.setText(" ");
 	}
 	
