@@ -37,12 +37,17 @@ import com.jgoodies.forms.layout.RowSpec;
 
 import edu.sdsu.rocket.command.controllers.RocketController;
 import edu.sdsu.rocket.command.controllers.RocketController.RocketControllerListener;
+import edu.sdsu.rocket.command.controllers.RocketController.ValveException;
 import edu.sdsu.rocket.command.io.TcpClient;
 import edu.sdsu.rocket.command.io.TcpClient.TcpClientListener;
 import edu.sdsu.rocket.command.models.BreakWire;
 import edu.sdsu.rocket.command.models.Ignitor;
 import edu.sdsu.rocket.command.models.Rocket;
+import edu.sdsu.rocket.command.models.Rocket.Valve;
+import edu.sdsu.rocket.command.models.Rocket.ValveAction;
+
 import java.awt.Component;
+
 import javax.swing.Box;
 
 public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
@@ -159,6 +164,17 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		
 		loxPressureLabel.setPressure(Float.NaN);
 		identLabel.setText(" ");
+	}
+	
+	protected void sendValveRequest(Valve valve, ValveAction action) {
+		try {
+			controller.sendValveRequest(valve, action);
+		} catch (ValveException e) {
+			JOptionPane.showMessageDialog(MainFrame.this, "Unable to perform valve request.\n" + e.getMessage());
+		} catch (IOException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(MainFrame.this, "Failed to perform valve request.\n" + e.getMessage());
+		}
 	}
 	
 	/*
@@ -335,18 +351,38 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				FormFactory.DEFAULT_ROWSPEC,}));
 		
 		btnOpenEthanolVent = new JButton("Open Ethanol Vent");
+		btnOpenEthanolVent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				sendValveRequest(Rocket.Valve.ETHANOL, Rocket.ValveAction.OPEN);
+			}
+		});
 		btnOpenEthanolVent.setFont(new Font("Dialog", Font.PLAIN, 20));
 		controlPanel.add(btnOpenEthanolVent, "2, 2, fill, fill");
 		
 		btnCloseEthanolVent = new JButton("Close Ethanol Vent");
+		btnCloseEthanolVent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				sendValveRequest(Rocket.Valve.ETHANOL, Rocket.ValveAction.CLOSE);
+			}
+		});
 		btnCloseEthanolVent.setFont(new Font("Dialog", Font.PLAIN, 20));
 		controlPanel.add(btnCloseEthanolVent, "2, 4, fill, fill");
 		
 		openLOXButton = new JButton("Open LOX Vent");
+		openLOXButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				sendValveRequest(Rocket.Valve.LOX, Rocket.ValveAction.OPEN);
+			}
+		});
 		openLOXButton.setFont(new Font("Dialog", Font.PLAIN, 20));
 		controlPanel.add(openLOXButton, "2, 6, fill, fill");
 		
 		closeLOXVentButton = new JButton("Close LOX Vent");
+		closeLOXVentButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				sendValveRequest(Rocket.Valve.LOX, Rocket.ValveAction.CLOSE);
+			}
+		});
 		closeLOXVentButton.setFont(new Font("Dialog", Font.PLAIN, 20));
 		controlPanel.add(closeLOXVentButton, "2, 8, fill, fill");
 		

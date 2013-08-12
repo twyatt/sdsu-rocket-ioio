@@ -5,12 +5,21 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import edu.sdsu.rocket.command.models.Rocket;
+import edu.sdsu.rocket.command.models.Rocket.Valve;
+import edu.sdsu.rocket.command.models.Rocket.ValveAction;
 import edu.sdsu.rocket.helpers.Threaded;
 import edu.sdsu.rocket.io.Packet;
 import edu.sdsu.rocket.io.PacketListener;
 import edu.sdsu.rocket.io.PacketWriter;
 
 public class RocketController extends Threaded implements PacketListener {
+	
+	public class ValveException extends RuntimeException {
+		private static final long serialVersionUID = 5178057669098068984L;
+		public ValveException(String message) {
+			super(message);
+		}
+	}
 	
 	public interface RocketControllerListener {
 		public void onIdent();
@@ -73,6 +82,34 @@ public class RocketController extends Threaded implements PacketListener {
 		}
 	}
 	
+	public void sendValveRequest(Valve valve, ValveAction action) throws IOException {
+		byte[] data = new byte[2];
+		
+		switch (valve) {
+		case ETHANOL:
+			data[0] = Packet.VALVE_REQUEST_ETHANOL;
+			break;
+		case LOX:
+			data[0] = Packet.VALVE_REQUEST_LOX;
+			break;
+		default:
+			throw new ValveException("Unknown valve: " + valve);
+		}
+		
+		switch (action) {
+		case CLOSE:
+			data[1] = Packet.VALVE_REQUEST_CLOSE;
+			break;
+		case OPEN:
+			data[1] = Packet.VALVE_REQUEST_OPEN;
+			break;
+		default:
+			throw new ValveException("Unknown valve action: " + action);
+		}
+		
+		writer.writePacket(Packet.VALVE_REQUEST, data);
+	}
+	
 	public void sendIgniteRequest() throws IOException {
 		writer.writePacket(Packet.IGNITE_REQUEST, null);
 	}
@@ -86,7 +123,7 @@ public class RocketController extends Threaded implements PacketListener {
 	}
 	
 	public void sendIOIOResetRequest() throws IOException {
-		writer.writePacket(Packet.IOIO_REQUEST_RESET, new byte[] { Packet.IOIO_REQUEST_DISCONNECT });
+		writer.writePacket(Packet.IOIO_REQUEST, new byte[] { Packet.IOIO_REQUEST_DISCONNECT });
 	}
 	
 	/*

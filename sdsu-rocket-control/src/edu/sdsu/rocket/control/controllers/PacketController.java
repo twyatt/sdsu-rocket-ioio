@@ -57,6 +57,47 @@ public class PacketController implements PacketListener {
 		sendSensorData();
 	}
 	
+	private void onValveRequest(Packet request) {
+		if (request.data == null || request.data.length < 2) {
+			App.stats.network.packetsDropped.incrementAndGet();
+			App.log.e(App.TAG, "Invalid valve request.");
+			return;
+		}
+		
+		byte valve  = request.data[0];
+		byte action = request.data[1];
+		
+		boolean error = false;
+		
+		switch (valve) {
+		case Packet.VALVE_REQUEST_ETHANOL:
+			if (action == Packet.VALVE_REQUEST_OPEN) {
+				App.rocketController.openEthanolVent();
+			} else if (action == Packet.VALVE_REQUEST_CLOSE) {
+				App.rocketController.closeEthanolVent();
+			} else {
+				error = true;
+			}
+			break;
+		case Packet.VALVE_REQUEST_LOX:
+			if (action == Packet.VALVE_REQUEST_OPEN) {
+				App.rocketController.openLOXVent();
+			} else if (action == Packet.VALVE_REQUEST_CLOSE) {
+				App.rocketController.closeLOXVent();
+			} else {
+				error = true;
+			}
+			break;
+		default:
+			error = true;
+		}
+		
+		if (error) {
+			App.stats.network.packetsDropped.incrementAndGet();
+			App.log.e(App.TAG, "Unknown valve request: " + valve + ", " + action);
+		}
+	}
+	
 	private void onDataCollectionRequest(Packet request) {
 		if (request.data == null || request.data.length == 0) {
 			App.stats.network.packetsDropped.incrementAndGet();
@@ -93,7 +134,7 @@ public class PacketController implements PacketListener {
 		App.rocketController.abortLaunch();
 	}
 	
-	private void onIOIOResetRequest(Packet request) {
+	private void onIOIORequest(Packet request) {
 		if (request.data == null || request.data.length == 0) {
 			App.stats.network.packetsDropped.incrementAndGet();
 			App.log.e(App.TAG, "Invalid IOIO reset request.");
@@ -174,7 +215,7 @@ public class PacketController implements PacketListener {
 		
 		send(Packet.SENSOR_RESPONSE, data);
 	}
-
+	
 	private void sendDataCollectionResponse(boolean on) {
 		 byte data = on ? Packet.DATA_COLLECTION_RESPONSE_ON : Packet.DATA_COLLECTION_RESPONSE_OFF;
 		 send(Packet.DATA_COLLECTION_RESPONSE, new byte[] { data });
@@ -221,6 +262,9 @@ public class PacketController implements PacketListener {
 		case Packet.SENSOR_REQUEST:
 			onSensorRequest(packet);
 			break;
+		case Packet.VALVE_REQUEST:
+			onValveRequest(packet);
+			break;
 		case Packet.IGNITE_REQUEST:
 			onIgniteRequest(packet);
 			break;
@@ -233,8 +277,8 @@ public class PacketController implements PacketListener {
 		case Packet.DATA_COLLECTION_REQUEST:
 			onDataCollectionRequest(packet);
 			break;
-		case Packet.IOIO_REQUEST_RESET:
-			onIOIOResetRequest(packet);
+		case Packet.IOIO_REQUEST:
+			onIOIORequest(packet);
 			break;
 		default:
 			App.log.e(App.TAG, "Unknown packet ID: " + packet.messageId);

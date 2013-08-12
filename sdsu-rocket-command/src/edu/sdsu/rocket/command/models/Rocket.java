@@ -2,6 +2,16 @@ package edu.sdsu.rocket.command.models;
 
 public class Rocket {
 
+	public enum Valve {
+		ETHANOL,
+		LOX,
+	}
+	
+	public enum ValveAction {
+		OPEN,
+		CLOSE,
+	}
+	
 	public String ident;
 	
 	public Ignitor ignitor = new Ignitor();

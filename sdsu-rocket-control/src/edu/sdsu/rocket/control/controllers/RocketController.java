@@ -48,10 +48,9 @@ public class RocketController extends Threaded {
 //		deviceManager.add(rocket.tankPressureEthanol, true /* threaded */);
 //		deviceManager.add(rocket.tankPressureEngine,  true /* threaded */);
 //		
-//		deviceManager.add(rocket.ethanolValve, false);
-//		
-		deviceManager.add(rocket.barometer, true /* threaded */);
+		deviceManager.add(rocket.ethanolValve, false);
 		
+		deviceManager.add(rocket.barometer, true /* threaded */);
 		deviceManager.add(rocket.accelerometer, true /* threaded */);
 		
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
