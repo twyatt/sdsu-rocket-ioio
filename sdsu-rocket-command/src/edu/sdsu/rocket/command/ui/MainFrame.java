@@ -69,9 +69,9 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JTextField portTextField;
 	private JButton connectButton;
 	private AccelerometerPanel accelerometerPanel;
-	private PressurePanel loxPanel;
-	private PressurePanel ethanolPanel;
-	private PressurePanel enginePanel;
+	private LabeledGaugePanel loxPanel;
+	private LabeledGaugePanel ethanolPanel;
+	private LabeledGaugePanel enginePanel;
 	private JSlider frequencySlider;
 	private JLabel frequencyLabel;
 	private JPanel sensorRequestRatePanel;
@@ -104,6 +104,8 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JLabel identLabel;
 	private PressureLabel loxPressureLabel;
 	private PressureLabel ethanolPressureLabel;
+
+	private LabeledGaugePanel loxTemperaturePanel;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
@@ -199,9 +201,11 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				ignitorLabel.setState(rocket.ignitor.state);
 				breakWireLabel.setState(rocket.breakWire.state);
 				
-				loxPanel.setPressure(rocket.pressureLOX.getPressure());
-				ethanolPanel.setPressure(rocket.pressureEthanol.getPressure());
-				enginePanel.setPressure(rocket.pressureEngine.getPressure());
+				loxPanel.setValue(rocket.pressureLOX.getPressure());
+				ethanolPanel.setValue(rocket.pressureEthanol.getPressure());
+				enginePanel.setValue(rocket.pressureEngine.getPressure());
+				
+				loxTemperaturePanel.setValue(rocket.loxTemperature.getTemperature());
 				
 				accelerometerPanel.updateWithValues(
 					rocket.accelerometer.getX(),
@@ -436,20 +440,25 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		rightPanel = new JPanel();
 		splitPane.setRightComponent(rightPanel);
 		
-		loxPanel = new PressurePanel(0 /* min */, 500 /* max */, 10);
+		loxPanel = new LabeledGaugePanel(0 /* min */, 500 /* max */, 10, "PSI");
 		loxPanel.setBorder(new TitledBorder(null, "LOX Pressure", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		loxPanel.setPreferredSize(new Dimension(210, 255));
 		rightPanel.add(loxPanel);
 		
-		ethanolPanel = new PressurePanel(0 /* min */, 500 /* max */, 10);
+		ethanolPanel = new LabeledGaugePanel(0 /* min */, 500 /* max */, 10, "PSI");
 		ethanolPanel.setBorder(new TitledBorder(null, "Ethanol Pressure", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		ethanolPanel.setPreferredSize(new Dimension(210, 255));
 		rightPanel.add(ethanolPanel);
 		
-		enginePanel = new PressurePanel(0 /* min */, 500 /* max */, 10);
+		enginePanel = new LabeledGaugePanel(0 /* min */, 500 /* max */, 10, "PSI");
 		enginePanel.setBorder(new TitledBorder(null, "Engine Pressure", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		enginePanel.setPreferredSize(new Dimension(210, 255));
 		rightPanel.add(enginePanel);
+		
+		loxTemperaturePanel = new LabeledGaugePanel(-200 /* min */, 100 /* max */, 10, "C");
+		loxTemperaturePanel.setBorder(new TitledBorder(null, "LOX Temperature", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		loxTemperaturePanel.setPreferredSize(new Dimension(210, 255));
+		rightPanel.add(loxTemperaturePanel);
 		
 		accelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
 		accelerometerPanel.setBorder(new TitledBorder(null, "Accelerometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));

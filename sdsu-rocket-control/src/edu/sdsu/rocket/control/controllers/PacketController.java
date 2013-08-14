@@ -193,9 +193,12 @@ public class PacketController implements PacketListener {
 		buffer.put((byte) (rocket.ignitor.isActive() ? 1 : 0));
 		buffer.put((byte) (rocket.breakWire.isBroken() ? 1 : 0));
 		
-		buffer.putFloat(rocket.tankPressureLOX.getPressure());
-		buffer.putFloat(rocket.tankPressureEthanol.getPressure());
-		buffer.putFloat(rocket.tankPressureEngine.getPressure());
+		buffer.putFloat(rocket.loxPressure.getPressure());
+		buffer.putFloat(rocket.ethanolPressure.getPressure());
+		buffer.putFloat(rocket.enginePressure.getPressure());
+		
+		buffer.putFloat(rocket.loxTemperature.getInternalTemperature());
+		buffer.putFloat(rocket.loxTemperature.getTemperature());
 		
 		buffer.putInt(rocket.barometer.getTemperature());
 		buffer.putInt(rocket.barometer.getPressure());
@@ -219,25 +222,6 @@ public class PacketController implements PacketListener {
 	private void sendDataCollectionResponse(boolean on) {
 		 byte data = on ? Packet.DATA_COLLECTION_RESPONSE_ON : Packet.DATA_COLLECTION_RESPONSE_OFF;
 		 send(Packet.DATA_COLLECTION_RESPONSE, new byte[] { data });
-	}
-
-	protected void onCommandRequest(Packet packet) {
-//		objectiveController.command(command.command);
-//		
-//		if (Network.ABORT_COMMAND.equals(command.command)) {
-//			/*
-//			 * Allow the abort command to close fuel valves and open tank
-//			 * vents no matter what objective is currently active.
-//			 */
-//			if (App.rocket != null) {
-//				App.log.i(App.TAG, "Closing fuel valves and opening tank vents!");
-//				App.rocket.servoLOX.open();
-//				App.rocket.servoEthanol.open();
-//				App.rocket.fuelValve.deactivate();
-//			}
-//			
-//			App.objective.set(Network.LAUNCH_OBJECTIVE);
-//		}
 	}
 	
 	public void send(Packet packet) {

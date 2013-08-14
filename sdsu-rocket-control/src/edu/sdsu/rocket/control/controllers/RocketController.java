@@ -38,20 +38,22 @@ public class RocketController extends Threaded {
 	public void setup(DeviceManager deviceManager, SensorManager sensorManager) {
 		deviceManager.add(rocket.connection1, true /* threaded */);
 		deviceManager.add(rocket.connection2, true /* threaded */);
-		deviceManager.add(rocket.arduino, true /* threaded */);
+		deviceManager.add(rocket.arduino,     true /* threaded */);
 		
-		deviceManager.add(rocket.ignitor, false);
-//		deviceManager.add(rocket.fuelValve, false);
+		deviceManager.add(rocket.ignitor,   false);
+		deviceManager.add(rocket.fuelValve, false);
 		deviceManager.add(rocket.breakWire, false);
 		
-//		deviceManager.add(rocket.tankPressureLOX,     true /* threaded */);
-//		deviceManager.add(rocket.tankPressureEthanol, true /* threaded */);
-//		deviceManager.add(rocket.tankPressureEngine,  true /* threaded */);
+//		deviceManager.add(rocket.loxPressure,     true /* threaded */);
+//		deviceManager.add(rocket.ethanolPressure, true /* threaded */);
+//		deviceManager.add(rocket.enginePressure,  true /* threaded */);
 //		
+		deviceManager.add(rocket.loxValve,     false);
 		deviceManager.add(rocket.ethanolValve, false);
 		
-		deviceManager.add(rocket.barometer, true /* threaded */);
-		deviceManager.add(rocket.accelerometer, true /* threaded */);
+		deviceManager.add(rocket.loxTemperature, true /* threaded */);
+		deviceManager.add(rocket.barometer,      true /* threaded */);
+		deviceManager.add(rocket.accelerometer,  true /* threaded */);
 		
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		rocket.internalAccelerometer
@@ -67,21 +69,24 @@ public class RocketController extends Threaded {
 		// TODO update phone's accelerometer rate
 		
 		if (SensorPriority.SENSOR_PRIORITY_HIGH.equals(priority)) {
-			rocket.tankPressureLOX.setSleep(5 /* milliseconds */);
-			rocket.tankPressureEthanol.setSleep(5 /* milliseconds */);
-			rocket.tankPressureEngine.setSleep(1 /* milliseconds */);
+			rocket.loxPressure.setSleep(5 /* milliseconds */);
+			rocket.loxTemperature.setSleep(50 /* milliseconds */);
+			rocket.ethanolPressure.setSleep(5 /* milliseconds */);
+			rocket.enginePressure.setSleep(1 /* milliseconds */);
 			rocket.barometer.setSleep(0 /* milliseconds */);
 			rocket.accelerometer.setFrequency(100f /* Hz */);
 		} else if (SensorPriority.SENSOR_PRIORITY_MEDIUM.equals(priority)) {
-			rocket.tankPressureLOX.setSleep(50 /* milliseconds */);
-			rocket.tankPressureEthanol.setSleep(50 /* milliseconds */);
-			rocket.tankPressureEngine.setSleep(10 /* milliseconds */);
+			rocket.loxPressure.setSleep(50 /* milliseconds */);
+			rocket.loxTemperature.setSleep(100 /* milliseconds */);
+			rocket.ethanolPressure.setSleep(50 /* milliseconds */);
+			rocket.enginePressure.setSleep(10 /* milliseconds */);
 			rocket.barometer.setSleep(10 /* milliseconds */);
 			rocket.accelerometer.setFrequency(10f /* Hz */);
 		} else { // SENSOR_PRIORITY_LOW
-			rocket.tankPressureLOX.setSleep(500 /* milliseconds */);
-			rocket.tankPressureEthanol.setSleep(500 /* milliseconds */);
-			rocket.tankPressureEngine.setSleep(500 /* milliseconds */);
+			rocket.loxPressure.setSleep(500 /* milliseconds */);
+			rocket.loxTemperature.setSleep(1000 /* milliseconds */);
+			rocket.ethanolPressure.setSleep(500 /* milliseconds */);
+			rocket.enginePressure.setSleep(500 /* milliseconds */);
 			rocket.barometer.setSleep(200 /* milliseconds */);
 			rocket.accelerometer.setFrequency(1f /* Hz */);
 		}

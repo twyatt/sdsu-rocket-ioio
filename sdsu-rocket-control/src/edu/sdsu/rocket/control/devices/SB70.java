@@ -18,7 +18,8 @@ import edu.sdsu.rocket.io.PacketWriter;
 
 public class SB70 extends DeviceAdapter implements PacketWriter {
 	
-	private static final int MAX_DATA_LENGTH = 1024000;
+//	private static final int MAX_DATA_LENGTH = 1024000;
+	private static final int MAX_DATA_LENGTH = 1024;
 	
 	private PacketListener listener;
 	
@@ -59,7 +60,7 @@ public class SB70 extends DeviceAdapter implements PacketWriter {
 			App.stats.network.packetsSent.incrementAndGet();
 		} catch (ConnectionLostException e) {
 			App.stats.ioio.errors.incrementAndGet();
-			e.printStackTrace();
+			App.log.e(App.TAG, "Failed to write packet.\n" + e.getMessage(), e);
 			Thread.yield();
 		}
 	}

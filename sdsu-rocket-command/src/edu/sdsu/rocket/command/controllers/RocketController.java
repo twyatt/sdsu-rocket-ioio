@@ -142,6 +142,11 @@ public class RocketController extends Threaded implements PacketListener {
 			rocket.pressureEthanol.pressure = buffer.getFloat();
 			rocket.pressureEngine.pressure = buffer.getFloat();
 			
+			// MAX31855 thermocouple
+			rocket.loxTemperature.internal = buffer.getFloat();
+			rocket.loxTemperature.thermocouple = buffer.getFloat();
+			
+			// MS5611 barometer
 			rocket.barometer.temperature = buffer.getInt();
 			rocket.barometer.pressure = buffer.getInt();
 			

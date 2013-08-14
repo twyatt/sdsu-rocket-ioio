@@ -99,7 +99,7 @@ public class DataLogger {
 		});
 		
 		makeStream(LOX_PRESSURE, PRESSURE_BUFFER_SIZE);
-		rocket.tankPressureLOX.setListener(new P51500AA1365V.P51500AA1365VListener() {
+		rocket.loxPressure.setListener(new P51500AA1365V.P51500AA1365VListener() {
 			@Override
 			public void onVoltage(float voltage) {
 				if (enabled) {
@@ -120,13 +120,13 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, LOX_PRESSURE + " = " + rocket.tankPressureLOX.getPressure() + " PSI");
+					App.log.i(App.TAG, LOX_PRESSURE + " = " + rocket.loxPressure.getPressure() + " PSI");
 				}
 			}
 		});
 		
 		makeStream(ETHANOL_PRESSURE, PRESSURE_BUFFER_SIZE);
-		rocket.tankPressureEthanol.setListener(new P51500AA1365V.P51500AA1365VListener() {
+		rocket.ethanolPressure.setListener(new P51500AA1365V.P51500AA1365VListener() {
 			@Override
 			public void onVoltage(float voltage) {
 				if (enabled) {
@@ -147,13 +147,13 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, ETHANOL_PRESSURE + " = " + rocket.tankPressureEthanol.getPressure() + " PSI");
+					App.log.i(App.TAG, ETHANOL_PRESSURE + " = " + rocket.ethanolPressure.getPressure() + " PSI");
 				}
 			}
 		});
 		
 		makeStream(ENGINE_PRESSURE, PRESSURE_BUFFER_SIZE);
-		rocket.tankPressureEngine.setListener(new P51500AA1365V.P51500AA1365VListener() {
+		rocket.enginePressure.setListener(new P51500AA1365V.P51500AA1365VListener() {
 			@Override
 			public void onVoltage(float voltage) {
 				if (enabled) {
@@ -174,7 +174,7 @@ public class DataLogger {
 				}
 				
 				if (LOG) {
-					App.log.i(App.TAG, ENGINE_PRESSURE + " = " + rocket.tankPressureEngine.getPressure() + " PSI");
+					App.log.i(App.TAG, ENGINE_PRESSURE + " = " + rocket.enginePressure.getPressure() + " PSI");
 				}
 			}
 		});

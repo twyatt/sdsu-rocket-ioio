@@ -8,8 +8,9 @@ import android.hardware.SensorManager;
 import edu.sdsu.rocket.control.devices.ADXL345;
 import edu.sdsu.rocket.control.devices.Arduino;
 import edu.sdsu.rocket.control.devices.BreakWire;
-import edu.sdsu.rocket.control.devices.DeviceRunnable;
+import edu.sdsu.rocket.control.devices.MAX31855;
 import edu.sdsu.rocket.control.devices.MS5611;
+import edu.sdsu.rocket.control.devices.MS5611.OversamplingRatio;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.PS050;
 import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
@@ -18,7 +19,6 @@ import edu.sdsu.rocket.control.devices.RelayIgnitor;
 import edu.sdsu.rocket.control.devices.RelayValve;
 import edu.sdsu.rocket.control.devices.SB70;
 import edu.sdsu.rocket.control.devices.ServoValve;
-import edu.sdsu.rocket.control.devices.MS5611.OversamplingRatio;
 
 public class Rocket {
 	
@@ -40,25 +40,24 @@ public class Rocket {
 	public Arduino arduino;
 	
 	public RelayIgnitor ignitor;
+	public volatile float ignitorTemperature; // value is received from the Arduino
+	
 	public BreakWire breakWire;
 	public RelayValve fuelValve;
 	
-	public P51500AA1365V tankPressureLOX;
-	public P51500AA1365V tankPressureEthanol;
-	public P51500AA1365V tankPressureEngine;
-	
 	public RelayValve loxValve;
+	public P51500AA1365V loxPressure;
+	public MAX31855 loxTemperature;
+	
+	public P51500AA1365V ethanolPressure;
 	public ServoValve ethanolValve;
+	
+	public P51500AA1365V enginePressure;
 	
 	public ADXL345 accelerometer;
 	public MS5611 barometer;
 	
 	public PhoneAccelerometer internalAccelerometer;
-	
-	DeviceRunnable tankPressureLOXRunnable;
-	DeviceRunnable tankPressureEthanolRunnable;
-	DeviceRunnable tankPressureEngineRunnable;
-	DeviceRunnable barometerRunnable;
 	
 	public Rocket() {
 		connection1 = new SB70(45 /* RX */, 46 /* TX */, 57600, Parity.NONE, StopBits.ONE);
@@ -71,9 +70,9 @@ public class Rocket {
 		
 		// max voltage for analog input = 3.3V
 		// calibrated May 12, 2013
-		tankPressureLOX     = new P51500AA1365V(41 /* pin */, 179.0827f /* slope */, -145.268f /* bias */);
-		tankPressureEthanol = new P51500AA1365V(42 /* pin */, 181.8296f /* slope */, -144.22f /* bias */);
-		tankPressureEngine  = new P51500AA1365V(43 /* pin */, 179.7781f /* slope */, -140.324f /* bias */);
+		loxPressure     = new P51500AA1365V(41 /* pin */, 179.0827f /* slope */, -145.268f /* bias */);
+		ethanolPressure = new P51500AA1365V(42 /* pin */, 181.8296f /* slope */, -144.22f /* bias */);
+		enginePressure  = new P51500AA1365V(43 /* pin */, 179.7781f /* slope */, -140.324f /* bias */);
 		
 		ethanolValve = new ServoValve(new PS050(11 /* pin */, 100 /* frequency */), SERVO_SIGNAL_DURATION);
 		loxValve     = new RelayValve(new Relay(14 /* pin */));
@@ -83,6 +82,7 @@ public class Rocket {
 		// DA0 = pin 4, CL0 = pin 5
 		barometer = new MS5611(0 /* twiNum */, TwiMaster.Rate.RATE_100KHz, OversamplingRatio.OSR_4096);
 		
+		loxTemperature = new MAX31855(7 /* miso */, 40 /* mosi */, 6 /* clk */, 8 /* cs */, SpiMaster.Rate.RATE_31K);
 		
 		/*
 		 * Devices internal to the Android phone (not connected via the IOIO).

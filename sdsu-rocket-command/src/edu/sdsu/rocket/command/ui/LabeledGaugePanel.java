@@ -7,7 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-public class PressurePanel extends JPanel {
+public class LabeledGaugePanel extends JPanel {
 
 	private static final DecimalFormat DISPLAY = new DecimalFormat("#.###");
 	
@@ -17,15 +17,18 @@ public class PressurePanel extends JPanel {
 	private static final long serialVersionUID = -5479341005593117239L;
 	
 	private GaugePanel gaugePanel;
-	private JLabel pressureLabel;
+	private JLabel valueLabel;
+
+	private String units;
 	
-	public PressurePanel(float min, float max, float ticks) {
+	public LabeledGaugePanel(float min, float max, float ticks, String units) {
+		this.units = units;
 		setupUI(min, max, ticks);
 	}
 	
-	public void setPressure(float pressure) {
-		gaugePanel.setValue(pressure);
-		pressureLabel.setText(DISPLAY.format(pressure) + " PSI");
+	public void setValue(float value) {
+		gaugePanel.setValue(value);
+		valueLabel.setText(DISPLAY.format(value) + " " + units);
 	}
 
 	private void setupUI(float min, float max, float ticks) {
@@ -37,8 +40,8 @@ public class PressurePanel extends JPanel {
 		valuesPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		add(valuesPanel, BorderLayout.SOUTH);
 		
-		pressureLabel = new JLabel(" ");
-		valuesPanel.add(pressureLabel);
+		valueLabel = new JLabel(" ");
+		valuesPanel.add(valueLabel);
 	}
 
 }
