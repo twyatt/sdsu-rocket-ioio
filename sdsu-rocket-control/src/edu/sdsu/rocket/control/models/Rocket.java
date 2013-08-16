@@ -40,7 +40,6 @@ public class Rocket {
 //	public Arduino arduino;
 	
 	public RelayIgnitor ignitor;
-	public volatile float ignitorTemperature; // value is received from the Arduino
 	
 	public BreakWire breakWire;
 	public RelayValve fuelValve;
@@ -48,6 +47,7 @@ public class Rocket {
 	public RelayValve loxValve;
 	public P51500AA1365V loxPressure;
 	public MAX31855 loxTemperature;
+	public MAX31855 ignitorTemperature;
 	
 	public P51500AA1365V ethanolPressure;
 	public ServoValve ethanolValve;
@@ -82,7 +82,8 @@ public class Rocket {
 		// DA0 = pin 4, CL0 = pin 5
 		barometer = new MS5611(0 /* twiNum */, TwiMaster.Rate.RATE_100KHz, OversamplingRatio.OSR_4096);
 		
-		loxTemperature = new MAX31855(7 /* miso */, 40 /* mosi */, 6 /* clk */, 8 /* cs */, SpiMaster.Rate.RATE_31K);
+		loxTemperature     = new MAX31855( 7 /* miso */, 40 /* mosi */,  6 /* clk */,  8 /* cs */, SpiMaster.Rate.RATE_31K);
+		ignitorTemperature = new MAX31855(32 /* miso */, 39 /* mosi */, 31 /* clk */, 33 /* cs */, SpiMaster.Rate.RATE_31K);
 		
 		/*
 		 * Devices internal to the Android phone (not connected via the IOIO).

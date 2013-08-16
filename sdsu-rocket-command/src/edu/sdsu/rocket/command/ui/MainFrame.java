@@ -102,13 +102,9 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private JLabel identLabel;
 	private PressureLabel loxPressureLabel;
 	private PressureLabel ethanolPressureLabel;
-
 	private LabeledGaugePanel loxTemperaturePanel;
-
 	private LabeledGaugePanel barometerPanel;
-
 	private LabeledGaugePanel ignitorTemperaturePanel;
-
 	private AccelerometerPanel internalAccelerometerPanel;
 
 	public MainFrame() {
@@ -218,6 +214,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 				
 				// TODO convert temps to F
 				
+				ignitorTemperaturePanel.setValue(rocket.ignitorTemperature.getTemperature());
 				loxTemperaturePanel.setValue(rocket.loxTemperature.getTemperature());
 				
 				accelerometerPanel.updateWithValues(
@@ -231,8 +228,6 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 					rocket.internalAccelerometer.getY(),
 					rocket.internalAccelerometer.getZ()
 				);
-				
-				ignitorTemperaturePanel.setValue(rocket.ignitorTemperature);
 			}
 		});
 	}

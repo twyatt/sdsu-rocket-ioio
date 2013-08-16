@@ -53,9 +53,10 @@ public class RocketController extends Threaded {
 		deviceManager.add(rocket.loxValve,     false);
 		deviceManager.add(rocket.ethanolValve, false);
 		
-		deviceManager.add(rocket.loxTemperature, true /* threaded */);
-		deviceManager.add(rocket.barometer,      true /* threaded */);
-		deviceManager.add(rocket.accelerometer,  true /* threaded */);
+		deviceManager.add(rocket.ignitorTemperature, true /* threaded */);
+		deviceManager.add(rocket.loxTemperature,     true /* threaded */);
+		deviceManager.add(rocket.barometer,          true /* threaded */);
+		deviceManager.add(rocket.accelerometer,      true /* threaded */);
 		
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		rocket.internalAccelerometer
@@ -70,6 +71,7 @@ public class RocketController extends Threaded {
 		
 		if (SensorPriority.SENSOR_PRIORITY_HIGH.equals(priority)) {
 			rocket.loxPressure.setSleep(5 /* milliseconds */);
+//			rocket.ignitorTemperature.setSleep(50 /* milliseconds */);
 			rocket.loxTemperature.setSleep(50 /* milliseconds */);
 			rocket.ethanolPressure.setSleep(5 /* milliseconds */);
 			rocket.enginePressure.setSleep(1 /* milliseconds */);
@@ -77,6 +79,7 @@ public class RocketController extends Threaded {
 			rocket.accelerometer.setFrequency(100f /* Hz */);
 		} else if (SensorPriority.SENSOR_PRIORITY_MEDIUM.equals(priority)) {
 			rocket.loxPressure.setSleep(50 /* milliseconds */);
+//			rocket.ignitorTemperature.setSleep(100 /* milliseconds */);
 			rocket.loxTemperature.setSleep(100 /* milliseconds */);
 			rocket.ethanolPressure.setSleep(50 /* milliseconds */);
 			rocket.enginePressure.setSleep(10 /* milliseconds */);
@@ -84,6 +87,7 @@ public class RocketController extends Threaded {
 			rocket.accelerometer.setFrequency(10f /* Hz */);
 		} else { // SENSOR_PRIORITY_LOW
 			rocket.loxPressure.setSleep(500 /* milliseconds */);
+			rocket.ignitorTemperature.setSleep(1000 /* milliseconds */);
 			rocket.loxTemperature.setSleep(1000 /* milliseconds */);
 			rocket.ethanolPressure.setSleep(500 /* milliseconds */);
 			rocket.enginePressure.setSleep(500 /* milliseconds */);

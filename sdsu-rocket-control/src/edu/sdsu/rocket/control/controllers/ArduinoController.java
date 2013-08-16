@@ -26,8 +26,8 @@ public class ArduinoController implements ArduinoListener {
 
 	@Override
 	public void onRequest(int request, float value) {
-		System.out.println("Received ignitor temperature of " + value + " C");
-		App.rocketController.getRocket().ignitorTemperature = value;
+//		System.out.println("Received ignitor temperature of " + value + " C");
+//		App.rocketController.getRocket().ignitorTemperature = value;
 		
 //		try {
 //			System.out.println("Processing Arduino request: " + request);
