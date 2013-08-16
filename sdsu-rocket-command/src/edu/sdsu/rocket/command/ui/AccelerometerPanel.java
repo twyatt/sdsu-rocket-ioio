@@ -34,7 +34,7 @@ public class AccelerometerPanel extends JPanel {
 		
 		graphPanel.point(x, Color.RED);
 		graphPanel.point(y, Color.GREEN);
-		graphPanel.point(z, Color.BLUE);
+		graphPanel.point(z, Color.CYAN);
 		graphPanel.step();
 	}
 

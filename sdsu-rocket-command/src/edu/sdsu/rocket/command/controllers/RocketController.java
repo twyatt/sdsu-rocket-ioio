@@ -160,6 +160,8 @@ public class RocketController extends Threaded implements PacketListener {
 			rocket.internalAccelerometer.x = buffer.getFloat();
 			rocket.internalAccelerometer.y = buffer.getFloat();
 			rocket.internalAccelerometer.z = buffer.getFloat();
+			
+			rocket.ignitorTemperature = buffer.getFloat();
 		} catch (BufferUnderflowException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

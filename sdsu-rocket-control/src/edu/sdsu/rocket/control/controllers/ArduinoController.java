@@ -29,34 +29,34 @@ public class ArduinoController implements ArduinoListener {
 		System.out.println("Received ignitor temperature of " + value + " C");
 		App.rocketController.getRocket().ignitorTemperature = value;
 		
-		try {
-			System.out.println("Processing Arduino request: " + request);
-			switch (request) {
-			case LOX_PRESSURE_REQUEST:
-				arduino.sendResponse(rocket.loxPressure.getPressure());
-				break;
-			case ETHANOL_TANK_PRESSURE:
-				arduino.sendResponse(rocket.ethanolPressure.getPressure());
-				break;
-			case ENGINE_PRESSURE:
-				arduino.sendResponse(rocket.enginePressure.getPressure());
-				break;
-			case LOX_VALVE_TEMPERATURE:
-				arduino.sendResponse(rocket.loxTemperature.getTemperature());
-				break;
-			case PHONE_BAY_TEMPERATURE:
-				arduino.sendResponse(rocket.loxTemperature.getInternalTemperature());
-				break;
-			case ANGLE_OF_ROCKET:
-				arduino.sendResponse(rocket.accelerometer.getZ()); // FIXME send angle
-				break;
-			default:
-				App.log.e(App.TAG, "Unknown Arduino request: " + request);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			App.log.e(App.TAG, "Failed to send response to Arduino.", e);
-		}
+//		try {
+//			System.out.println("Processing Arduino request: " + request);
+//			switch (request) {
+//			case LOX_PRESSURE_REQUEST:
+//				arduino.sendResponse(rocket.loxPressure.getPressure());
+//				break;
+//			case ETHANOL_TANK_PRESSURE:
+//				arduino.sendResponse(rocket.ethanolPressure.getPressure());
+//				break;
+//			case ENGINE_PRESSURE:
+//				arduino.sendResponse(rocket.enginePressure.getPressure());
+//				break;
+//			case LOX_VALVE_TEMPERATURE:
+//				arduino.sendResponse(rocket.loxTemperature.getTemperature());
+//				break;
+//			case PHONE_BAY_TEMPERATURE:
+//				arduino.sendResponse(rocket.loxTemperature.getInternalTemperature());
+//				break;
+//			case ANGLE_OF_ROCKET:
+//				arduino.sendResponse(rocket.accelerometer.getZ()); // FIXME send angle
+//				break;
+//			default:
+//				App.log.e(App.TAG, "Unknown Arduino request: " + request);
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			App.log.e(App.TAG, "Failed to send response to Arduino.", e);
+//		}
 	}
 	
 }

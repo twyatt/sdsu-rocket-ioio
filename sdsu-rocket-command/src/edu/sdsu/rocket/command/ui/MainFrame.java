@@ -107,11 +107,17 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 
 	private LabeledGaugePanel loxTemperaturePanel;
 
+	private LabeledGaugePanel barometerPanel;
+
+	private LabeledGaugePanel ignitorTemperaturePanel;
+
+	private AccelerometerPanel internalAccelerometerPanel;
+
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
 		client.setPacketListener(controller).setListener(this);
 		
-		setSize(new Dimension(1024, 650));
+		setSize(new Dimension(1280, 650));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		setupUI();
@@ -198,12 +204,20 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				float loxPressure = rocket.pressureLOX.getPressure();
+				float ethPressure = rocket.pressureEthanol.getPressure();
+				
+				loxPressureLabel.setPressure(loxPressure);
+				ethanolPressureLabel.setPressure(ethPressure);
 				ignitorLabel.setState(rocket.ignitor.state);
 				breakWireLabel.setState(rocket.breakWire.state);
 				
-				loxPanel.setValue(rocket.pressureLOX.getPressure());
-				ethanolPanel.setValue(rocket.pressureEthanol.getPressure());
+				loxPanel.setValue(loxPressure);
+				ethanolPanel.setValue(ethPressure);
 				enginePanel.setValue(rocket.pressureEngine.getPressure());
+				barometerPanel.setValue(rocket.barometer.getPressure());
+				
+				// TODO convert temps to F
 				
 				loxTemperaturePanel.setValue(rocket.loxTemperature.getTemperature());
 				
@@ -213,13 +227,13 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 					rocket.accelerometer.getZ()
 				);
 				
-//				float x = rocket.internalAccelerometer.getX();
-//				float y = rocket.internalAccelerometer.getY();
-//				float z = rocket.internalAccelerometer.getZ();
+				internalAccelerometerPanel.updateWithValues(
+					rocket.internalAccelerometer.getX(),
+					rocket.internalAccelerometer.getY(),
+					rocket.internalAccelerometer.getZ()
+				);
 				
-//				lblX.setText(String.valueOf(rocket.internalAccelerometer.getX()));
-//				lblY.setText(String.valueOf(rocket.internalAccelerometer.getY()));
-//				lblZ.setText(String.valueOf(rocket.internalAccelerometer.getZ()));
+				ignitorTemperaturePanel.setValue(rocket.ignitorTemperature);
 			}
 		});
 	}
@@ -408,6 +422,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		btnLaunch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				try {
+					frequencySlider.setValue(0);
 					controller.sendLaunchRequest();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -460,10 +475,25 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		loxTemperaturePanel.setPreferredSize(new Dimension(210, 255));
 		rightPanel.add(loxTemperaturePanel);
 		
+		ignitorTemperaturePanel = new LabeledGaugePanel(0 /* min */, 500 /* max */, 10, "C");
+		ignitorTemperaturePanel.setBorder(new TitledBorder(null, "Ignitor Temperature", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		ignitorTemperaturePanel.setPreferredSize(new Dimension(210, 255));
+		rightPanel.add(ignitorTemperaturePanel);
+		
+		barometerPanel = new LabeledGaugePanel(900 /* min */, 1100 /* max */, 10, "mbar");
+		barometerPanel.setBorder(new TitledBorder(null, "Barometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		barometerPanel.setPreferredSize(new Dimension(210, 255));
+		rightPanel.add(barometerPanel);
+		
 		accelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
 		accelerometerPanel.setBorder(new TitledBorder(null, "Accelerometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		accelerometerPanel.setPreferredSize(new Dimension(300, 200));
+		accelerometerPanel.setPreferredSize(new Dimension(200, 200));
 		rightPanel.add(accelerometerPanel);
+		
+		internalAccelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
+		internalAccelerometerPanel.setBorder(new TitledBorder(null, "Phone Accel.", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		internalAccelerometerPanel.setPreferredSize(new Dimension(200, 200));
+		rightPanel.add(internalAccelerometerPanel);
 		
 		/*
 		 * Bottom Panel

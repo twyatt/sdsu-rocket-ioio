@@ -18,14 +18,13 @@ import edu.sdsu.rocket.control.models.Rocket;
 
 public class DataLogger {
 
-	private static boolean LOG = false;
-	
-	public static final String STATUS           = "status";
-	public static final String BAROMETER        = "baro";
-	public static final String ENGINE_PRESSURE  = "eng";
-	public static final String LOX_PRESSURE     = "lox";
-	public static final String ETHANOL_PRESSURE = "eth";
-	public static final String ACCELEROMETER    = "accel";
+	public static final String STATUS                 = "status";
+	public static final String BAROMETER              = "baro";
+	public static final String ENGINE_PRESSURE        = "eng";
+	public static final String LOX_PRESSURE           = "lox";
+	public static final String ETHANOL_PRESSURE       = "eth";
+	public static final String ACCELEROMETER          = "accel"; // TODO
+	public static final String INTERNAL_ACCELEROMETER = "intaccel";
 	
 	private static final int STATUS_BUFFER_SIZE        = 1024;
 	private static final int BAROMETER_BUFFER_SIZE     = 512;
@@ -146,15 +145,15 @@ public class DataLogger {
 			}
 		});
 		
-		makeStream(ACCELEROMETER, ACCELEROMETER_BUFFER_SIZE);
+		makeStream(INTERNAL_ACCELEROMETER, ACCELEROMETER_BUFFER_SIZE);
 		rocket.internalAccelerometer.setListener(new PhoneAccelerometer.PhoneAccelerometerListener() {
 			@Override
 			public void onPhoneAccelerometer(float x, float y, float z) {
 				if (enabled) {
-					DataOutputStream stream = out.get(ACCELEROMETER);
+					DataOutputStream stream = out.get(INTERNAL_ACCELEROMETER);
 					
 					if (stream == null) {
-						App.log.e(App.TAG, "Output stream not available for " + ACCELEROMETER + ".");
+						App.log.e(App.TAG, "Output stream not available for " + INTERNAL_ACCELEROMETER + ".");
 					} else {
 						try {
 							stream.writeFloat(App.elapsedTime());
@@ -162,7 +161,7 @@ public class DataLogger {
 							stream.writeFloat(y);
 							stream.writeFloat(z);
 						} catch (IOException e) {
-							App.log.e(App.TAG, "Failed to write " + ACCELEROMETER + " values to output stream.");
+							App.log.e(App.TAG, "Failed to write " + INTERNAL_ACCELEROMETER + " values to output stream.");
 							e.printStackTrace();
 							return;
 						}

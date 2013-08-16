@@ -37,7 +37,6 @@ public class Arduino extends DeviceAdapter {
 	private StopBits stopbits;
 	
 	private BufferedReader in;
-	private OutputStream o;
 	private BufferedWriter out;
 
 	public Arduino(int rxPin, int txPin, int baud, Parity parity, StopBits stopbits) {
@@ -87,8 +86,7 @@ public class Arduino extends DeviceAdapter {
 		
 		try {
 			in = new BufferedReader(new InputStreamReader(uart.getInputStream(), "ASCII"));
-			o = uart.getOutputStream();
-			out = new BufferedWriter(new OutputStreamWriter(o, "ASCII"));
+			out = new BufferedWriter(new OutputStreamWriter(uart.getOutputStream(), "ASCII"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

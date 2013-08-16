@@ -92,7 +92,9 @@ public class GaugePanel extends JPanel {
 		float interval = (max - min) / ticks;
 		
 		for (float value = min; value < max; value += interval) {
+			g.setColor(Color.WHITE);
 			drawTickLine(g, convertValueToAngle(value));
+			g.setColor(Color.BLACK);
 			drawTickLabel(g, convertValueToAngle(value), value);
 		}
 	}
@@ -153,11 +155,9 @@ public class GaugePanel extends JPanel {
 		drawGaugeBorder(g);
 		
 		g.setFont(new Font("Arial", Font.PLAIN, 10));
-//		g.setColor(Color.LIGHT_GRAY);
-		g.setColor(Color.RED);
 		drawTicks(g);
 		
-		g.setColor(Color.BLUE);
+		g.setColor(Color.YELLOW);
 		drawNeedle(g);
 	}
 

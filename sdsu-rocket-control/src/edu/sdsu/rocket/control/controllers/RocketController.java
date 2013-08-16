@@ -131,6 +131,7 @@ public class RocketController extends Threaded {
 	public void ignite() {
 		App.log.i(App.TAG, "Igniting ignitor.");
 		rocket.ignitor.ignite();
+		App.data.enable();
 	}
 	
 	public void launch() {
@@ -151,10 +152,9 @@ public class RocketController extends Threaded {
 		rocket.ethanolValve.open();
 		App.log.i(App.TAG, "Closing fuel valves, cancelling ignitor and opening tank vents!");
 		
+		setSensorPriority(DEFAULT_SENSOR_PRIORITY);
 		App.data.disable();
 		App.log.i(App.TAG, "Launch aborted!");
-		
-		setSensorPriority(DEFAULT_SENSOR_PRIORITY);
 	}
 	
 	/*

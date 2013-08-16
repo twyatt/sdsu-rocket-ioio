@@ -217,6 +217,8 @@ public class PacketController implements PacketListener {
 		buffer.putFloat(rocket.internalAccelerometer.getY());
 		buffer.putFloat(rocket.internalAccelerometer.getZ());
 		
+		buffer.putFloat(rocket.ignitorTemperature);
+		
 		buffer.flip();
 		byte[] data = new byte[buffer.limit()];
 		buffer.get(data);

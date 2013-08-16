@@ -27,4 +27,6 @@ public class Rocket {
 	
 	public PhoneAccelerometer internalAccelerometer = new PhoneAccelerometer();
 
+	public volatile float ignitorTemperature; // C
+
 }
