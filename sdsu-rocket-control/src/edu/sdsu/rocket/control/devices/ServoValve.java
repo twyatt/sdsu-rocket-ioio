@@ -28,6 +28,12 @@ public class ServoValve extends DeviceAdapter implements Valve {
 		this.duration = duration;
 	}
 	
+	@Override
+	public void setSleep(long sleep) {
+		if (servo != null)
+			servo.setSleep(sleep);
+	}
+	
 	/*
 	 * Valve interface methods.
 	 */

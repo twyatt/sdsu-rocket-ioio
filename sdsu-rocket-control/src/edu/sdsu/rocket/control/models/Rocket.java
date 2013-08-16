@@ -24,7 +24,7 @@ public class Rocket {
 	
 	private static final float SERVO_SIGNAL_DURATION = 3.0f; // seconds
 	private static final float IGNITOR_SIGNAL_DURATION = 3.0f; // seconds
-
+	
 	public enum Mode {
 		
 	}
@@ -69,10 +69,10 @@ public class Rocket {
 		breakWire = new BreakWire(3 /* pin */);
 		
 		// max voltage for analog input = 3.3V
-		// calibrated May 12, 2013
-		loxPressure     = new P51500AA1365V(41 /* pin */, 179.0827f /* slope */, -145.268f /* bias */);
-		ethanolPressure = new P51500AA1365V(42 /* pin */, 181.8296f /* slope */, -144.22f /* bias */);
-		enginePressure  = new P51500AA1365V(43 /* pin */, 179.7781f /* slope */, -140.324f /* bias */);
+		// calibrated Aug 15, 2013
+		loxPressure     = new P51500AA1365V(41 /* pin */, 175.89706f /* slope */, -141.0809f /* bias */);
+		ethanolPressure = new P51500AA1365V(42 /* pin */, 176.27741f /* slope */, -135.2379f /* bias */);
+		enginePressure  = new P51500AA1365V(43 /* pin */, 168.9382f  /* slope */, -125.1707f /* bias */);
 		
 		ethanolValve = new ServoValve(new PS050(11 /* pin */, 100 /* frequency */), SERVO_SIGNAL_DURATION);
 		loxValve     = new RelayValve(new Relay(14 /* pin */));

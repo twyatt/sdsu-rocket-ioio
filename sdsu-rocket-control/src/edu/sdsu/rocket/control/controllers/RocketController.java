@@ -10,6 +10,8 @@ import edu.sdsu.rocket.helpers.Threaded;
 
 public class RocketController extends Threaded {
 	
+	public static final SensorPriority DEFAULT_SENSOR_PRIORITY = SensorPriority.SENSOR_PRIORITY_LOW;
+	
 	private static final float CYCLE_CLOSE_DURATION = 1.5f; // seconds
 	private static final float CYCLE_OPEN_DURATION = 10f; // seconds
 
@@ -44,10 +46,10 @@ public class RocketController extends Threaded {
 		deviceManager.add(rocket.fuelValve, false);
 		deviceManager.add(rocket.breakWire, false);
 		
-//		deviceManager.add(rocket.loxPressure,     true /* threaded */);
-//		deviceManager.add(rocket.ethanolPressure, true /* threaded */);
-//		deviceManager.add(rocket.enginePressure,  true /* threaded */);
-//		
+		deviceManager.add(rocket.loxPressure,     true /* threaded */);
+		deviceManager.add(rocket.ethanolPressure, true /* threaded */);
+		deviceManager.add(rocket.enginePressure,  true /* threaded */);
+		
 		deviceManager.add(rocket.loxValve,     false);
 		deviceManager.add(rocket.ethanolValve, false);
 		
@@ -60,9 +62,7 @@ public class RocketController extends Threaded {
 			.setDataSource(accelerometerSensor)
 			.setSensorManager(sensorManager);
 		
-//		setSensorPriority(SensorPriority.SENSOR_PRIORITY_LOW);
-		setSensorPriority(SensorPriority.SENSOR_PRIORITY_MEDIUM);
-//		setSensorPriority(SensorPriority.SENSOR_PRIORITY_HIGH);
+		setSensorPriority(DEFAULT_SENSOR_PRIORITY);
 	}
 	
 	public void setSensorPriority(SensorPriority priority) {
@@ -134,16 +134,14 @@ public class RocketController extends Threaded {
 	}
 	
 	public void launch() {
-		if (rocket.breakWire.isBroken()) {
-			isLOXCycling = false;
-			isEthanolCycling = false;
-			
-			App.log.i(App.TAG, "Opening fuel valve!");
-			rocket.fuelValve.open();
-			
-			App.log.i(App.TAG, "Setting sensor priority to high.");
-			setSensorPriority(SensorPriority.SENSOR_PRIORITY_HIGH);
-		}
+		isLOXCycling = false;
+		isEthanolCycling = false;
+		
+		App.log.i(App.TAG, "Opening fuel valve!");
+		rocket.fuelValve.open();
+		
+		App.log.i(App.TAG, "Setting sensor priority to high.");
+		setSensorPriority(SensorPriority.SENSOR_PRIORITY_HIGH);
 	}
 	
 	public void abortLaunch() {
@@ -155,6 +153,8 @@ public class RocketController extends Threaded {
 		
 		App.data.disable();
 		App.log.i(App.TAG, "Launch aborted!");
+		
+		setSensorPriority(DEFAULT_SENSOR_PRIORITY);
 	}
 	
 	/*

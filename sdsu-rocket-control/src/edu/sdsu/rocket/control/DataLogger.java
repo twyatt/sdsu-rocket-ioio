@@ -20,16 +20,16 @@ public class DataLogger {
 
 	private static boolean LOG = false;
 	
-	public static final String STATUS = "status";
-	public static final String BAROMETER = "baro";
-	public static final String ENGINE_PRESSURE = "eng";
-	public static final String LOX_PRESSURE = "lox";
+	public static final String STATUS           = "status";
+	public static final String BAROMETER        = "baro";
+	public static final String ENGINE_PRESSURE  = "eng";
+	public static final String LOX_PRESSURE     = "lox";
 	public static final String ETHANOL_PRESSURE = "eth";
-	public static final String ACCELEROMETER = "accel";
+	public static final String ACCELEROMETER    = "accel";
 	
-	private static final int STATUS_BUFFER_SIZE = 1024;
-	private static final int BAROMETER_BUFFER_SIZE = 512;
-	private static final int PRESSURE_BUFFER_SIZE = 512;
+	private static final int STATUS_BUFFER_SIZE        = 1024;
+	private static final int BAROMETER_BUFFER_SIZE     = 512;
+	private static final int PRESSURE_BUFFER_SIZE      = 512;
 	private static final int ACCELEROMETER_BUFFER_SIZE = 512;
 	
 	private boolean enabled;
@@ -71,31 +71,10 @@ public class DataLogger {
 						}
 					}
 				}
-				
-				if (LOG) {
-					App.log.i(App.TAG, BAROMETER + " = P: " + (P / 100f) + " mbar, T: " + (TEMP / 100f) + " C");
-					
-//					float temperatureK = temperature + 273.15f; // C -> K
-//					double tempF = Units.convertCelsiusToFahrenheit(temperature);
-//					
-//					/*
-//					 * http://en.wikipedia.org/wiki/Density_altitude
-//					 */
-//					float Psl = 1013.25f; // standard sea level atmospheric pressure (hPa)
-//					float Tsl = 288.15f; // ISA standard sea level air temperature (K)
-//					float b = 0.234969f;
-//					
-////					float altitude = 145442.156f * (1f - (float)Math.pow((pressure / Psl) / (temperature / Tsl), b));
-//					float altitude = (((float)Math.pow(Psl / pressure, 1f/5.257f) - 1f) * temperatureK) / 0.0065f;
-//					
-//					App.log.i(App.TAG, BAROMETER + " = A: " + altitude + " ft, T: " + tempF + " F");
-				}
 			}
 
 			@Override
-			public void onError(String message) {
-				
-			}
+			public void onError(String message) {}
 		});
 		
 		makeStream(LOX_PRESSURE, PRESSURE_BUFFER_SIZE);
@@ -117,10 +96,6 @@ public class DataLogger {
 							return;
 						}
 					}
-				}
-				
-				if (LOG) {
-					App.log.i(App.TAG, LOX_PRESSURE + " = " + rocket.loxPressure.getPressure() + " PSI");
 				}
 			}
 		});
@@ -145,10 +120,6 @@ public class DataLogger {
 						}
 					}
 				}
-				
-				if (LOG) {
-					App.log.i(App.TAG, ETHANOL_PRESSURE + " = " + rocket.ethanolPressure.getPressure() + " PSI");
-				}
 			}
 		});
 		
@@ -171,10 +142,6 @@ public class DataLogger {
 							return;
 						}
 					}
-				}
-				
-				if (LOG) {
-					App.log.i(App.TAG, ENGINE_PRESSURE + " = " + rocket.enginePressure.getPressure() + " PSI");
 				}
 			}
 		});
@@ -201,10 +168,6 @@ public class DataLogger {
 						}
 					}
 				}
-				
-				if (LOG) {
-					App.log.i(App.TAG, ACCELEROMETER + " = [" + rocket.internalAccelerometer.getX() + ", " + rocket.internalAccelerometer.getY() + ", " + rocket.internalAccelerometer.getZ() + "]");
-				}
 			}
 		});
 		
@@ -226,8 +189,10 @@ public class DataLogger {
 			App.log.e(App.TAG, "Output stream not available for " + STATUS + ".");
 		} else {
 			try {
-				stream.writeLong(System.currentTimeMillis());
-				stream.writeFloat(App.elapsedTime());
+				long currentTime = System.currentTimeMillis();
+				float elapsedTime = App.elapsedTime();
+				stream.writeLong(currentTime);
+				stream.writeFloat(elapsedTime);
 			} catch (IOException e) {
 				App.log.e(App.TAG, "Failed to write " + STATUS + " values to output stream.");
 				e.printStackTrace();
@@ -277,7 +242,6 @@ public class DataLogger {
 	}
 	
 	private DataOutputStream makeStream(String name, int bufferSize) {
-		// FIXME /mnt/sdcard/sd_external for Galaxy S2
 		File sd = Environment.getExternalStorageDirectory();
 		File path = new File(sd, "sensors");
 		File file;

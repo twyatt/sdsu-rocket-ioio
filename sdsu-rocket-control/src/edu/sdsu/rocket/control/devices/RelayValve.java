@@ -8,10 +8,16 @@ import ioio.lib.api.exception.ConnectionLostException;
  */
 public class RelayValve extends DeviceAdapter implements Valve {
 
-	private Relay relay;
+	private final Relay relay;
 
 	public RelayValve(Relay relay) {
 		this.relay = relay;
+	}
+	
+	@Override
+	public void setSleep(long sleep) {
+		if (relay != null)
+			relay.setSleep(sleep);
 	}
 	
 	/*

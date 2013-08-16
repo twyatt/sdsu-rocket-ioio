@@ -23,6 +23,12 @@ public class RelayIgnitor extends DeviceAdapter {
 		this.duration = duration;
 	}
 	
+	@Override
+	public void setSleep(long sleep) {
+		if (relay != null)
+			relay.setSleep(sleep);
+	}
+	
 	public void ignite() {
 		startTime = App.elapsedTime();
 		relay.high();

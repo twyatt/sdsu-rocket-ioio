@@ -197,6 +197,11 @@ public class PacketController implements PacketListener {
 		buffer.putFloat(rocket.ethanolPressure.getPressure());
 		buffer.putFloat(rocket.enginePressure.getPressure());
 		
+		// used for calibration:
+//		buffer.putFloat(rocket.loxPressure.getVoltage());
+//		buffer.putFloat(rocket.ethanolPressure.getVoltage());
+//		buffer.putFloat(rocket.enginePressure.getVoltage());
+		
 		buffer.putFloat(rocket.loxTemperature.getInternalTemperature());
 		buffer.putFloat(rocket.loxTemperature.getTemperature());
 		
