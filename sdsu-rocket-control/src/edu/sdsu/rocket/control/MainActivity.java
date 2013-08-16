@@ -65,7 +65,7 @@ public class MainActivity extends IOIOActivity {
 		
 		SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		App.rocketController.setup(deviceManager, sensorManager);
-//		App.rocketController.start(); // TODO uncomment?
+//		App.rocketController.start(); // only needed for tank vent cycling
 		
 		setupPacketController(rocket);
 		setupStatusTimer();
@@ -102,7 +102,7 @@ public class MainActivity extends IOIOActivity {
 		packetController2 = new PacketController(rocket.connection2);
 		rocket.connection1.setListener(packetController1);
 		rocket.connection2.setListener(packetController2);
-		rocket.arduino.setListener(new ArduinoController(rocket.arduino, rocket));
+//		rocket.arduino.setListener(new ArduinoController(rocket.arduino, rocket));
 	}
 
 	private void setupDeviceManager() {

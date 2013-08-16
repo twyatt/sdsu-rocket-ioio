@@ -40,7 +40,7 @@ public class RocketController extends Threaded {
 	public void setup(DeviceManager deviceManager, SensorManager sensorManager) {
 		deviceManager.add(rocket.connection1, true /* threaded */);
 		deviceManager.add(rocket.connection2, true /* threaded */);
-		deviceManager.add(rocket.arduino,     true /* threaded */);
+//		deviceManager.add(rocket.arduino,     true /* threaded */);
 		
 		deviceManager.add(rocket.ignitor,   false);
 		deviceManager.add(rocket.fuelValve, false);

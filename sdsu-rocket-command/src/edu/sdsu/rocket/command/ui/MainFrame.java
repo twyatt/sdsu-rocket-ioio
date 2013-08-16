@@ -2,6 +2,7 @@ package edu.sdsu.rocket.command.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -45,10 +47,6 @@ import edu.sdsu.rocket.command.models.Ignitor;
 import edu.sdsu.rocket.command.models.Rocket;
 import edu.sdsu.rocket.command.models.Rocket.Valve;
 import edu.sdsu.rocket.command.models.Rocket.ValveAction;
-
-import java.awt.Component;
-
-import javax.swing.Box;
 
 public class MainFrame extends JFrame implements RocketControllerListener, TcpClientListener {
 
@@ -170,6 +168,7 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		rocket.ignitor.state = Ignitor.State.UNKNOWN;
 		onChange();
 		
+		ethanolPressureLabel.setPressure(Float.NaN);
 		loxPressureLabel.setPressure(Float.NaN);
 		identLabel.setText(" ");
 	}
@@ -487,12 +486,12 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		
 		accelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
 		accelerometerPanel.setBorder(new TitledBorder(null, "Accelerometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		accelerometerPanel.setPreferredSize(new Dimension(200, 200));
+		accelerometerPanel.setPreferredSize(new Dimension(250, 200));
 		rightPanel.add(accelerometerPanel);
 		
 		internalAccelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
 		internalAccelerometerPanel.setBorder(new TitledBorder(null, "Phone Accel.", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		internalAccelerometerPanel.setPreferredSize(new Dimension(200, 200));
+		internalAccelerometerPanel.setPreferredSize(new Dimension(250, 200));
 		rightPanel.add(internalAccelerometerPanel);
 		
 		/*

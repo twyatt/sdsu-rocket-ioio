@@ -37,7 +37,7 @@ public class Rocket {
 	
 	public SB70 connection1;
 	public SB70 connection2;
-	public Arduino arduino;
+//	public Arduino arduino;
 	
 	public RelayIgnitor ignitor;
 	public volatile float ignitorTemperature; // value is received from the Arduino
@@ -62,7 +62,7 @@ public class Rocket {
 	public Rocket() {
 		connection1 = new SB70(45 /* RX */, 46 /* TX */, 57600, Parity.NONE, StopBits.ONE);
 		connection2 = new SB70( 9 /* RX */, 10 /* TX */, 57600, Parity.NONE, StopBits.ONE);
-		arduino = new Arduino(35 /* RX */, 34 /* TX */, 9600, Parity.NONE, StopBits.ONE);
+//		arduino = new Arduino(35 /* RX */, 34 /* TX */, 9600, Parity.NONE, StopBits.ONE);
 		
 		ignitor = new RelayIgnitor(new Relay(12 /* pin */), IGNITOR_SIGNAL_DURATION);
 		fuelValve = new RelayValve(new Relay(13 /* pin */));

@@ -177,7 +177,6 @@ public class DataLogger {
 		logTime();
 		
 		enabled = true;
-		rocket.internalAccelerometer.start();
 		App.log.i(App.TAG, "Enabled data logging.");
 	}
 	
@@ -202,7 +201,6 @@ public class DataLogger {
 
 	public void disable() {
 		enabled = false;
-		rocket.internalAccelerometer.stop();
 		App.log.i(App.TAG, "Disabled data logging.");
 	}
 	
