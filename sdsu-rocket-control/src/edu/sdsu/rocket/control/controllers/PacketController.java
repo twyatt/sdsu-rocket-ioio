@@ -216,6 +216,11 @@ public class PacketController implements PacketListener {
 		buffer.putInt(rocket.accelerometer.getY());
 		buffer.putInt(rocket.accelerometer.getZ());
 		
+//		buffer.putInt(rocket.gyro.getX());
+//		buffer.putInt(rocket.gyro.getY());
+//		buffer.putInt(rocket.gyro.getZ());
+//		buffer.putInt(rocket.gyro.getTemperature());
+		
 		buffer.putFloat(rocket.internalAccelerometer.getX());
 		buffer.putFloat(rocket.internalAccelerometer.getY());
 		buffer.putFloat(rocket.internalAccelerometer.getZ());

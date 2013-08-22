@@ -6,30 +6,63 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import android.os.Environment;
+import edu.sdsu.rocket.control.devices.ADXL345;
+import edu.sdsu.rocket.control.devices.ITG3205;
+import edu.sdsu.rocket.control.devices.MAX31855;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.P51500AA1365V;
 import edu.sdsu.rocket.control.devices.PhoneAccelerometer;
 import edu.sdsu.rocket.control.models.Rocket;
 
 public class DataLogger {
+	
+	public enum Event {
+		ENABLE       ((byte) 0x01),
+		IGNITE       ((byte) 0x02),
+		LAUNCH       ((byte) 0x03),
+		ABORT        ((byte) 0x04),
+		ACCELEROMETER_MULTIPLIER((byte) 0x05),
+		ETHANOL_OPEN ((byte) 0x06),
+		ETHANOL_CLOSE((byte) 0x07),
+		LOX_OPEN     ((byte) 0x08),
+		LOX_CLOSE    ((byte) 0x09),
+		;
+		private byte value;
+		Event(byte value) {
+			this.value = value;
+		}
+		public byte getValue() {
+			return value;
+		}
+	}
 
-	public static final String STATUS                 = "status";
-	public static final String BAROMETER              = "baro";
-	public static final String ENGINE_PRESSURE        = "eng";
-	public static final String LOX_PRESSURE           = "lox";
-	public static final String ETHANOL_PRESSURE       = "eth";
-	public static final String ACCELEROMETER          = "accel"; // TODO
+	public static final String EVENT               = "event";
+	
+	public static final String ENGINE_PRESSURE     = "eng";
+	public static final String LOX_PRESSURE        = "lox";
+	public static final String ETHANOL_PRESSURE    = "eth";
+	
+	public static final String BAROMETER           = "baro";
+	public static final String ACCELEROMETER       = "accel";
+	public static final String GYRO                = "gyro";
+	
+	public static final String LOX_TEMPERATURE     = "loxtemp"; // TODO
+	public static final String IGNITOR_TEMPERATURE = "igntemp"; // TODO
+	
 	public static final String INTERNAL_ACCELEROMETER = "intaccel";
 	
-	private static final int STATUS_BUFFER_SIZE        = 1024;
+	private static final int EVENT_BUFFER_SIZE         = 512;
 	private static final int BAROMETER_BUFFER_SIZE     = 512;
 	private static final int PRESSURE_BUFFER_SIZE      = 512;
 	private static final int ACCELEROMETER_BUFFER_SIZE = 512;
+	private static final int GYRO_BUFFER_SIZE          = 512;
+	private static final int TEMPERATURE_BUFFER_SIZE   = 512;
 	
 	private boolean enabled;
 	public final Map<String, DataOutputStream> out = new HashMap<String, DataOutputStream>();
@@ -47,7 +80,7 @@ public class DataLogger {
 	
 	// FIXME return false if there are any failures
 	public boolean setup() {
-		makeStream(STATUS, STATUS_BUFFER_SIZE);
+		makeStream(EVENT, EVENT_BUFFER_SIZE);
 		
 		makeStream(BAROMETER, BAROMETER_BUFFER_SIZE);
 		rocket.barometer.setListener(new MS5611.MS5611Listener() {
@@ -75,6 +108,38 @@ public class DataLogger {
 			@Override
 			public void onError(String message) {}
 		});
+		
+//		makeStream(GYRO, GYRO_BUFFER_SIZE);
+//		rocket.gyro.setListener(new ITG3205.ITG3205Listener() {
+//			@Override
+//			public void onDeviceId(byte deviceId) {}
+//			
+//			@Override
+//			public void onData(int x, int y, int z, int temperature) {
+//				if (enabled) {
+//					DataOutputStream stream = out.get(GYRO);
+//					
+//					if (stream == null) {
+//						App.log.e(App.TAG, "Output stream not available for " + GYRO + ".");
+//					} else {
+//						try {
+//							stream.writeFloat(App.elapsedTime());
+//							stream.writeInt(x);
+//							stream.writeInt(y);
+//							stream.writeInt(z);
+//							stream.writeInt(temperature);
+//						} catch (IOException e) {
+//							App.log.e(App.TAG, "Failed to write " + GYRO + " values to output stream.");
+//							e.printStackTrace();
+//							return;
+//						}
+//					}
+//				}
+//			}
+//			
+//			@Override
+//			public void onError(String message) {}
+//		});
 		
 		makeStream(LOX_PRESSURE, PRESSURE_BUFFER_SIZE);
 		rocket.loxPressure.setListener(new P51500AA1365V.P51500AA1365VListener() {
@@ -145,6 +210,46 @@ public class DataLogger {
 			}
 		});
 		
+		makeStream(ACCELEROMETER, ACCELEROMETER_BUFFER_SIZE);
+		rocket.accelerometer.setListener(new ADXL345.ADXL345Listener() {
+			
+			@Override
+			public void onDeviceId(byte deviceId) {}
+			
+			@Override
+			public void onMultiplier(float multiplier) {
+				byte[] data = new byte[4];
+				ByteBuffer.wrap(data).putFloat(multiplier);
+				event(Event.ACCELEROMETER_MULTIPLIER, data);
+			}
+			
+			@Override
+			public void onData(int x, int y, int z) {
+				if (enabled) {
+					DataOutputStream stream = out.get(ACCELEROMETER);
+					
+					if (stream == null) {
+						App.log.e(App.TAG, "Output stream not available for " + ACCELEROMETER + ".");
+					} else {
+						try {
+							stream.writeFloat(App.elapsedTime());
+							stream.writeInt(x);
+							stream.writeInt(y);
+							stream.writeInt(z);
+						} catch (IOException e) {
+							App.log.e(App.TAG, "Failed to write " + ACCELEROMETER + " values to output stream.");
+							e.printStackTrace();
+							return;
+						}
+					}
+				}
+			}
+			
+			@Override
+			public void onError(String message) {}
+			
+		});
+		
 		makeStream(INTERNAL_ACCELEROMETER, ACCELEROMETER_BUFFER_SIZE);
 		rocket.internalAccelerometer.setListener(new PhoneAccelerometer.PhoneAccelerometerListener() {
 			@Override
@@ -170,6 +275,60 @@ public class DataLogger {
 			}
 		});
 		
+		makeStream(LOX_TEMPERATURE, TEMPERATURE_BUFFER_SIZE);
+		rocket.loxTemperature.setListener(new MAX31855.MAX31855Listener() {
+			@Override
+			public void onFault(byte fault) {}
+			
+			@Override
+			public void onData(float internal, float thermocouple) {
+				if (enabled) {
+					DataOutputStream stream = out.get(LOX_TEMPERATURE);
+					
+					if (stream == null) {
+						App.log.e(App.TAG, "Output stream not available for " + LOX_TEMPERATURE + ".");
+					} else {
+						try {
+							stream.writeFloat(App.elapsedTime());
+							stream.writeFloat(internal);
+							stream.writeFloat(thermocouple);
+						} catch (IOException e) {
+							App.log.e(App.TAG, "Failed to write " + LOX_TEMPERATURE + " values to output stream.");
+							e.printStackTrace();
+							return;
+						}
+					}
+				}
+			}
+		});
+		
+		makeStream(IGNITOR_TEMPERATURE, TEMPERATURE_BUFFER_SIZE);
+		rocket.ignitorTemperature.setListener(new MAX31855.MAX31855Listener() {
+			@Override
+			public void onFault(byte fault) {}
+			
+			@Override
+			public void onData(float internal, float thermocouple) {
+				if (enabled) {
+					DataOutputStream stream = out.get(IGNITOR_TEMPERATURE);
+					
+					if (stream == null) {
+						App.log.e(App.TAG, "Output stream not available for " + IGNITOR_TEMPERATURE + ".");
+					} else {
+						try {
+							stream.writeFloat(App.elapsedTime());
+							stream.writeFloat(internal);
+							stream.writeFloat(thermocouple);
+						} catch (IOException e) {
+							App.log.e(App.TAG, "Failed to write " + IGNITOR_TEMPERATURE + " values to output stream.");
+							e.printStackTrace();
+							return;
+						}
+					}
+				}
+			}
+		});
+		
 		return true;
 	}
 	
@@ -180,23 +339,38 @@ public class DataLogger {
 		App.log.i(App.TAG, "Enabled data logging.");
 	}
 	
-	private void logTime() {
-		DataOutputStream stream = out.get(STATUS);
+	public void event(Event event) {
+		event(event, null);
+	}
+	
+	private void event(Event event, byte[] data) {
+		DataOutputStream stream = out.get(EVENT);
 		
 		if (stream == null) {
-			App.log.e(App.TAG, "Output stream not available for " + STATUS + ".");
+			App.log.e(App.TAG, "Output stream not available for " + EVENT + ".");
 		} else {
 			try {
-				long currentTime = System.currentTimeMillis();
 				float elapsedTime = App.elapsedTime();
-				stream.writeLong(currentTime);
 				stream.writeFloat(elapsedTime);
+				stream.write(event.getValue());
+				if (data != null) {
+					stream.write(data);
+				}
 			} catch (IOException e) {
-				App.log.e(App.TAG, "Failed to write " + STATUS + " values to output stream.");
+				App.log.e(App.TAG, "Failed to write " + EVENT + " values to output stream.");
 				e.printStackTrace();
 				return;
 			}
 		}
+	}
+	
+	private void logTime() {
+		long currentTime = System.currentTimeMillis();
+		
+		byte[] data = new byte[8];
+		ByteBuffer.wrap(data).putLong(currentTime);
+		
+		event(Event.ENABLE, data);
 	}
 
 	public void disable() {

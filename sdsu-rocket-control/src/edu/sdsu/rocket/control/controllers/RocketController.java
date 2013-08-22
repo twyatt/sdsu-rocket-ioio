@@ -3,6 +3,7 @@ package edu.sdsu.rocket.control.controllers;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import edu.sdsu.rocket.control.App;
+import edu.sdsu.rocket.control.DataLogger;
 import edu.sdsu.rocket.control.DeviceManager;
 import edu.sdsu.rocket.control.models.Rocket;
 import edu.sdsu.rocket.control.models.Rocket.SensorPriority;
@@ -45,6 +46,7 @@ public class RocketController extends Threaded {
 		deviceManager.add(rocket.ignitor,   false);
 		deviceManager.add(rocket.fuelValve, false);
 		deviceManager.add(rocket.breakWire, false);
+//		deviceManager.add(rocket.camera,    false);
 		
 		deviceManager.add(rocket.loxPressure,     true /* threaded */);
 		deviceManager.add(rocket.ethanolPressure, true /* threaded */);
@@ -57,6 +59,7 @@ public class RocketController extends Threaded {
 		deviceManager.add(rocket.loxTemperature,     true /* threaded */);
 		deviceManager.add(rocket.barometer,          true /* threaded */);
 		deviceManager.add(rocket.accelerometer,      true /* threaded */);
+//		deviceManager.add(rocket.gyro,               true /* threaded */);
 		
 		Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		rocket.internalAccelerometer
@@ -77,6 +80,7 @@ public class RocketController extends Threaded {
 			rocket.enginePressure.setSleep(1 /* milliseconds */);
 			rocket.barometer.setSleep(0 /* milliseconds */);
 			rocket.accelerometer.setFrequency(100f /* Hz */);
+//			rocket.gyro.setFrequency(100f /* Hz */);
 		} else if (SensorPriority.SENSOR_PRIORITY_MEDIUM.equals(priority)) {
 			rocket.loxPressure.setSleep(50 /* milliseconds */);
 //			rocket.ignitorTemperature.setSleep(100 /* milliseconds */);
@@ -85,6 +89,7 @@ public class RocketController extends Threaded {
 			rocket.enginePressure.setSleep(10 /* milliseconds */);
 			rocket.barometer.setSleep(10 /* milliseconds */);
 			rocket.accelerometer.setFrequency(10f /* Hz */);
+//			rocket.gyro.setFrequency(10f /* Hz */);
 		} else { // SENSOR_PRIORITY_LOW
 			rocket.loxPressure.setSleep(500 /* milliseconds */);
 			rocket.ignitorTemperature.setSleep(1000 /* milliseconds */);
@@ -93,11 +98,13 @@ public class RocketController extends Threaded {
 			rocket.enginePressure.setSleep(500 /* milliseconds */);
 			rocket.barometer.setSleep(200 /* milliseconds */);
 			rocket.accelerometer.setFrequency(1f /* Hz */);
+//			rocket.gyro.setFrequency(1f /* Hz */);
 		}
 	}
 	
 	public void openLOXVent() {
 		App.log.i(App.TAG, "Opening LOX vent.");
+		App.data.event(DataLogger.Event.LOX_OPEN);
 		rocket.loxValve.open();
 		isLOXCycling = false;
 	}
@@ -110,12 +117,14 @@ public class RocketController extends Threaded {
 	
 	public void closeLOXVent() {
 		App.log.i(App.TAG, "Closing LOX vent.");
+		App.data.event(DataLogger.Event.LOX_CLOSE);
 		rocket.loxValve.close();
 		isLOXCycling = false;
 	}
 	
 	public void openEthanolVent() {
 		App.log.i(App.TAG, "Opening Ethanol vent.");
+		App.data.event(DataLogger.Event.ETHANOL_OPEN);
 		rocket.ethanolValve.open();
 		isEthanolCycling = false;
 	}
@@ -128,12 +137,14 @@ public class RocketController extends Threaded {
 	
 	public void closeEthanolVent() {
 		App.log.i(App.TAG, "Closing Ethanol vent.");
+		App.data.event(DataLogger.Event.ETHANOL_CLOSE);
 		rocket.ethanolValve.close();
 		isEthanolCycling = false;
 	}
 	
 	public void ignite() {
 		App.log.i(App.TAG, "Igniting ignitor.");
+		App.data.event(DataLogger.Event.IGNITE);
 		rocket.ignitor.ignite();
 		App.data.enable();
 	}
@@ -141,12 +152,17 @@ public class RocketController extends Threaded {
 	public void launch() {
 		isLOXCycling = false;
 		isEthanolCycling = false;
+		App.data.event(DataLogger.Event.LAUNCH);
+		
+		rocket.ignitor.cancel();
 		
 		App.log.i(App.TAG, "Opening fuel valve!");
 		rocket.fuelValve.open();
 		
 		App.log.i(App.TAG, "Setting sensor priority to high.");
 		setSensorPriority(SensorPriority.SENSOR_PRIORITY_HIGH);
+		
+//		rocket.camera.high();
 	}
 	
 	public void abortLaunch() {
@@ -158,7 +174,11 @@ public class RocketController extends Threaded {
 		
 		setSensorPriority(DEFAULT_SENSOR_PRIORITY);
 		App.data.disable();
+		
+//		rocket.camera.low();
 		App.log.i(App.TAG, "Launch aborted!");
+		
+		App.data.event(DataLogger.Event.ABORT);
 	}
 	
 	/*

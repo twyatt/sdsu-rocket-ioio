@@ -16,6 +16,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -103,15 +104,21 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 	private PressureLabel loxPressureLabel;
 	private PressureLabel ethanolPressureLabel;
 	private LabeledGaugePanel loxTemperaturePanel;
-	private LabeledGaugePanel barometerPanel;
+	private JPanel barometerPanel;
 	private LabeledGaugePanel ignitorTemperaturePanel;
 	private AccelerometerPanel internalAccelerometerPanel;
+	private JLabel barometerLabel;
+	private JPanel panel;
+//	private JPanel gyroPanel;
+//	private JLabel gyroLabel;
+	private JPanel internalTemperaturePanel;
+	private JLabel internalTemperatureLabel;
 
 	public MainFrame() {
 		controller = new RocketController(rocket).setListener(this);
 		client.setPacketListener(controller).setListener(this);
 		
-		setSize(new Dimension(1280, 650));
+		setSize(new Dimension(1280, 800));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		setupUI();
@@ -201,21 +208,27 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 			public void run() {
 				float loxPressure = rocket.pressureLOX.getPressure();
 				float ethPressure = rocket.pressureEthanol.getPressure();
+				float engPressure = rocket.pressureEngine.getPressure();
 				
 				loxPressureLabel.setPressure(loxPressure);
 				ethanolPressureLabel.setPressure(ethPressure);
+				
 				ignitorLabel.setState(rocket.ignitor.state);
 				breakWireLabel.setState(rocket.breakWire.state);
 				
 				loxPanel.setValue(loxPressure);
 				ethanolPanel.setValue(ethPressure);
-				enginePanel.setValue(rocket.pressureEngine.getPressure());
-				barometerPanel.setValue(rocket.barometer.getPressure());
+				enginePanel.setValue(engPressure);
+				
+				barometerLabel.setText("" + rocket.barometer.getPressure() + " mbar");
 				
 				// TODO convert temps to F
 				
 				ignitorTemperaturePanel.setValue(rocket.ignitorTemperature.getTemperature());
 				loxTemperaturePanel.setValue(rocket.loxTemperature.getTemperature());
+				
+//				gyroLabel.setText("X: " + rocket.gyro.getX() + " Y: " + rocket.gyro.getY() + " Z: " + rocket.gyro.getZ());
+				internalTemperatureLabel.setText("" + rocket.loxTemperature.getInternalTemperature() + " C");
 				
 				accelerometerPanel.updateWithValues(
 					rocket.accelerometer.getX(),
@@ -474,11 +487,6 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		ignitorTemperaturePanel.setPreferredSize(new Dimension(210, 255));
 		rightPanel.add(ignitorTemperaturePanel);
 		
-		barometerPanel = new LabeledGaugePanel(900 /* min */, 1100 /* max */, 10, "mbar");
-		barometerPanel.setBorder(new TitledBorder(null, "Barometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		barometerPanel.setPreferredSize(new Dimension(210, 255));
-		rightPanel.add(barometerPanel);
-		
 		accelerometerPanel = new AccelerometerPanel(-10 /* min */, 10 /* max */);
 		accelerometerPanel.setBorder(new TitledBorder(null, "Accelerometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		accelerometerPanel.setPreferredSize(new Dimension(250, 200));
@@ -488,6 +496,31 @@ public class MainFrame extends JFrame implements RocketControllerListener, TcpCl
 		internalAccelerometerPanel.setBorder(new TitledBorder(null, "Phone Accel.", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		internalAccelerometerPanel.setPreferredSize(new Dimension(250, 200));
 		rightPanel.add(internalAccelerometerPanel);
+		
+		panel = new JPanel();
+		rightPanel.add(panel);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		barometerPanel = new JPanel();
+		panel.add(barometerPanel);
+		barometerPanel.setBorder(new TitledBorder(null, "Barometer", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		
+		barometerLabel = new JLabel("???? mbar");
+		barometerPanel.add(barometerLabel);
+		
+//		gyroPanel = new JPanel();
+//		gyroPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Gyro (deg/s)", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+//		panel.add(gyroPanel);
+//		
+//		gyroLabel = new JLabel("X: ? Y: ? Z: ?");
+//		gyroPanel.add(gyroLabel);
+		
+		internalTemperaturePanel = new JPanel();
+		internalTemperaturePanel.setBorder(new TitledBorder(null, "Int. Temp", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel.add(internalTemperaturePanel);
+		
+		internalTemperatureLabel = new JLabel("? C");
+		internalTemperaturePanel.add(internalTemperatureLabel);
 		
 		/*
 		 * Bottom Panel

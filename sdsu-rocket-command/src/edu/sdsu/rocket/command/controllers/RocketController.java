@@ -160,6 +160,12 @@ public class RocketController extends Threaded implements PacketListener {
 			rocket.accelerometer.y = buffer.getInt();
 			rocket.accelerometer.z = buffer.getInt();
 			
+			// ITG3205 gyro
+//			rocket.gyro.x = buffer.getInt();
+//			rocket.gyro.y = buffer.getInt();
+//			rocket.gyro.z = buffer.getInt();
+//			rocket.gyro.temperature = buffer.getInt();
+			
 			// phone's internal accelerometer
 			rocket.internalAccelerometer.x = buffer.getFloat();
 			rocket.internalAccelerometer.y = buffer.getFloat();

@@ -6,8 +6,8 @@ import ioio.lib.api.Uart.Parity;
 import ioio.lib.api.Uart.StopBits;
 import android.hardware.SensorManager;
 import edu.sdsu.rocket.control.devices.ADXL345;
-import edu.sdsu.rocket.control.devices.Arduino;
 import edu.sdsu.rocket.control.devices.BreakWire;
+import edu.sdsu.rocket.control.devices.ITG3205;
 import edu.sdsu.rocket.control.devices.MAX31855;
 import edu.sdsu.rocket.control.devices.MS5611;
 import edu.sdsu.rocket.control.devices.MS5611.OversamplingRatio;
@@ -43,6 +43,7 @@ public class Rocket {
 	
 	public BreakWire breakWire;
 	public RelayValve fuelValve;
+//	public Relay camera;
 	
 	public RelayValve loxValve;
 	public P51500AA1365V loxPressure;
@@ -56,6 +57,7 @@ public class Rocket {
 	
 	public ADXL345 accelerometer;
 	public MS5611 barometer;
+//	public ITG3205 gyro;
 	
 	public PhoneAccelerometer internalAccelerometer;
 	
@@ -67,6 +69,7 @@ public class Rocket {
 		ignitor = new RelayIgnitor(new Relay(12 /* pin */), IGNITOR_SIGNAL_DURATION);
 		fuelValve = new RelayValve(new Relay(13 /* pin */));
 		breakWire = new BreakWire(3 /* pin */);
+//		camera = new Relay(38 /* pin */);
 		
 		// max voltage for analog input = 3.3V
 		// calibrated Aug 15, 2013
@@ -78,9 +81,8 @@ public class Rocket {
 		loxValve     = new RelayValve(new Relay(14 /* pin */));
 		
 		accelerometer = new ADXL345(29 /* miso */, 28 /* mosi */, 27 /* scl */, 30 /* cs */, SpiMaster.Rate.RATE_31K);
-		
-		// DA0 = pin 4, CL0 = pin 5
 		barometer = new MS5611(0 /* twiNum */, TwiMaster.Rate.RATE_100KHz, OversamplingRatio.OSR_4096);
+//		gyro = new ITG3205(1 /* twiNum */, TwiMaster.Rate.RATE_100KHz);
 		
 		loxTemperature     = new MAX31855( 7 /* miso */, 40 /* mosi */,  6 /* clk */,  8 /* cs */, SpiMaster.Rate.RATE_31K);
 		ignitorTemperature = new MAX31855(32 /* miso */, 39 /* mosi */, 31 /* clk */, 33 /* cs */, SpiMaster.Rate.RATE_31K);

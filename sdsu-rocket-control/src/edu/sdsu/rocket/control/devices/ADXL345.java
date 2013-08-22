@@ -89,6 +89,7 @@ public class ADXL345 extends DeviceAdapter {
 	
 	public interface ADXL345Listener {
 		public void onDeviceId(byte deviceId);
+		public void onMultiplier(float multiplier);
 		public void onData(int x, int y, int z);
 		public void onError(String message);
 	}
@@ -179,6 +180,10 @@ public class ADXL345 extends DeviceAdapter {
 		
 		// Gs = Measurement Value * (G-range / 2^10)
 		multiplier = (float) range * 2f / 1024f;
+		
+		if (listener != null) {
+			listener.onMultiplier(multiplier);
+		}
 	}
 	
 	public byte getDeviceId() throws ConnectionLostException, InterruptedException {
@@ -200,7 +205,7 @@ public class ADXL345 extends DeviceAdapter {
 			listener.onDeviceId(deviceId);
 		}
 		
-		setRange(16); // +/- 16 G
+		setRange(8); // +/- 8 G
 		write(POWER_CTL, POWER_CTL_Measure);
 	}
 	

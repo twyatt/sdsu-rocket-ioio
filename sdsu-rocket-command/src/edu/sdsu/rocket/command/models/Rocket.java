@@ -25,7 +25,9 @@ public class Rocket {
 	public MAX31855 loxTemperature = new MAX31855();
 	public MS5611 barometer = new MS5611();
 	public ADXL345 accelerometer = new ADXL345();
+	public ITG3205 gyro = new ITG3205();
 	
 	public PhoneAccelerometer internalAccelerometer = new PhoneAccelerometer();
+
 
 }
